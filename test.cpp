@@ -1,15 +1,11 @@
-#include <cstdint>
-#include <cstdio>
-#include <iostream>
 #include "portaudio.h"
+#include <iostream>
 #include <cmath>
-#include <limits>
-#include <vector>
 
 #define DURATION		(4000) // milliseconds
 #define SAMPLE_RATE		(48000)
 #define TABLE_LEN       512
-#define AMP             0.1f
+#define AMP             0.2f
 #define FREQ            30.0f
 
 // TODO: 

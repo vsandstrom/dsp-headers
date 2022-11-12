@@ -29,6 +29,9 @@ enum WAVETYPES {
     ENV
 };
 
+// instead of #defined math macros
+const double PI = 3.14159265358979323846;
+
 double TABLE[512] = {0};
 double ENV_TABLE[512] = {0};
 
@@ -169,19 +172,19 @@ void populateTable(double* table, int n, int tabletype ) {
 
     switch (tabletype) {
         case (SINE) : {
-                inc = M_PI*2 / (float) n;
+            inc = PI * 2  / (float) n;
 
-                for (i = 0; i < n; ++i) {
-                    *table++ = sin(angle);
-                    angle += inc;
+            for (i = 0; i < n; ++i) {
+                *table++ = sin(angle);
+                angle += inc;
             }
             D(printf("SINE\n"));
             break;
         }
 
         case (SAW) : {
-                inc = 2.0f / (float) n;
-                for (i = 0; i < n; ++i) {
+            inc = 2.0f / (float) n;
+            for (i = 0; i < n; ++i) {
                 *table++ =  angle - 1.0f;
                 angle += inc;
             }
@@ -191,7 +194,7 @@ void populateTable(double* table, int n, int tabletype ) {
 
         case (ENV) : {
             // A hanning window style envelope (squared sine)
-            inc = M_PI / (float) n;
+            inc = PI / (float) n;
             for (i = 0; i < n; ++i) {
                 *table++ = 1.0f - cos(angle) * cos(angle); 
                 angle += inc;

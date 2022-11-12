@@ -8,6 +8,11 @@
 #define AMP             0.2f
 #define FREQ            30.0f
 
+#ifdef DEBUG
+    #define D(x) x
+#else
+    #define D(x)
+#endif
 // TODO: 
 // experiment with a wavetable struct that keeps track of its own position,
 
@@ -104,11 +109,12 @@ int main(void) {
 
     populateTable(TABLE, TABLE_LEN, SINE);
     populateTable(ENV_TABLE, TABLE_LEN, ENV);
+    D(std::cout << "Populated tables");
 
 	PaStream* stream;
 	PaError err;
 
-	std::cout << "PortAudio Test: output 4 second sound wave.\n";
+    D(std::cout << "PortAudio Test.\n";);
 
 	// data here is not pointer, we access member variables directly, i. e '.' instead of '->'
 	data.left = data.right = 0.0;
@@ -169,7 +175,7 @@ void populateTable(double* table, int n, int tabletype ) {
                     *table++ = sin(angle);
                     angle += inc;
             }
-            printf("SINE\n");
+            D(printf("SINE\n"));
             break;
         }
 
@@ -179,7 +185,7 @@ void populateTable(double* table, int n, int tabletype ) {
                 *table++ =  angle - 1.0f;
                 angle += inc;
             }
-            printf("SAW\n");
+            D(printf("SAW\n"));
             break;
         }
 
@@ -190,7 +196,7 @@ void populateTable(double* table, int n, int tabletype ) {
                 *table++ = 1.0f - cos(angle) * cos(angle); 
                 angle += inc;
             }
-            printf("env based on one half of a squared sine\n");
+            D(printf("ENV: 1 - cos(x)^2\n"));
             break;
         }
 

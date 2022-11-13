@@ -3,12 +3,20 @@
 #include <cmath>
 #include "sound.hpp"
 
-#define DURATION		(4000) // milliseconds
-#define SAMPLE_RATE		(48000)
-#define TABLE_LEN       512
-#define AMP             0.2
+
+// CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 #define FREQ            300.0
 #define LFOFREQ         0.250
+
+// MASTER VOLUME OF THE GENERATED TONE
+#define AMP             0.2
+// DURATION OF THE GENERATED TONE
+#define DURATION		(4000) // milliseconds
+// DEFAULT LENGHT OF THE WAVETABLE
+#define TABLE_LEN       512
+// IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
+#define SAMPLE_RATE		(48000)
+
 
 #ifdef DEBUG
     #define D(x) x

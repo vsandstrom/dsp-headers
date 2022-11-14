@@ -1,12 +1,13 @@
 #include "portaudio.h"
+#include <cstdlib>
 #include <iostream>
 #include <cmath>
 #include "sound.hpp"
 
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-#define FREQ            300.0
-#define LFOFREQ         0.250
+#define FREQ            3
+#define LFOFREQ         5
 
 // MASTER VOLUME OF THE GENERATED TONE
 #define AMP             0.2
@@ -23,28 +24,18 @@
 #else
     #define D(x)
 #endif
-// TODO: 
-// experiment with a wavetable struct that keeps track of its own position,
 
-typedef struct {
-	float left;
-	float right;
-} frame;
-
-double TABLE[512] = {0};
-double ENV_TABLE[512] = {0};
-
-// Initialize position as global value
-// if you don't want to use static position variables, create them as global values. 
-double pos = 0;
-double envpos = 0;
-double samplePerHertz = 0, steps = 0;
-// int bPos = 0, fPos = 0;
-// int ePos = 0;
+double TABLE[TABLE_LEN] = {0};
+double ENV_TABLE[TABLE_LEN] = {0};
 
 // Fill Wavetable with values
-void populateTable(double*, int, int);
+void populateTable(double*, int, WAVETYPES);
 double interpolate(double, double*);
+
+// initialize structs as global values
+wavetable sig {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE};
+wavetable env {ENV_TABLE, TABLE_LEN, 0, LFOFREQ, SAMPLE_RATE};
+static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,						// input
@@ -68,45 +59,29 @@ static int paCallback(  const void* inputBuffer,						// input
     double diff = 0, bWeight = 0, fWeight = 0;
     double samplePerHertz = 0, steps = 0;
     
-    // initialize first value, no wierd garbage value
-    // if they are initialized here, make sure to give the variables the correct values
-    // before using it, otherwise there will be a '0'-sample at the start of each block.
-    data->left = 0;
-    data->right = 0;
 
 	// Write saw waveform to buffer
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-                                            //
-        // WRITE FROM "FAST" TABLE
-        data -> left = interpolate(pos, TABLE);
-        data -> right = interpolate(pos, TABLE);
 
-        // WRITE FROM "SLOW" TABLE
         // multiply signal by the envelope table
-        data -> left *= interpolate(envpos, ENV_TABLE);
-        data -> right *= interpolate(envpos, ENV_TABLE);
+        // WRITE FROM "FAST" TABLE                            WRITE FROM "SLOW" TABLE
+        data -> left = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
+        data -> right = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
 
-        // data -> left *= ENV_TABLE[bPos] * fWeight + ENV_TABLE[fPos] * bWeight;
-        // data -> right *= ENV_TABLE[bPos] * fWeight + ENV_TABLE[fPos] * bWeight;
-    
         // write data to the out buffer
-        *out++ = data -> left; // LEFT			-- travel through buffer and fill with samples
-		*out++ = data -> right; // RIGHT		-- 'out' variable is dereferenced before filled
+        *out++ = data -> left * AMP; // LEFT			-- travel through buffer and fill with samples
+		*out++ = data -> right * AMP; // RIGHT		-- 'out' variable is dereferenced before filled
 
         // increment both wavetable and envelope
-        samplePerHertz = (double)SAMPLE_RATE / freq;
-        steps = (double)TABLE_LEN / samplePerHertz;
-        pos += steps;
+        sig.position += calcPosition(SAMPLE_RATE, sig.frequency, sig.tablelenght);
+        env.position += calcPosition(SAMPLE_RATE, env.frequency, env.tablelenght); 
 
-        samplePerHertz = (double)SAMPLE_RATE / lfo;
-        steps = (double)TABLE_LEN / samplePerHertz;
-        envpos += steps;
-
-        if (pos > TABLE_LEN) {
-            pos -= TABLE_LEN;
+        // use 'while' instead of 'if', to handle if pos > (TABLE_LEN * 2)
+        while (sig.position > sig.tablelenght) {
+            sig.position -= sig.tablelenght;
         }
-        if (envpos > TABLE_LEN) {
-            envpos -= TABLE_LEN;
+        while (env.position > env.tablelenght) {
+            env.position -= env.tablelenght;
         }
 
 	}
@@ -114,14 +89,10 @@ static int paCallback(  const void* inputBuffer,						// input
 }
 
 
-
-static frame data;
-
-
 int main(void) {
 
-    populateTable(TABLE, TABLE_LEN, SINE);
-    populateTable(ENV_TABLE, TABLE_LEN, ENV);
+    populateTable(sig.table, sig.tablelenght, SINE);
+    populateTable(env.table, env.tablelenght, ENV);
     D(std::cout << "Populated tables");
 
 	PaStream* stream;
@@ -129,8 +100,10 @@ int main(void) {
 
     D(std::cout << "PortAudio Test.\n";);
 
-	// data here is not pointer, we access member variables directly, i. e '.' instead of '->'
-	// data.left = data.right = 0.0;
+    // initialize first value, no wierd garbage value
+    // if they are initialized here, make sure to give the variables the correct values
+    // before using it, otherwise there will be an unwanted '0'-sample at the first block
+	data.left = data.right = 0.0;
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;

@@ -12,24 +12,32 @@
     #define D(x)
 #endif
 
-int bPos = 0;
-int fPos = 0;
 
 double interpolate(double pos, double* table) {
     // iterpolate
+    int prevPos, currPos;
     double diff = floor(pos);
-    double bWeight = pos - diff;
-    double fWeight = 1.0 - bWeight;
-    bPos = (int)(pos-1.f);
-    fPos = (int)pos;
-    if (bPos < 0) {
-        bPos = 511;
+    double currWeight = pos - diff;
+    double prevWeight = 1.0 - currWeight;
+    prevPos = (int)(pos-1.f);
+    currPos = (int)pos;
+    if (prevPos < 0) {
+        prevPos = 511;
     }
 
-    return (table[bPos] * fWeight) + (table[fPos] * bWeight);
+    return (table[prevPos] * prevWeight) + (table[currPos] * currWeight);
 }
 
-void populateTable(double* table, int n, int tabletype ) {
+
+double calcPosition(double samplerate, double frequency, double tablelenght) {
+    // calculates how many samples in the table corresponds to the frequency, 
+    // if you want to play an 'A' at 440:
+    // tablelenght: 512 / samplerate: 48000 / frequency: 440
+    return tablelenght / (samplerate / frequency); // <-- apparently the parenthesis matters
+};
+
+
+void populateTable(double* table, int n, WAVETYPES tabletype ) {
     double inc = 0, angle = 0;
     int i = 0;
 
@@ -66,7 +74,26 @@ void populateTable(double* table, int n, int tabletype ) {
             break;
         }
 
+        case (TRIANGLE) : {
+            //
+            // TODO
+            //
+            break;
+        }
+
+        case (SQUARE) : {
+            //
+            // TODO
+            //
+            break;
+        }
+
+        default:
+            break;
+
     }
 }
 
 #endif
+
+

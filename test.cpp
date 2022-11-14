@@ -25,11 +25,9 @@
     #define D(x)
 #endif
 
+
 double TABLE[TABLE_LEN] = {0};
 double ENV_TABLE[TABLE_LEN] = {0};
-
-void populateTable(double*, int, WAVETYPES);
-double interpolate(double, double*);
 
 // initialize structs as global values
 wavetable sig {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE};

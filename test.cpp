@@ -28,7 +28,6 @@
 double TABLE[TABLE_LEN] = {0};
 double ENV_TABLE[TABLE_LEN] = {0};
 
-// Fill Wavetable with values
 void populateTable(double*, int, WAVETYPES);
 double interpolate(double, double*);
 

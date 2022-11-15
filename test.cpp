@@ -6,18 +6,17 @@
 
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-#define FREQ            3
-#define LFOFREQ         5
+#define FREQ            300
+#define LFOFREQ         300
 
 // MASTER VOLUME OF THE GENERATED TONE
 #define AMP             0.2
 // DURATION OF THE GENERATED TONE
 #define DURATION		(4000) // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-#define TABLE_LEN       512
+// #define TABLE_LEN       512
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 #define SAMPLE_RATE		(48000)
-
 
 #ifdef DEBUG
     #define D(x) x
@@ -25,13 +24,12 @@
     #define D(x)
 #endif
 
-
 double TABLE[TABLE_LEN] = {0};
 double ENV_TABLE[TABLE_LEN] = {0};
 
 // initialize structs as global values
-wavetable sig {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE};
-wavetable env {ENV_TABLE, TABLE_LEN, 0, LFOFREQ, SAMPLE_RATE};
+wavetable sig {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE, interpolate, calcPosition};
+wavetable env {ENV_TABLE, TABLE_LEN, 0, LFOFREQ, SAMPLE_RATE, interpolate, calcPosition};
 static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
@@ -56,22 +54,40 @@ static int paCallback(  const void* inputBuffer,						// input
     double diff = 0, bWeight = 0, fWeight = 0;
     double samplePerHertz = 0, steps = 0;
     
+    // D(for (int i = 0; i < sig.tablelenght; ++i) {
+    //         printf("|%f%|", sig.table[i]);
+    //     }
+    //     printf("\n");
+    // )
+    // D(for (int i = 0; i < env.tablelenght; ++i) {
+    //         printf("|%f%|", env.table[i]);
+    //     }
+    //     printf("\n");
+    // )
 
 	// Write saw waveform to buffer
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
 
         // multiply signal by the envelope table
         // WRITE FROM "FAST" TABLE                            WRITE FROM "SLOW" TABLE
-        data -> left = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
-        data -> right = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
+        data -> left = sig.interpolate(&sig) * env.interpolate(&env);
+        data -> right = sig.interpolate(&sig) * env.interpolate(&env);
+        // data -> left = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
+        // data -> right = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
+        // D(printf("after interpolate\n"));
 
         // write data to the out buffer
-        *out++ = data -> left * AMP; // LEFT			-- travel through buffer and fill with samples
-		*out++ = data -> right * AMP; // RIGHT		-- 'out' variable is dereferenced before filled
+        *out++ = data -> left; // LEFT			-- travel through buffer and fill with samples
+		*out++ = data -> right; // RIGHT		-- 'out' variable is dereferenced before filled
 
         // increment both wavetable and envelope
-        sig.position += calcPosition(SAMPLE_RATE, sig.frequency, sig.tablelenght);
-        env.position += calcPosition(SAMPLE_RATE, env.frequency, env.tablelenght); 
+        // sig.position += calcPosition(SAMPLE_RATE, sig.frequency, sig.tablelenght);
+        // env.position += calcPosition(SAMPLE_RATE, env.frequency, env.tablelenght); 
+        // sig.position += sig.calcPosition(&sig);
+        // env.position += env.calcPosition(&env); 
+        sig.calcPosition(&sig);
+        env.calcPosition(&env); 
+        // D(printf("after calc\n"));
 
         // use 'while' instead of 'if', to handle if pos > (TABLE_LEN * 2)
         while (sig.position > sig.tablelenght) {
@@ -90,6 +106,8 @@ int main(void) {
 
     populateTable(sig.table, sig.tablelenght, SINE);
     populateTable(env.table, env.tablelenght, ENV);
+    // populateTable(sig, SINE);
+    // populateTable(&env, ENV);
     D(std::cout << "Populated tables");
 
 	PaStream* stream;

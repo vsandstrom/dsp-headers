@@ -154,7 +154,7 @@ double interpolate(wavetable* table) {
     prevPos = (int)(table -> position-1.f);
     currPos = (int)table -> position;
     if (prevPos < 0) {
-        prevPos = 511;
+        prevPos = table -> tablelenght - 1;
     }
 
     // D(printf("inside interpolate \n"));

@@ -1,23 +1,21 @@
+
+#include "portaudio.h"
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <cmath>
+#include "sound.hpp"
+
+
 #ifdef DEBUG
     #define D(x) x
 #else
     #define D(x)
 #endif
 
-#include "portaudio.h"
-#include <cstdlib>
-#include <iostream>
-#include <cmath>
-#include "sound.hpp"
-
-
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 #define FREQ            300
-<<<<<<< HEAD
-#define LFOFREQ         0.250
-=======
 #define LFOFREQ         0.250 
->>>>>>> dev
 
 // MASTER VOLUME OF THE GENERATED TONE
 #define AMP             0.2
@@ -34,7 +32,6 @@ double ENV_TABLE[TABLE_LEN] = {0};
 
 // initialize structs as global values
 wavetable sig = {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE, interpolate, calcPosition};
-
 wavetable env = {ENV_TABLE, TABLE_LEN, 0, LFOFREQ, SAMPLE_RATE, interpolate, calcPosition};
 
 static frame data;
@@ -109,7 +106,13 @@ static int paCallback(  const void* inputBuffer,						// input
 }
 
 
-int main(void) {
+int main(int argc, const char** argv) {
+
+    if (argc == 3) {
+        sig.frequency = std::stod(argv[1]);
+        env.frequency = std::stod(argv[2]);
+    }
+    
 
     populateTable(sig.table, sig.tablelenght, SINE);
     populateTable(env.table, env.tablelenght, ENV);

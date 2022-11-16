@@ -1,5 +1,6 @@
 
 #include "portaudio.h"
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -106,14 +107,39 @@ static int paCallback(  const void* inputBuffer,						// input
 }
 
 
-int main(int argc, const char** argv) {
+int main(int argc, char** argv) {
+    if ( argc == 5 ) {
+        argc--;
+        argv++;
+        while (argc != 0){
+            if ((*argv)[0] == '-') {
+                switch ((*argv)[1]){
+                    case 'c':{
+                                argc--;
+                                argv++;
+                                sig.frequency = std::stod(*argv);
+                             }
+                    case 'm':{
+                                argc--;
+                                argv++;
+                                env.frequency = std::stod(*argv);
+                             }
+                    default:{
 
-    if (argc == 3) {
-        sig.frequency = std::stod(argv[1]);
-        env.frequency = std::stod(argv[2]);
+                            argc--;
+                            argv++;
+                            }
+                }
+
+            }
+            argc--;
+            argv++;
+        }
+        printf("running user input frequencies");
+    } else {
+        printf("running on default frequencies\n");
     }
     
-
     populateTable(sig.table, sig.tablelenght, SINE);
     populateTable(env.table, env.tablelenght, ENV);
     // populateTable(sig, SINE);

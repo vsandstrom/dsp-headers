@@ -11,6 +11,7 @@ enum WAVETYPES {
     ENV = 4
 };
 
+
 struct wavetable {
     double* table;
     double tablelenght;
@@ -21,7 +22,7 @@ struct wavetable {
     double (*interpolate)(wavetable* self);
     // double (*calcPosition)(wavetable* self);
     void (*calcPosition)(wavetable* self);
-    void (*populateTable)(wavetable* self, WAVETYPES type);
+    // void (*populateTable)(wavetable* self, WAVETYPES type);
 };
 
 struct frame {
@@ -29,11 +30,13 @@ struct frame {
 	float right;
 };
 
+
 // instead of #defined math macros
 const double PI = 3.14159265358979323846;
 void populateTable(double* table, int tablelenght, WAVETYPES wavetype);
 void populateTable2(wavetable* table, WAVETYPES wavetype);
 // doing operations on struct member variables
+//
 double interpolate(wavetable* table);
 // function with no access to member variables
 // double interpolate2(double position, double* table);
@@ -45,5 +48,4 @@ void calcPosition(wavetable* table);
 // double calcPosition2(wavetable* table);
 // function with no access to member variables
 // double calcPosition3(double samplerate, double frequency, double tablelenght);
-
 

@@ -11,10 +11,6 @@
     #define D(x)
 #endif
 
-
-
-
-
 void populateTable2(wavetable* table, WAVETYPES tabletype ) {
     double inc = 0, angle = 0;
     int i = 0;

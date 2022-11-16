@@ -29,7 +29,9 @@ double ENV_TABLE[TABLE_LEN] = {0};
 
 // initialize structs as global values
 wavetable sig {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE, interpolate, calcPosition};
+
 wavetable env {ENV_TABLE, TABLE_LEN, 0, LFOFREQ, SAMPLE_RATE, interpolate, calcPosition};
+
 static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
@@ -108,12 +110,12 @@ int main(void) {
     populateTable(env.table, env.tablelenght, ENV);
     // populateTable(sig, SINE);
     // populateTable(&env, ENV);
-    D(std::cout << "Populated tables");
+    D(std::cout << "Populated tables";)
 
 	PaStream* stream;
 	PaError err;
 
-    D(std::cout << "PortAudio Test.\n";);
+    D(std::cout << "PortAudio Test.\n";)
 
     // initialize first value, no wierd garbage value
     // if they are initialized here, make sure to give the variables the correct values

@@ -7,7 +7,7 @@
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 #define FREQ            300
-#define LFOFREQ         300
+#define LFOFREQ         0.250
 
 // MASTER VOLUME OF THE GENERATED TONE
 #define AMP             0.2
@@ -28,9 +28,9 @@ double TABLE[TABLE_LEN] = {0};
 double ENV_TABLE[TABLE_LEN] = {0};
 
 // initialize structs as global values
-wavetable sig {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE, interpolate, calcPosition};
+wavetable sig = {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE, interpolate, calcPosition};
 
-wavetable env {ENV_TABLE, TABLE_LEN, 0, LFOFREQ, SAMPLE_RATE, interpolate, calcPosition};
+wavetable env = {ENV_TABLE, TABLE_LEN, 0, LFOFREQ, SAMPLE_RATE, interpolate, calcPosition};
 
 static frame data;
 

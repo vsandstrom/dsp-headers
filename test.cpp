@@ -1,3 +1,9 @@
+#ifdef DEBUG
+    #define D(x) x
+#else
+    #define D(x)
+#endif
+
 #include "portaudio.h"
 #include <cstdlib>
 #include <iostream>
@@ -7,7 +13,11 @@
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 #define FREQ            300
+<<<<<<< HEAD
 #define LFOFREQ         0.250
+=======
+#define LFOFREQ         0.250 
+>>>>>>> dev
 
 // MASTER VOLUME OF THE GENERATED TONE
 #define AMP             0.2
@@ -18,11 +28,6 @@
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 #define SAMPLE_RATE		(48000)
 
-#ifdef DEBUG
-    #define D(x) x
-#else
-    #define D(x)
-#endif
 
 double TABLE[TABLE_LEN] = {0};
 double ENV_TABLE[TABLE_LEN] = {0};

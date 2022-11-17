@@ -111,23 +111,27 @@ int main(int argc, char** argv) {
     if ( argc == 5 ) {
         argc--;
         argv++;
-        while (argc != 0){
+        while (argc > 0){
             if ((*argv)[0] == '-') {
+                printf("%c\n", (*argv)[1]);
                 switch ((*argv)[1]){
                     case 'c':{
                                 argc--;
                                 argv++;
                                 sig.frequency = std::stod(*argv);
+                                break;
                              }
                     case 'm':{
                                 argc--;
                                 argv++;
                                 env.frequency = std::stod(*argv);
+                                break;
                              }
                     default:{
 
                             argc--;
                             argv++;
+                            break;
                             }
                 }
 

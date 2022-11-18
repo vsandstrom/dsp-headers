@@ -75,8 +75,8 @@ static int paCallback(  const void* inputBuffer,						// input
 
         // multiply signal by the envelope table
         // WRITE FROM "FAST" TABLE                            WRITE FROM "SLOW" TABLE
-        data -> left = sig.interpolate(&sig) * env.interpolate(&env);
-        data -> right = sig.interpolate(&sig) * env.interpolate(&env);
+        data -> left = sig.interpolate(&sig, COSINE) * env.interpolate(&env, COSINE);
+        data -> right = sig.interpolate(&sig, COSINE) * env.interpolate(&env, COSINE);
         // data -> left = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
         // data -> right = interpolate(sig.position, sig.table) * interpolate(env.position, env.table);
         // D(printf("after interpolate\n"));

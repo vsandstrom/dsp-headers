@@ -11,6 +11,13 @@ enum WAVETYPES {
     ENV = 4
 };
 
+enum IPTYPE {
+    LINEAR = 0,
+    COSINE,
+    CUBIC,
+    HERMITE
+};
+
 
 struct wavetable {
     double* table;
@@ -19,7 +26,7 @@ struct wavetable {
     double frequency;
     double samplerate;
 
-    double (*interpolate)(wavetable* self);
+    double (*interpolate)(wavetable* self, IPTYPE type);
     // double (*calcPosition)(wavetable* self);
     void (*calcPosition)(wavetable* self);
     // void (*populateTable)(wavetable* self, WAVETYPES type);
@@ -37,7 +44,7 @@ void populateTable(double* table, int tablelenght, WAVETYPES wavetype);
 void populateTable2(wavetable* table, WAVETYPES wavetype);
 // doing operations on struct member variables
 //
-double interpolate(wavetable* table);
+double interpolate(wavetable* table, IPTYPE);
 // function with no access to member variables
 // double interpolate2(double position, double* table);
 //

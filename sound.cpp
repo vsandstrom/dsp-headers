@@ -141,14 +141,22 @@ void populateTable(double* table, int n, WAVETYPES tabletype ) {
     }
 }
 
-double interpolate(wavetable* table) {
+double interpolate(wavetable* table, IPTYPE type) {
     // iterpolate
-    int prevPos, currPos;
+    double currWeight, prevWeight;
+    
     double diff = floor(table -> position);
-    double currWeight = table -> position - diff;
-    double prevWeight = 1.0 - currWeight;
-    prevPos = (int)(table -> position-1.f);
-    currPos = (int)table -> position;
+    int prevPos = (int)(table -> position-1.f);
+    int currPos = (int)table -> position;
+
+    if (type == LINEAR) {
+        currWeight = table -> position - diff;
+        prevWeight = 1.0 - currWeight;
+    } else if ( type == COSINE ) {
+        currWeight = (1 - cos(diff*PI)) / 2;
+        prevWeight = 1.0 - currWeight;
+    }
+    
     if (prevPos < 0) {
         prevPos = table -> tablelenght - 1;
     }

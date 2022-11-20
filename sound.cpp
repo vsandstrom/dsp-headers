@@ -84,13 +84,13 @@ void populateTable2(wavetable* table, WAVETYPES tabletype ) {
     }
 }
 
-void populateTable(double* table, int n, WAVETYPES tabletype ) {
-    double inc = 0, angle = 0;
+void populateTable(double* table, int n, WAVETYPES tabletype) {
+    double inc = 0, angle = 0, numSamples = (double) n;
     int i = 0;
 
     switch (tabletype) {
         case (SINE) : {
-            inc = PI * 2  / (float) n;
+            inc = PI * 2  / numSamples;
 
             for (i = 0; i < n; ++i) {
                 *table++ = sin(angle);
@@ -101,7 +101,7 @@ void populateTable(double* table, int n, WAVETYPES tabletype ) {
         }
 
         case (SAW) : {
-            inc = 2.0 / (double) n;
+            inc = 2.0 / numSamples;
             for (i = 0; i < n; ++i) {
                 *table++ =  angle - 1.0;
                 angle += inc;
@@ -112,7 +112,7 @@ void populateTable(double* table, int n, WAVETYPES tabletype ) {
 
         case (ENV) : {
             // A hanning window style envelope (squared sine)
-            inc = PI / (float) n;
+            inc = PI / numSamples;
             for (i = 0; i < n; ++i) {
                 *table++ = 1.0 - cos(angle) * cos(angle); 
                 angle += inc;
@@ -122,9 +122,14 @@ void populateTable(double* table, int n, WAVETYPES tabletype ) {
         }
 
         case (TRIANGLE) : {
-            //
-            // TODO
-            //
+            inc = 4.0 / (numSamples / 4);
+            for (; i < n; ++i) {
+                if ( angle >= 1.0 || angle < -1.0) {
+                    inc *= -1.0;
+                }
+                *table++ = angle;
+                angle += inc;
+            }
             break;
         }
 
@@ -144,30 +149,51 @@ void populateTable(double* table, int n, WAVETYPES tabletype ) {
 double interpolate(wavetable* table, IPTYPE type) {
     // iterpolate
     double currWeight, prevWeight;
-    
     double diff = floor(table -> position);
-    int prevPos = (int)(table -> position-1.f);
-    int currPos = (int)table -> position;
-
-    if (type == LINEAR) {
-        currWeight = table -> position - diff;
-        prevWeight = 1.0 - currWeight;
-    } else if ( type == COSINE ) {
-        currWeight = (1 - cos(diff*PI)) / 2;
-        prevWeight = 1.0 - currWeight;
-    }
+    // since the table is TABLE_LEN + 1, we can do this and not worry about going out of bounds.
+    int prevPos = (int)(table -> position);
+    int currPos = (int)table -> position + 1.f;
     
-    if (prevPos < 0) {
-        prevPos = table -> tablelenght - 1;
+
+    switch (type) {
+        case (LINEAR) : {
+            currWeight = table -> position - diff;
+            prevWeight = 1.0 - currWeight;
+            break;
+        } 
+
+        case (COSINE) : {
+            currWeight = (1 - cos(diff*PI)) / 2;
+            prevWeight = 1.0 - currWeight;
+            break;
+        }
+
+        case (CUBIC) : {
+            // TODO
+            printf("CUBIC INTERPOLATION NOT IMPLEMENTED");
+            exit(1);
+            break;
+        }
+
+        case (HERMITE) : {
+            printf("CUBIC INTERPOLATION NOT IMPLEMENTED");
+            exit(1);
+            break;
+        }
+        default: {
+            break;
+        }
     }
+
+    
 
     // D(printf("inside interpolate \n"));
 
     return (table->table[prevPos] * prevWeight) + (table->table[currPos] * currWeight);
 }
 
-void calcPosition(wavetable* table) {
-    table -> position += table -> tablelenght / ( table -> samplerate / table -> frequency );
+void calcPosition(wavetable* table, double phase) {
+    table -> position += table -> tablelenght / ( table -> samplerate / (table -> frequency * phase) );
     while (table -> position > table -> tablelenght) table -> position -= table -> tablelenght;
 }
 

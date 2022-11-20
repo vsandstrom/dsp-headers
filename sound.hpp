@@ -1,5 +1,5 @@
 #ifndef TABLE_LEN
-    #define TABLE_LEN 512
+    #define TABLE_LEN 16
 #endif
 
 
@@ -28,7 +28,7 @@ struct wavetable {
 
     double (*interpolate)(wavetable* self, IPTYPE type);
     // double (*calcPosition)(wavetable* self);
-    void (*calcPosition)(wavetable* self);
+    void (*calcPosition)(wavetable* self, double phase);
     // void (*populateTable)(wavetable* self, WAVETYPES type);
 };
 
@@ -44,12 +44,12 @@ void populateTable(double* table, int tablelenght, WAVETYPES wavetype);
 void populateTable2(wavetable* table, WAVETYPES wavetype);
 // doing operations on struct member variables
 //
-double interpolate(wavetable* table, IPTYPE);
+double interpolate(wavetable* table, IPTYPE type);
 // function with no access to member variables
 // double interpolate2(double position, double* table);
 //
 // no return value, only updates member variables
-void calcPosition(wavetable* table);
+void calcPosition(wavetable* table, double phase = 1);
 
 // doing operations on member variables, with return value
 // double calcPosition2(wavetable* table);

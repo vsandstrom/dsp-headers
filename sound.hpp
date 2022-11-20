@@ -2,6 +2,9 @@
     #define TABLE_LEN 16
 #endif
 
+// TODO: 
+// [  ] -> "calcPosition" needs to handle *negative* steps, when the phase input is negative, 
+//          like the case is wiht a bipolar oscillator signal. 
 
 enum WAVETYPES {
     SINE = 0,
@@ -49,6 +52,7 @@ double interpolate(wavetable* table, IPTYPE type);
 // double interpolate2(double position, double* table);
 //
 // no return value, only updates member variables
+// 
 void calcPosition(wavetable* table, double phase = 1);
 
 // doing operations on member variables, with return value

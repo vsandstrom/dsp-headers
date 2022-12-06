@@ -10,6 +10,10 @@ or you could **try** using
 ```bash
 $ make
 ```
+Usage:
+```bash
+$ ./<program name>  [-c <carrier frequency>] [-m <modulator frequency>]
+```
 
 ## AM or Envelope
 There are two oscillators in test.cpp.

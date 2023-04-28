@@ -10,20 +10,19 @@
 #else
     #define D(x)
 #endif
-#ifdef P
-  #define PHASE(x) x
-#else 
-  #define PHASE(x)
-#endif
 
-WaveTable::WaveTable(WAVESHAPE waveshape, int tableLength, INTERPOLATION interpolation, int samplerate): tableLength(tableLength), interpolationType(interpolation), samplerate(samplerate) {
+WaveTable::WaveTable(WAVESHAPE waveshape, int tableLength, INTERPOLATION interpolation, int samplerate)
+  : tableLength(tableLength), interpolationType(interpolation), samplerate(samplerate) 
+{
   // Requests a +1 memory block to do one less comparison in linear interpolation
   table = (float*)calloc(tableLength + 1, sizeof(float));
   position = 0;
   populateTable(waveshape);
 };
 
-WaveTable::WaveTable(float* wavetable, int tableLength, INTERPOLATION interpolation, int samplerate): table(wavetable), tableLength(tableLength), interpolationType(interpolation), samplerate(samplerate) {
+WaveTable::WaveTable(float* wavetable, int tableLength, INTERPOLATION interpolation, int samplerate)
+  : table(wavetable), tableLength(tableLength), interpolationType(interpolation), samplerate(samplerate) 
+{
   table = wavetable;
   position = 0;
 };
@@ -32,7 +31,7 @@ WaveTable::~WaveTable() {
   free(table);
 }
 
-void WaveTable::movePointer(float phase){
+void WaveTable::movePointer(float phase) {
     position += tableLength / (samplerate / (frequency * phase));
     while (position >= tableLength) {
       position -= tableLength;
@@ -40,7 +39,7 @@ void WaveTable::movePointer(float phase){
     D(printf("position: %f", position));
 }
 
-void WaveTable::movePointer(){
+void WaveTable::movePointer() {
     position += tableLength / (samplerate / frequency);
     while (position >= tableLength) {
       position -= tableLength;
@@ -48,7 +47,7 @@ void WaveTable::movePointer(){
     D(printf("position: %f", position));
 }
 
-void WaveTable::populateTable(WAVESHAPE waveshape){
+void WaveTable::populateTable(WAVESHAPE waveshape) {
   float inc = 0, angle = 0, numSamples = (float) tableLength;
 
   switch (waveshape) {

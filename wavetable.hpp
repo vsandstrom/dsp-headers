@@ -23,13 +23,14 @@ enum INTERPOLATION {
 };
 
 class WaveTable {
-  public:
-    float* table;
+  private:
     float tableLength;
     float position;
-    float frequency;
     float samplerate;
+    float* table;
     INTERPOLATION interpolationType;
+  public:
+    float frequency;
 
     // Creates one of several simple WaveTable shapes, chosen by the WAVESHAPE enum argument
     //
@@ -54,11 +55,11 @@ class WaveTable {
     //
     // This also allows for an optional *phase* input, easily translated to frequency modulation, 
     // or *phase modulation*.
-    void calcPosition(float phase);
+    void movePointer(float phase);
 
     // Determines which sample to read next, taking into account the oscillators frequency and the
     // global samplerate, then updates the WaveTable-structs *position* member. 
-    void calcPosition();
+    void movePointer();
 
     // Initializes the WaveTable with a **zeroed** float-array of of size **tableLength**, 
     // and sets the member variable

@@ -36,12 +36,12 @@ WaveTable envelope = WaveTable(ENV, TABLE_LEN, LINEAR, SAMPLE_RATE);
 static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
-static int paCallback(  const void* inputBuffer,						// input
-						void* outputBuffer,								// output
-						unsigned long framesPerBuffer,					// length of buffer in frames
-						const PaStreamCallbackTimeInfo* timeinfo,		// :
-						PaStreamCallbackFlags statusFlags,
-						void* userdata )								// "void"-type can be typecast to other
+static int paCallback(  const void* inputBuffer,				// input
+						void* outputBuffer,								          // output
+						unsigned long framesPerBuffer,					    // length of buffer in frames
+						const PaStreamCallbackTimeInfo* timeinfo,		//
+						PaStreamCallbackFlags statusFlags,          //
+						void* userdata )								            // "void"-type can be typecast to other 
 {
 
 	// cast data passing through stream
@@ -61,9 +61,9 @@ static int paCallback(  const void* inputBuffer,						// input
     *out++ = data -> right;
 
     // the modulator modulates the carriers phase
-    carrier.calcPosition(modulator.interpolate());
-    modulator.calcPosition();
-    envelope.calcPosition(); 
+    carrier.movePointer(modulator.interpolate());
+    modulator.movePointer();
+    envelope.movePointer(); 
 
 	}
 	return 0;
@@ -75,43 +75,42 @@ int main(int argc, char** argv) {
   modulator.frequency = FM_FREQ;
   envelope.frequency = ENV_FREQ;
     if ( argc > 3 && argc < 8 ) {
-        argc--;
-        argv++;
-        while (argc > 0){
-            if ((*argv)[0] == '-') {
-                printf("%c\n", (*argv)[1]);
-                switch ((*argv)[1]){
-                    case 'c':{
-                                argc--;
-                                argv++;
-                                carrier.frequency = std::stof(*argv);
-                                break;
-                             }
-                    case 'e':{
-                                argc--;
-                                argv++;
-                                envelope.frequency = std::stof(*argv);
-                                break;
-                             }
-                    case 'm':{
-                                argc--;
-                                argv++;
-                                modulator.frequency = std::stof(*argv);
-                                break;
-                             }
-                    default:{
-
-                            argc--;
-                            argv++;
-                            break;
-                            }
-                }
+      argc--;
+      argv++;
+      while (argc > 0){
+        if ((*argv)[0] == '-') {
+          printf("%c\n", (*argv)[1]);
+          switch ((*argv)[1]){
+            case 'c': {
+              argc--;
+              argv++;
+              carrier.frequency = std::stof(*argv);
+              break;
+            }
+            case 'e':{
+              argc--;
+              argv++;
+              envelope.frequency = std::stof(*argv);
+              break;
+            }
+            case 'm':{
+              argc--;
+              argv++;
+              modulator.frequency = std::stof(*argv);
+              break;
+            }
+            default:{
+              argc--;
+              argv++;
+              break;
 
             }
-            argc--;
-            argv++;
+          }
         }
-        printf("running user input frequencies");
+        argc--;
+        argv++;
+      }
+      printf("running user input frequencies");
     } else {
         printf("running on default frequencies\n");
     }
@@ -126,7 +125,7 @@ int main(int argc, char** argv) {
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;
-    
+
 	// open an audio I/O stream:
 	err = Pa_OpenDefaultStream( &stream,  // < --- Callback is in err
 								0, 

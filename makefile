@@ -1,8 +1,9 @@
-compile: test.o sound.o
-	g++ test.o sound.o -I/usr/local/include -L/usr/local/lib/ -lportaudio -o test
+compile: test.o wavetable.o
+	g++ test.o wavetable.o -I/usr/local/include -L/usr/local/lib/ -lportaudio -o test \
+		&& rm *.o 
 
 test.o: 
 	g++ -o test.o -c test.cpp 
 
-sound.o:
-	g++ -o sound.o -c sound.cpp
+wavetable.o:
+	g++ -o wavetable.o -c wavetable.cpp -DP

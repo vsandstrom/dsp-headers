@@ -5,8 +5,9 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
-#include "sound.hpp"
-
+#include <string>
+// #include "sound.hpp"
+#include "wavetable.hpp"
 
 #ifdef DEBUG
     #define D(x) x
@@ -15,28 +16,22 @@
 #endif
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-#define FREQ            300
-#define FM_FREQ         180
-#define ENV_FREQ         0.250 
+#define FREQ            300.0f
+#define FM_FREQ         180.0f
+#define ENV_FREQ         0.250f 
 
 // MASTER VOLUME OF THE GENERATED TONE
-#define AMP             0.2
+#define AMP             0.5
 // DURATION OF THE GENERATED TONE
 #define DURATION		(4000) // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-// #define TABLE_LEN       512
+#define TABLE_LEN       512
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 #define SAMPLE_RATE		(48000)
 
-// Using TABLE_LEN + 1 to interpolate easier without doing a "out of bounds"-check.
-double TABLE[TABLE_LEN + 1] = {0};
-double ENV_TABLE[TABLE_LEN + 1] = {0};
-double FM_TABLE[TABLE_LEN + 1] = {0};
-
-// initialize structs as global values
-wavetable carrier = {TABLE, TABLE_LEN, 0, FREQ, SAMPLE_RATE, interpolate, calcPosition};
-wavetable envelope = {ENV_TABLE, TABLE_LEN, 0, ENV_FREQ, SAMPLE_RATE, interpolate, calcPosition};
-wavetable modulator = {FM_TABLE, TABLE_LEN, 0, FM_FREQ, SAMPLE_RATE, interpolate, calcPosition};
+WaveTable carrier = WaveTable(SINE, TABLE_LEN, LINEAR, SAMPLE_RATE);
+WaveTable modulator = WaveTable(ENV, TABLE_LEN, LINEAR, SAMPLE_RATE);
+WaveTable envelope = WaveTable(ENV, TABLE_LEN, LINEAR, SAMPLE_RATE);
 
 static frame data;
 
@@ -51,69 +46,24 @@ static int paCallback(  const void* inputBuffer,						// input
 
 	// cast data passing through stream
 	frame* data = (frame*) userdata;
-	float* out = (float*) outputBuffer;
+	float* out = (float*)outputBuffer;
 	unsigned int i;
 	(void) inputBuffer; // prevent unused variable warning
-    
-    
-    // våglängden är samplerate / hertz -> samples per våglängd
-    double freq = FREQ;
-    double lfo = ENV_FREQ;
-    double diff = 0, bWeight = 0, fWeight = 0;
-    double samplePerHertz = 0, steps = 0;
-    
-    // D(for (int i = 0; i < carrier.tablelenght; ++i) {
-    //         printf("|%f%|", carrier.table[i]);
-    //     }
-    //     printf("\n");
-    // )
-    // D(for (int i = 0; i < envelope.tablelenght; ++i) {
-    //         printf("|%f%|", envelope.table[i]);
-    //     }
-    //     printf("\n");
-    // )
 
-	// Write saw waveform to buffer
+    
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
 
-        // multiply signal by the envelope table
-        // WRITE FROM "FAST" TABLE                            WRITE FROM "SLOW" TABLE
-        data -> left = carrier.interpolate(
-                &carrier, 
-                LINEAR
-                // PHASE
-                )
-            * envelope.interpolate(
-                &envelope, 
-                LINEAR
-            );
-        data -> right = carrier.interpolate(
-                &carrier,
-                LINEAR
-                // PHASE
-            ) 
-            * envelope.interpolate(
-                &envelope,
-                LINEAR 
-            );
+    data -> left = carrier.interpolate() * envelope.interpolate() * AMP;
+    data -> right = carrier.interpolate() * envelope.interpolate() * AMP;
 
-        // write data to the out buffer
-        *out++ = data -> left; // LEFT			-- travel through buffer and fill with samples
-		*out++ = data -> right; // RIGHT		-- 'out' variable is dereferenced before filled
+    // write data to the out buffer
+    *out++ = data -> left; 
+    *out++ = data -> right;
 
-        carrier.calcPosition(&carrier, modulator.interpolate(&modulator, LINEAR));
-        envelope.calcPosition(&envelope, 1); 
-        modulator.calcPosition(&modulator, 1);
-
-        while (carrier.position > carrier.tablelenght) {
-            carrier.position -= carrier.tablelenght;
-        }
-        while (envelope.position > envelope.tablelenght) {
-            envelope.position -= envelope.tablelenght;
-        }
-        while (modulator.position > modulator.tablelenght) {
-            modulator.position -= modulator.tablelenght;
-        }
+    // the modulator modulates the carriers phase
+    carrier.calcPosition(modulator.interpolate());
+    modulator.calcPosition();
+    envelope.calcPosition(); 
 
 	}
 	return 0;
@@ -121,6 +71,9 @@ static int paCallback(  const void* inputBuffer,						// input
 
 
 int main(int argc, char** argv) {
+  carrier.frequency = FREQ;
+  modulator.frequency = FM_FREQ;
+  envelope.frequency = ENV_FREQ;
     if ( argc > 3 && argc < 8 ) {
         argc--;
         argv++;
@@ -131,19 +84,19 @@ int main(int argc, char** argv) {
                     case 'c':{
                                 argc--;
                                 argv++;
-                                carrier.frequency = std::stod(*argv);
+                                carrier.frequency = std::stof(*argv);
                                 break;
                              }
                     case 'e':{
                                 argc--;
                                 argv++;
-                                envelope.frequency = std::stod(*argv);
+                                envelope.frequency = std::stof(*argv);
                                 break;
                              }
                     case 'm':{
                                 argc--;
                                 argv++;
-                                modulator.frequency = std::stod(*argv);
+                                modulator.frequency = std::stof(*argv);
                                 break;
                              }
                     default:{
@@ -162,28 +115,18 @@ int main(int argc, char** argv) {
     } else {
         printf("running on default frequencies\n");
     }
-    
-    populateTable(carrier.table, carrier.tablelenght, SINE);
-    populateTable(modulator.table, carrier.tablelenght, ENV);
-    populateTable(envelope.table, envelope.tablelenght, ENV);
-    // populateTable(carrier, SINE);
-    // populateTable(&envelope, ENV);
-    D(std::cout << "Populated tables";)
 
 	PaStream* stream;
 	PaError err;
 
-    D(std::cout << "PortAudio Test.\n";)
-
-    // initialize first value, no wierd garbage value
-    // if they are initialized here, make sure to give the variables the correct values
-    // before using it, otherwise there will be an unwanted '0'-sample at the first block
+  // initialize first value, no wierd garbage value
+  // if they are initialized here, make sure to give the variables the correct values
+  // before using it, otherwise there will be an unwanted '0'-sample at the first block
 	data.left = data.right = 0.0;
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;
     
-
 	// open an audio I/O stream:
 	err = Pa_OpenDefaultStream( &stream,  // < --- Callback is in err
 								0, 
@@ -216,7 +159,6 @@ int main(int argc, char** argv) {
 	return err;
 error:
 	Pa_Terminate();
-
 	std::fprintf( stderr, "An error occurred while using the portaudio stream\n" );
 	std::fprintf( stderr, "Error number: %d\n", err );
 	std::fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ));

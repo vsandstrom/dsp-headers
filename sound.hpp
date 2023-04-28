@@ -4,9 +4,14 @@
 
 // TODO: 
 // [  ] -> "calcPosition" needs to handle *negative* steps, when the phase input is negative, 
-//          like the case is wiht a bipolar oscillator signal. 
+//          like the case is with a bipolar oscillator signal. 
 
-enum WAVETYPES {
+#ifndef PI
+  const double PI = 3.14159265358979323846;
+#endif
+
+
+enum WAVESHAPE {
     SINE = 0,
     TRIANGLE = 1,
     SAW = 2,
@@ -14,7 +19,7 @@ enum WAVETYPES {
     ENV = 4
 };
 
-enum IPTYPE {
+enum INTERPOLATION {
     LINEAR = 0,
     COSINE,
     CUBIC,
@@ -24,12 +29,12 @@ enum IPTYPE {
 
 struct wavetable {
     double* table;
-    double tablelenght;
+    double tableLength;
     double position;
     double frequency;
     double samplerate;
 
-    double (*interpolate)(wavetable* self, IPTYPE type);
+    double (*interpolate)(wavetable* self, INTERPOLATION type);
     // double (*calcPosition)(wavetable* self);
     void (*calcPosition)(wavetable* self, double phase);
     // void (*populateTable)(wavetable* self, WAVETYPES type);
@@ -40,23 +45,23 @@ struct frame {
 	float right;
 };
 
-
 // instead of #defined math macros
-const double PI = 3.14159265358979323846;
-void populateTable(double* table, int tablelenght, WAVETYPES wavetype);
-void populateTable2(wavetable* table, WAVETYPES wavetype);
+//
+//
+void populateTable(double* table, int tableLength, WAVESHAPE waveshape);
 // doing operations on struct member variables
 //
-double interpolate(wavetable* table, IPTYPE type);
+double interpolate(wavetable* table, INTERPOLATION type);
 // function with no access to member variables
 // double interpolate2(double position, double* table);
 //
 // no return value, only updates member variables
 // 
-void calcPosition(wavetable* table, double phase = 1);
+void calcPosition(wavetable* table, double phase);
+void calcPosition(wavetable* table);
 
 // doing operations on member variables, with return value
 // double calcPosition2(wavetable* table);
 // function with no access to member variables
-// double calcPosition3(double samplerate, double frequency, double tablelenght);
+// double calcPosition3(double samplerate, double frequency, double tableLength);
 

@@ -32,7 +32,7 @@ WaveTable::~WaveTable() {
   free(table);
 }
 
-void WaveTable::calcPosition(float phase){
+void WaveTable::movePointer(float phase){
     position += tableLength / (samplerate / (frequency * phase));
     while (position >= tableLength) {
       position -= tableLength;
@@ -40,7 +40,7 @@ void WaveTable::calcPosition(float phase){
     D(printf("position: %f", position));
 }
 
-void WaveTable::calcPosition(){
+void WaveTable::movePointer(){
     position += tableLength / (samplerate / frequency);
     while (position >= tableLength) {
       position -= tableLength;
@@ -128,13 +128,14 @@ float WaveTable::interpolate() {
       break;
     } 
 
-    // case (COSINE) : {
-    //   nextWeight = (1 - cos(diff*PI)) / 2;
-    //   prevWeight = 1.0 - nextWeight;
-    //   D(printf("COSINE\n"));
-    //   break;
-    // }
-    //
+    case (COSINE) : {
+      float diff = position - floor(position);
+      nextWeight = (1 - cos(diff*PI)) / 2;
+      prevWeight = 1.0 - nextWeight;
+      D(printf("COSINE\n"));
+      break;
+    }
+
     // case (CUBIC) : {
     //   // TODO
     //   printf("CUBIC INTERPOLATION NOT IMPLEMENTED");

@@ -8,30 +8,29 @@ struct frame {
 };
 
 enum WAVESHAPE {
-  SINE = 0,
-  TRIANGLE = 1,
-  SAW = 2,
-  SQUARE = 3,
-  ENV = 4
+  SINE,
+  TRIANGLE,
+  SAW,
+  SQUARE,
+  ENV
 };
 
 enum INTERPOLATION {
-  LINEAR = 0,
+  LINEAR,
   COSINE,
   CUBIC,
   HERMITE
 };
 
 class WaveTable {
-  public:
-    float* table;
-    float tableLength;
+  private:
     float position;
-    float frequency;
+    float tableLength;
     float samplerate;
+    float* table;
     INTERPOLATION interpolationType;
-
-    // Creates one of several simple WaveTable shapes, chosen by the WAVESHAPE enum argument
+    
+    // Creates one of several simple WaveTable shapes, chosen by the WAVESHAPE argument
     //
     //
     // -- SINE     : Sine waveform
@@ -41,8 +40,14 @@ class WaveTable {
     // -- ENV      : Hanning window waveform ( squared sine ), used for Envelopes
     void populateTable(WAVESHAPE waveshape);
 
+  public:
+    float frequency;
+
+
     // Performs an interpolation between samples to determine what value to return when the 
     // read-pointer tries to read the value two samples.
+    // ----
+    // -- LINEAR : Weighs two points relative to the readpointer. 
     // ----
     //
     // Uses the WaveTable member **interpolationType** 
@@ -52,17 +57,23 @@ class WaveTable {
     // global samplerate, then updates the WaveTable-structs *position* member. 
     // ----
     //
-    // This also allows for an optional *phase* input, easily translated to frequency modulation, 
-    // or *phase modulation*.
-    void calcPosition(float phase);
+    // This also allows for an optional *phase* input, easily translated to **frequency modulation** (
+    // FM ).
+    void movePointer(float phase);
 
     // Determines which sample to read next, taking into account the oscillators frequency and the
     // global samplerate, then updates the WaveTable-structs *position* member. 
-    void calcPosition();
+    void movePointer();
 
-    // Initializes the WaveTable with a **zeroed** float-array of of size **tableLength**, 
-    // and sets the member variable
-    // for the interpolation
+    // Initializes the WaveTable with a WAVESHAPE, creates a new wavetable with a 
+    // **zeroed** float-array of of size **tableLength** and populates it with the chosen **WAVESHAPE**, sets the member variable for which type of 
+    // interpolation used, and which samplerate is used on the system.
+    // ---- 
+    // -- SINE     : Sine waveform
+    // -- TRIANGLE : Triangle waveform
+    // -- SQUARE   : Square waveform
+    // -- SAW      : Saw waveform
+    // -- ENV      : Hanning window waveform ( squared sine ), used for Envelopes
     // ----
     //
     // The float-array will be +1 of the tableLength, to mediate the check for out of bounds when
@@ -75,7 +86,7 @@ class WaveTable {
     // ----
     //
     // !! BEWARE !! - When the WaveTable object goes out of scope, it will try to free the table
-    // pointer. All float-arrays used should be dynamically allocated.
+    // pointer. All float-arrays given should be dynamically allocated.
     WaveTable(float* wavetable, int tableLength, INTERPOLATION interpolation, int samplerate);
 
     // Frees the float-array

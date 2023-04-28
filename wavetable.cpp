@@ -5,11 +5,6 @@
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 
 
-#ifdef DEBUG
-    #define D(x) x
-#else
-    #define D(x)
-#endif
 
 WaveTable::WaveTable(WAVESHAPE waveshape, int tableLength, INTERPOLATION interpolation, int samplerate): tableLength(tableLength), interpolationType(interpolation), samplerate(samplerate) {
   // Requests a +1 memory block to do one less comparison in linear interpolation
@@ -32,7 +27,6 @@ void WaveTable::movePointer(float phase){
     while (position >= tableLength) {
       position -= tableLength;
     }
-    D(printf("position: %f", position));
 }
 
 void WaveTable::movePointer(){
@@ -40,7 +34,6 @@ void WaveTable::movePointer(){
     while (position >= tableLength) {
       position -= tableLength;
     }
-    D(printf("position: %f", position));
 }
 
 void WaveTable::populateTable(WAVESHAPE waveshape){
@@ -53,7 +46,6 @@ void WaveTable::populateTable(WAVESHAPE waveshape){
         table[i] = sin(angle);
         angle += inc;
       }
-      D(printf("SINE\n"));
       break;
     }
 
@@ -63,7 +55,6 @@ void WaveTable::populateTable(WAVESHAPE waveshape){
         table[i] =  angle - 1.0;
         angle += inc;
       }
-      D(printf("SAW\n"));
       break;
     }
 
@@ -74,7 +65,6 @@ void WaveTable::populateTable(WAVESHAPE waveshape){
         table[i] = 1.0 - cos(angle) * cos(angle); 
         angle += inc;
       }
-      D(printf("ENV: 1 - cos(x)^2\n"));
       break;
     }
 
@@ -87,7 +77,6 @@ void WaveTable::populateTable(WAVESHAPE waveshape){
         table[i] = angle;
         angle += inc;
         }
-      D(printf("TRIANGLE\n"));
       break;
     }
 
@@ -99,7 +88,6 @@ void WaveTable::populateTable(WAVESHAPE waveshape){
           value = -1.0f;
         }
       }
-      D(printf("SQUARE\n"));
       break;
     }
 
@@ -119,14 +107,12 @@ float WaveTable::interpolate() {
       float diff = position - (float)prevPosition;
       nextWeight = diff;
       prevWeight = 1 - diff;
-      D(printf("LINEAR\n"));
       break;
     } 
 
     // case (COSINE) : {
     //   nextWeight = (1 - cos(diff*PI)) / 2;
     //   prevWeight = 1.0 - nextWeight;
-    //   D(printf("COSINE\n"));
     //   break;
     // }
     //
@@ -134,7 +120,6 @@ float WaveTable::interpolate() {
     //   // TODO
     //   printf("CUBIC INTERPOLATION NOT IMPLEMENTED");
     //   exit(1);
-    //   D(printf("CUBIC\n"));
     //   break;
     // }
 

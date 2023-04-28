@@ -9,11 +9,6 @@
 // #include "sound.hpp"
 #include "wavetable.hpp"
 
-#ifdef DEBUG
-    #define D(x) x
-#else
-    #define D(x)
-#endif
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 #define FREQ            300.0f
@@ -110,9 +105,9 @@ int main(int argc, char** argv) {
         argc--;
         argv++;
       }
-      printf("running user input frequencies");
+      printf("running user input frequencies\n");
     } else {
-        printf("running on default frequencies\n");
+      printf("running on default frequencies\n");
     }
 
 	PaStream* stream;

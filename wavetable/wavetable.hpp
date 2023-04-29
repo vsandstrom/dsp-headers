@@ -25,6 +25,7 @@ enum INTERPOLATION {
 class WaveTable {
   private:
     float position;
+    //WAVESHAPE waveshape;
     float tableLength;
     float samplerate;
     float* table;
@@ -41,6 +42,19 @@ class WaveTable {
     void populateTable(WAVESHAPE waveshape);
 
   public:
+	// Entry-point to let the WaveTable oscillator play. Does interpolation and movement of
+    // readpointer under the hood.
+	float play();
+  
+    // Entry-point to let the WaveTable oscillator play. Does interpolation and movement of
+    // readpointer under the hood.
+    // ----
+    //
+    // Includes access to phase of the wavetable readpointer, allowing for 
+    //
+    // Frequency Modulation
+	float play(float phase);
+	
     float frequency;
 
 
@@ -78,8 +92,8 @@ class WaveTable {
     //
     // The float-array will be +1 of the tableLength, to mediate the check for out of bounds when
     // interpolation between last and first sample. 
-    WaveTable(WAVESHAPE waveshape, int tableLength, INTERPOLATION interpolation, int samplerate);
-
+    WaveTable(WAVESHAPE waveshape, int tableLength, int samplerate, INTERPOLATION interpolation);
+    
     // Initializes the WaveTable with a user supplied float-array of size 
     // **tableLength**, and sets the member variable
     // for the type of interpolation used
@@ -87,7 +101,7 @@ class WaveTable {
     //
     // !! BEWARE !! - When the WaveTable object goes out of scope, it will try to free the table
     // pointer. All float-arrays given should be dynamically allocated.
-    WaveTable(float* wavetable, int tableLength, INTERPOLATION interpolation, int samplerate);
+    WaveTable(float* wavetable, int tableLength, int samplerate, INTERPOLATION interpolation);
 
     // Frees the float-array
     ~WaveTable();

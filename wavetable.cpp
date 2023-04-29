@@ -1,42 +1,56 @@
 #include <cmath>
-#include <cstdio>
 #include "wavetable.hpp"
 
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 
 
-
-WaveTable::WaveTable(WAVESHAPE waveshape, int tableLength, INTERPOLATION interpolation, int samplerate): tableLength(tableLength), interpolationType(interpolation), samplerate(samplerate) {
+WaveTable::WaveTable(
+	WAVESHAPE waveshape, int tableLength, int samplerate, INTERPOLATION interpolation)
+  : tableLength(tableLength), samplerate((float)samplerate), interpolationType(interpolation)
+{
   // Requests a +1 memory block to do one less comparison in linear interpolation
-  table = (float*)calloc(tableLength + 1, sizeof(float));
+  table = new float[tableLength + 1];
+
   position = 0;
   populateTable(waveshape);
+
 };
 
-WaveTable::WaveTable(float* wavetable, int tableLength, INTERPOLATION interpolation, int samplerate): table(wavetable), tableLength(tableLength), interpolationType(interpolation), samplerate(samplerate) {
+WaveTable::WaveTable(
+	float* wavetable, int tableLength, int samplerate, INTERPOLATION interpolation)
+  : tableLength(tableLength), samplerate((float)samplerate), interpolationType(interpolation) 
+{
   table = wavetable;
   position = 0;
 };
 
+
 WaveTable::~WaveTable() {
-  free(table);
+  delete [] table;
 }
 
-void WaveTable::movePointer(float phase){
-    position += tableLength / (samplerate / (frequency * phase));
-    while (position >= tableLength) {
-      position -= tableLength;
-    }
+
+
+void WaveTable::movePointer(float phase) {
+	// This phase modulation cannot handle negative phase.
+	float normalizedPhase = fabs((phase + 1.0f) * 0.5f);
+  if (!(normalizedPhase <= 0)) {
+    // Handle if phase accidentally becomes negative.
+    position += tableLength / ((float)samplerate / (frequency * normalizedPhase));
+  }
+  while (position > tableLength) {
+    position -= tableLength;
+  }
 }
 
-void WaveTable::movePointer(){
-    position += tableLength / (samplerate / frequency);
-    while (position >= tableLength) {
-      position -= tableLength;
-    }
+void WaveTable::movePointer() {
+  position += tableLength / ((float)samplerate / frequency);
+  while (position > tableLength) {
+    position -= tableLength;
+  }
 }
 
-void WaveTable::populateTable(WAVESHAPE waveshape){
+void WaveTable::populateTable(WAVESHAPE waveshape) {
   float inc = 0, angle = 0, numSamples = (float) tableLength;
 
   switch (waveshape) {
@@ -62,16 +76,17 @@ void WaveTable::populateTable(WAVESHAPE waveshape){
       // A hanning window style envelope (squared sine)
       inc = PI / numSamples;
       for (int i = 0; i < tableLength; ++i) {
-        table[i] = 1.0 - cos(angle) * cos(angle); 
+        float value = 1.0 - cos(angle) * cos(angle); 
+        table[i] = value >= 0 ? value : 0.0f;
         angle += inc;
       }
       break;
     }
 
     case (TRIANGLE) : {
-      inc = 4.0 / (numSamples / 4);
+      inc = 2.0 / (numSamples / 2);
       for (int i = 0; i < tableLength; ++i) {
-        if ( angle >= 1.0 || angle < -1.0) {
+        if ( angle > 1.0 || angle < -1.0) {
           inc *= -1.0;
         }
         table[i] = angle;
@@ -97,8 +112,8 @@ void WaveTable::populateTable(WAVESHAPE waveshape){
 }
 
 float WaveTable::interpolate() {
-  float nextWeight, prevWeight;
-  int prevPosition, nextPosition;
+  float nextWeight = 0.0f, prevWeight = 0.0f;
+  int prevPosition = 0, nextPosition = 0;
   
   switch (interpolationType) {
     case (LINEAR) : {
@@ -110,16 +125,18 @@ float WaveTable::interpolate() {
       break;
     } 
 
-    // case (COSINE) : {
-    //   nextWeight = (1 - cos(diff*PI)) / 2;
-    //   prevWeight = 1.0 - nextWeight;
-    //   break;
-    // }
-    //
+    case (COSINE) : {
+      float diff = position - floor(position);
+      nextWeight = (1 - cos(diff*PI)) / 2;
+      prevWeight = 1.0 - nextWeight;
+      break;
+    }
+
     // case (CUBIC) : {
     //   // TODO
     //   printf("CUBIC INTERPOLATION NOT IMPLEMENTED");
     //   exit(1);
+    //   D(printf("CUBIC\n"));
     //   break;
     // }
 
@@ -127,7 +144,19 @@ float WaveTable::interpolate() {
         break;
     }
   }
-
+  
   return table[prevPosition] * prevWeight + table[nextPosition] * nextWeight;
 }
+
+  float WaveTable::play(){
+	float out = interpolate();
+	movePointer();
+	return out;
+  }
+
+  float WaveTable::play(float phase) {
+	float out = interpolate();
+	movePointer(phase);
+	return out;
+  }
 #endif

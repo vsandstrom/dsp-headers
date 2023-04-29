@@ -10,23 +10,24 @@
 #include "wavetable.hpp"
 
 
-// CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-#define FREQ            300.0f
-#define FM_FREQ         180.0f
-#define ENV_FREQ         0.250f 
 
 // MASTER VOLUME OF THE GENERATED TONE
 #define AMP             0.5
 // DURATION OF THE GENERATED TONE
-#define DURATION		(4000) // milliseconds
+#define DURATION		(5000) // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
 #define TABLE_LEN       512
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
-#define SAMPLE_RATE		(48000)
+#define SAMPLE_RATE		48000
 
-WaveTable carrier = WaveTable(SINE, TABLE_LEN, LINEAR, SAMPLE_RATE);
-WaveTable modulator = WaveTable(ENV, TABLE_LEN, LINEAR, SAMPLE_RATE);
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, LINEAR, SAMPLE_RATE);
+// CHANGE THE VALUES BELOW FOR OTHER PITCHES 
+float FREQ =           300.0f;
+float FM_FREQ =        180.0f;
+float ENV_FREQ =       4.0f;
+
+WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
+WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
+WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
 
 static frame data;
 
@@ -47,18 +48,19 @@ static int paCallback(  const void* inputBuffer,				// input
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-
-    data -> left = carrier.interpolate() * envelope.interpolate() * AMP;
-    data -> right = carrier.interpolate() * envelope.interpolate() * AMP;
-
+    // float mono = carrier.interpolate() * envelope.interpolate();
+    float car = carrier.play(modulator.play());
+    float env = envelope.play();
+    data -> left = car * env;
+    data -> right = car * env;
     // write data to the out buffer
     *out++ = data -> left; 
     *out++ = data -> right;
 
     // the modulator modulates the carriers phase
-    carrier.movePointer(modulator.interpolate());
-    modulator.movePointer();
-    envelope.movePointer(); 
+    // carrier.movePointer(modulator.interpolate());
+    // modulator.movePointer();
+    // envelope.movePointer(); 
 
 	}
 	return 0;
@@ -116,7 +118,7 @@ int main(int argc, char** argv) {
   // initialize first value, no wierd garbage value
   // if they are initialized here, make sure to give the variables the correct values
   // before using it, otherwise there will be an unwanted '0'-sample at the first block
-	data.left = data.right = 0.0;
+	data.left = data.right = 0.0f;
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;
@@ -126,8 +128,8 @@ int main(int argc, char** argv) {
 								0, 
 								2,
 								paFloat32,
-								SAMPLE_RATE,
-								256, 
+								(int)SAMPLE_RATE,
+							  256, 
 								paCallback,
 								&data
 			);

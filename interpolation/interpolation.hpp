@@ -3,5 +3,9 @@ const float pi = 3.14159265358979323846;
 #define PI
 #endif
 
-float linear(float position, float* table);
-float cosine(float position, float* table);
+
+class Interpolation {
+  public:
+    static float linear(float position, float* table);
+    static float cosine(float position, float* table);
+};

@@ -5,6 +5,7 @@
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 
 
+
 WaveTable::WaveTable(
 	WAVESHAPE waveshape, int tableLength, int samplerate, INTERPOLATION interpolation)
   : tableLength(tableLength), samplerate(samplerate), interpolationType(interpolation)
@@ -123,21 +124,11 @@ float WaveTable::interpolate() {
   
   switch (interpolationType) {
     case (LINEAR) : {
-      return linear(position, table);
-      // prevPosition = position; // implicit cast
-      // nextPosition = prevPosition + 1;
-      // float diff = position - (float)prevPosition;
-      // nextWeight = diff;
-      // prevWeight = 1 - diff;
-      // break;
+      return Interpolation::linear(position, table);
     } 
 
     case (COSINE) : {
-      return cosine(position, table);
-      // float diff = position - floor(position);
-      // nextWeight = (1 - cos(diff*pi)) / 2;
-      // prevWeight = 1.0 - nextWeight;
-      // break;
+      return Interpolation::cosine(position, table);
     }
 
     // case (CUBIC) : {
@@ -149,13 +140,9 @@ float WaveTable::interpolate() {
     // }
 
     default: {
-        break;
+      return table[(int)position];
     }
   }
-  
-
-
-  return table[prevPosition] * prevWeight + table[nextPosition] * nextWeight;
 }
 
 #endif

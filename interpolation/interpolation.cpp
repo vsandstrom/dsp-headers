@@ -1,8 +1,7 @@
 #include <math.h>
-
-
 #include "interpolation.hpp"
-float linear(float position, float* table){
+
+float Interpolation::linear(float position, float* table){
   int prevPosition = position; // implicit cast
   int nextPosition = prevPosition + 1;
   float diff = position - (float)prevPosition;
@@ -12,11 +11,11 @@ float linear(float position, float* table){
   return table[prevPosition] * prevWeight + table[nextPosition] * nextWeight;
 }
 
-float cosine(float position, float *table) {
+float Interpolation::cosine(float position, float *table) {
   int prevPosition = position; // implicit cast
   int nextPosition = prevPosition + 1;
   float diff = position - floor(position);
-  float nextWeight = (1 - cos(diff*PI)) / 2;
+  float nextWeight = (1 - cos(diff*pi)) / 2;
   float prevWeight = 1.0 - nextWeight;
   return table[prevPosition] * prevWeight + table[nextPosition] * nextWeight;
 }

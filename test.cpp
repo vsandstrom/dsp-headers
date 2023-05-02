@@ -7,7 +7,7 @@
 #include <cmath>
 #include <string>
 // #include "sound.hpp"
-#include "wavetable.hpp"
+#include "wavetable/wavetable.hpp"
 
 
 

@@ -1,5 +1,6 @@
 #ifndef PI
-const float PI = 3.14159265358979323846;
+const float pi = 3.14159265358979323846;
+#define PI
 #endif
 
 struct frame {
@@ -42,10 +43,10 @@ class WaveTable {
     void populateTable(WAVESHAPE waveshape);
 
   public:
-    // Entry-point to let the WaveTable oscillator play. Does interpolation and movement of
-      // readpointer under the hood.
-    float play();
-    
+	// Entry-point to let the WaveTable oscillator play. Does interpolation and movement of
+    // readpointer under the hood.
+	float play();
+  
     // Entry-point to let the WaveTable oscillator play. Does interpolation and movement of
     // readpointer under the hood.
     // ----
@@ -53,8 +54,8 @@ class WaveTable {
     // Includes access to phase of the wavetable readpointer, allowing for 
     //
     // Frequency Modulation
-    float play(float phase);
-    
+	float play(float phase);
+	
     float frequency;
 
 

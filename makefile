@@ -1,15 +1,14 @@
 INCLUDES = /opt/homebrew/include
 
-
 CXX = clang++
-CXXFLAGS = -std=c++11 -Wall -I${INCLUDES} -I./dsp-headers/wavetable
+CXXFLAGS = -std=c++11 -Wall -I${INCLUDES} -I./dsp-headers/
 BUILDDIR =: $(shell mkdir -p build)
 
 compile: test.o wavetable.o interpolation.o
 	${CXX} ${CXXFLAGS} test.o wavetable.o interpolation.o -I/usr/local/include -L/usr/local/lib/ -lportaudio -o test \
 		&& rm *.o 
 
-SRCS = ${wildcard *.cpp ./dsp-headers/wavetable/wavetable.cpp ./dsp-headers/interpolation/interpolation.cpp}
+SRCS = ${wildcard *.cpp ./dsp-headers/wavetable.cpp ./dsp-headers/interpolation.cpp}
 OBJS = $(patsubst %.cpp,build/%.o,${SRCS})
 
 all: ${OBJS} 

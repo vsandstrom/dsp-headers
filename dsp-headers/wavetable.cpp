@@ -1,7 +1,7 @@
 #include <cmath>
 #include <memory>
 #include "wavetable.hpp"
-#include "../interpolation/interpolation.hpp"
+#include "interpolation.hpp"
 
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 

@@ -1,4 +1,3 @@
-
 #include "portaudio.h"
 #include <cstdio>
 #include <cstdlib>
@@ -7,27 +6,24 @@
 #include <cmath>
 #include <string>
 // #include "sound.hpp"
-#include "wavetable/wavetable.hpp"
+#include "wavetable.hpp"
 
 
-
-// MASTER VOLUME OF THE GENERATED TONE
-#define AMP             0.5
 // DURATION OF THE GENERATED TONE
-#define DURATION		(5000) // milliseconds
-// DEFAULT LENGHT OF THE WAVETABLE
-#define TABLE_LEN       512
+const int DURATION = 5000; // milliseconds
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
-#define SAMPLE_RATE		48000
+const int sampleRate = 48000;
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 float FREQ =           300.0f;
 float FM_FREQ =        180.0f;
 float ENV_FREQ =       4.0f;
 
-WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
+//WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
+//WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
+//WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
+
+WaveTable carrier, modulator, envelope;
 
 static frame data;
 
@@ -48,19 +44,19 @@ static int paCallback(  const void* inputBuffer,				// input
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    // float mono = carrier.interpolate() * envelope.interpolate();
-    float car = carrier.play(modulator.play());
-    float env = envelope.play();
-    data -> left = car * env;
-    data -> right = car * env;
-    // write data to the out buffer
-    *out++ = data -> left; 
-    *out++ = data -> right;
+        // float mono = carrier.interpolate() * envelope.interpolate();
+        float car = carrier.getSampleL(modulator.getSampleL(0.f));
+        float env = envelope.getSampleL(0.f);
+        data -> left = car * env;
+        data -> right = car * env;
+        // write data to the out buffer
+        *out++ = data -> left; 
+        *out++ = data -> right;
 
-    // the modulator modulates the carriers phase
-    // carrier.movePointer(modulator.interpolate());
-    // modulator.movePointer();
-    // envelope.movePointer(); 
+        // the modulator modulates the carriers phase
+        // carrier.movePointer(modulator.interpolate());
+        // modulator.movePointer();
+        // envelope.movePointer(); 
 
 	}
 	return 0;
@@ -68,9 +64,19 @@ static int paCallback(  const void* inputBuffer,				// input
 
 
 int main(int argc, char** argv) {
-  carrier.frequency = FREQ;
-  modulator.frequency = FM_FREQ;
-  envelope.frequency = ENV_FREQ;
+
+  carrier.init(sampleRate);
+  carrier.setWave(WAVESHAPE::TRIANGLE);
+  carrier.setFreq(FREQ);
+
+  modulator.init(sampleRate);
+  modulator.setWave(WAVESHAPE::TRIANGLE);
+  modulator.setFreq(FM_FREQ); 
+
+  envelope.init(sampleRate); 
+  envelope.setWave(WAVESHAPE::TRIANGLE);
+  envelope.setFreq(ENV_FREQ);
+
     if ( argc > 3 && argc < 8 ) {
       argc--;
       argv++;
@@ -81,19 +87,19 @@ int main(int argc, char** argv) {
             case 'c': {
               argc--;
               argv++;
-              carrier.frequency = std::stof(*argv);
+              carrier.setFreq(std::stof(*argv));
               break;
             }
             case 'e':{
               argc--;
               argv++;
-              envelope.frequency = std::stof(*argv);
+              envelope.setFreq(std::stof(*argv));
               break;
             }
             case 'm':{
               argc--;
               argv++;
-              modulator.frequency = std::stof(*argv);
+              modulator.setFreq(std::stof(*argv));
               break;
             }
             default:{
@@ -128,7 +134,7 @@ int main(int argc, char** argv) {
 								0, 
 								2,
 								paFloat32,
-								(int)SAMPLE_RATE,
+								sampleRate,
 							  256, 
 								paCallback,
 								&data

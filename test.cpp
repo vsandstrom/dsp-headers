@@ -95,6 +95,7 @@ int main(int argc, char** argv) {
 
   for (auto &t : vecTables)
     printf("%f", t.frequency);
+
   carrier.setFreq(FREQ);
   modulator.setFreq(FM_FREQ);
   vec.setFreq(FREQ);

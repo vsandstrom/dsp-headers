@@ -1,26 +1,52 @@
 #include <cmath>
-#include <memory>
 #include "wavetable.hpp"
 #include "interpolation.hpp"
 
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 
 
+using namespace dspheaders;
 
-void WaveTable::init(int samplerate)
+
+WaveTable::WaveTable(
+	WAVESHAPE waveshape, int table_length,int samplerate, INTERPOLATION interpolation)
+  : tableLength(table_length), samplerate(samplerate), interpolationType(interpolation)
 {
   // Requests a +1 memory block to do one less comparison in linear interpolation
+  table = new float[table_length+1];
   position = 0;
-  populateTable(WAVESHAPE::TRIANGLE);
+  populateTable(waveshape);
 
 };
 
-void WaveTable::init(
-	float* wavetable,int samplerate)
+
+WaveTable::WaveTable(
+	float* wavetable, int table_length, int samplerate, INTERPOLATION interpolation)
+  : tableLength(table_length), samplerate(samplerate), interpolationType(interpolation) 
 {
-  memcpy(&table, &wavetable, sizeof(float)*tableLength);
+  table = wavetable;
   position = 0;
 };
+
+
+
+WaveTable::~WaveTable() {
+}
+
+
+float WaveTable::play(){
+	float out = interpolate();
+	movePointer();
+	return out;
+}
+
+
+float WaveTable::play(float phase) {
+	float out = interpolate();
+	movePointer(phase);
+	return out;
+}
+
 
 void WaveTable::movePointer(float phase) {
 	// This phase modulation cannot handle negative phase.
@@ -31,12 +57,14 @@ void WaveTable::movePointer(float phase) {
     }
 }
 
+
 void WaveTable::movePointer() {
   position += tableLength / (samplerate / frequency);
   while (position > tableLength) {
     position -= tableLength;
   }
 }
+
 
 void WaveTable::populateTable(WAVESHAPE waveshape) {
   float inc = 0, angle = 0, numSamples = (float) tableLength;
@@ -98,26 +126,34 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
   }
 }
 
-void WaveTable::setFreq(float f) {
-    frequency = f;
-}
 
-void WaveTable::setWave(WAVESHAPE ws) {
-    waveshape = ws;
-}
+float WaveTable::interpolate() {
+  float nextWeight = 0.0f, prevWeight = 0.0f;
+  int prevPosition = 0, nextPosition = 0;
+  
+  switch (interpolationType) {
+    case (LINEAR) : {
+      return Interpolation::linear(position, table);
+    } 
 
-inline const float WaveTable::getSampleL(const float p) const{
-    return 0.f;
-}
+    case (COSINE) : {
+      return Interpolation::cosine(position, table);
+    }
 
-float WaveTable::getSampleL(float p){
-    return 0.f;
-}
+    // case (CUBIC) : {
+    //   // TODO
+    //   printf("CUBIC INTERPOLATION NOT IMPLEMENTED");
+    //   exit(1);
+    //   D(printf("CUBIC\n"));
+    //   break;
+    // }
 
-inline const float WaveTable::getSampleCos(const float p) const{
-    return 0.f;
+    default: {
+      return table[(int)position];
+    }
+  }
 }
-
 
 #endif
+
 

@@ -26,7 +26,7 @@ float VectorOscillator::play(float transferPhase) {
       float weight = transferTable.play(transferPhase);
 
       for (int i = 0; i < tables.size(); ++i) {
-        tables[i].frequency = frequency;
+        tables[i].setFreq(frequency);
         crossection[i] = tables[i].play();
       }
 
@@ -44,7 +44,7 @@ float VectorOscillator::play(float phase, float transferPhase) {
       float weight = transferTable.play(transferPhase);
 
       for (int i = 0; i < tables.size(); ++i) {
-        tables[i].frequency = frequency;
+        tables[i].setFreq(frequency);
         crossection[i] = tables[i].play(phase);
       }
 

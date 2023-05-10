@@ -34,11 +34,11 @@ float FREQ =           300.0f;
 float FM_FREQ =        180.0f;
 float ENV_FREQ =       4.0f;
 
-auto carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-auto modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
+auto carrier = WaveTable(TRIANGLE, SAMPLE_RATE, LINEAR);
+auto modulator = WaveTable(SINE, SAMPLE_RATE, LINEAR);
 
-auto transfer = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, LINEAR);
-auto envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
+auto transfer = WaveTable(SAW, SAMPLE_RATE, LINEAR);
+auto envelope = WaveTable(ENV, SAMPLE_RATE, LINEAR);
 
 std::vector<WaveTable> vecTables = {carrier, modulator};
 
@@ -92,9 +92,6 @@ static int paCallback(  const void* inputBuffer,				// input
 
 
 int main(int argc, char** argv) {
-
-  for (auto &t : vecTables)
-    printf("%f", t.frequency);
 
   carrier.setFreq(FREQ);
   modulator.setFreq(FM_FREQ);

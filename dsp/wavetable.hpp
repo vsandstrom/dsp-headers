@@ -31,23 +31,6 @@ enum INTERPOLATION {
 
 
 class WaveTable {
-  private:
-    float position;
-    //WAVESHAPE waveshape;
-    float tableLength;
-    float samplerate;
-    float * table;
-    INTERPOLATION interpolationType;
-    
-    // Creates one of several simple WaveTable shapes, chosen by the WAVESHAPE argument
-    //
-    //
-    // -- SINE     : Sine waveform
-    // -- TRIANGLE : Triangle waveform
-    // -- SQUARE   : Square waveform
-    // -- SAW      : Saw waveform
-    // -- ENV      : Hanning window waveform ( squared sine ), used for Envelopes
-    void populateTable(WAVESHAPE waveshape);
 
   public:
 	// Entry-point to let the WaveTable oscillator play. Does interpolation and movement of
@@ -63,9 +46,6 @@ class WaveTable {
     // Frequency Modulation
 	float play(float phase);
 	
-    float frequency;
-
-
     // Performs an interpolation between samples to determine what value to return when the 
     // read-pointer tries to read the value two samples.
     // ----
@@ -100,7 +80,12 @@ class WaveTable {
     //
     // The float-array will be +1 of the tableLength, to mediate the check for out of bounds when
     // interpolation between last and first sample. 
-    WaveTable(WAVESHAPE waveshape,int table_length, int samplerate, INTERPOLATION interpolation);
+
+    WaveTable();
+
+    WaveTable(int sampleRate);
+
+    WaveTable(WAVESHAPE waveshape, int samplerate, INTERPOLATION interpolation);
     
     // Initializes the WaveTable with a user supplied float-array of size 
     // **tableLength**, and sets the member variable
@@ -109,13 +94,33 @@ class WaveTable {
     //
     // !! BEWARE !! - When the WaveTable object goes out of scope, it will try to free the table
     // pointer. All float-arrays given should be dynamically allocated.
-    WaveTable(float* wavetable, int table_length,int samplerate, INTERPOLATION interpolation);
+    WaveTable(float* wavetable, int samplerate, INTERPOLATION interpolation);
 
+    void setWave(WAVESHAPE shape) { populateTable(shape);}
 
     void setFreq(float f) {frequency = f;}
 
     // Frees the float-array
     ~WaveTable();
+
+  private:
+    float position;
+    //WAVESHAPE waveshape;
+    const float tableLength = 512;
+    float samplerate_;
+    float table[513];
+    float frequency;
+    INTERPOLATION interpolationType;
+    
+    // Creates one of several simple WaveTable shapes, chosen by the WAVESHAPE argument
+    //
+    //
+    // -- SINE     : Sine waveform
+    // -- TRIANGLE : Triangle waveform
+    // -- SQUARE   : Square waveform
+    // -- SAW      : Saw waveform
+    // -- ENV      : Hanning window waveform ( squared sine ), used for Envelopes
+    void populateTable(WAVESHAPE waveshape);
 };
 
 } /* namespace dspheaders */

@@ -4,29 +4,16 @@
 
 #include "interpolation.hpp"
 #include "wavetable.hpp"
-#include <vector>
+#include <array>
 
 namespace dspheaders {
     class VectorOscillator {
-      private:
-        std::vector<WaveTable> tables;
-        // WaveTable that is used in the *transfer function*, which curve is supposed to be followed
-        // when traversing between tables
-        int sampleRate;
-        WaveTable transferTable;
-        INTERPOLATION transferInterpolation;
-        int tableWidth;
-        // a vertical crossection containing all current samples from all tables in *tables*
-        float* crossection;
-
       public:
-        float frequency;
 
         // Feed the VectorOscillator with a vector of 'n' WaveTables
-        VectorOscillator(std::vector<WaveTable> tables, WaveTable transferTable, int sampleRate, INTERPOLATION transferInterpolation);
+        VectorOscillator(int sampleRate);
 
-
-        void setFreq(float f) {frequency = f;}
+        void setFreq(float f);
         float play(float transferPhase);
         // Returns the next sample from the vector oscillator. 
         // ----
@@ -39,6 +26,15 @@ namespace dspheaders {
         //
         // phase - *Phase* or *frequency* modulation input
         // transferPhase - set the position of the readpointer in the transfer table
+
+      private:
+        std::array<WaveTable,5> tables;
+        // WaveTable that is used in the *transfer function*, which curve is supposed to be followed
+        // when traversing between tables
+        int sampleRate_;
+        int tableWidth = 5;
+        float frequency;
+
     };
 
 } /* namespace dspheaders */

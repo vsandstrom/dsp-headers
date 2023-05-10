@@ -6,17 +6,22 @@
 
 #include <cmath>
 
-inline float clamp(float x, float bot, float top) {
-    return fmax(bot, (fmin(x, top)));
-}
+namespace dspheaders {
 
-inline float scale(float x, float y, float a, b) {
-    return a*b*x*y;
-}
+    inline float clamp(float x, float bot, float top) {
+        return fmax(bot, (fmin(x, top)));
+    }
 
-inline float dcblock(float x, float xm1, float ym1) {
-    float y = x - xm1 + 0.995 * ym1;
-    xm1 = x;
-    ym1 = y;
-    return y;
-}
+    inline float scale(float x, float a, float  b) {
+        return (b-a)*x + a;
+    }
+
+    inline float dcblock(float x, float xm1, float ym1) {
+        return  x - xm1 + 0.995 * ym1;
+    }
+
+    inline float mtof(int n, float base = 440.f) {
+        return base * pow(2,(n/12));
+    }
+
+} /* namespace dspheaders */

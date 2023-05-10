@@ -1,5 +1,10 @@
-
 #include "portaudio.h"
+
+#include "dsp/dsp.h"
+#include "dsp/wavetable.hpp"
+#include "dsp/vectoroscillator.hpp"
+
+
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -8,8 +13,6 @@
 #include <cmath>
 #include <string>
 // #include "sound.hpp"
-#include "dsp/wavetable.hpp"
-#include "dsp/vectoroscillator.hpp"
 #include <vector>
 
 using namespace dspheaders;
@@ -20,33 +23,22 @@ struct frame {
 };
 
 
-// MASTER VOLUME OF THE GENERATED TONE
-const float AMP = 0.5f;
 // DURATION OF THE GENERATED TONE
 const float DURATION = 5000.f; // milliseconds
-// DEFAULT LENGHT OF THE WAVETABLE
-constexpr int TABLE_LEN = 512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const int SAMPLE_RATE = 48000;
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-float FREQ =           300.0f;
+float FREQ =           200.0f;
 float FM_FREQ =        180.0f;
 float ENV_FREQ =       4.0f;
 
-auto carrier = WaveTable(TRIANGLE, SAMPLE_RATE, LINEAR);
-auto modulator = WaveTable(SINE, SAMPLE_RATE, LINEAR);
-
-auto transfer = WaveTable(SAW, SAMPLE_RATE, LINEAR);
-auto envelope = WaveTable(ENV, SAMPLE_RATE, LINEAR);
-
-std::vector<WaveTable> vecTables = {carrier, modulator};
-
-VectorOscillator vec = VectorOscillator(vecTables, transfer, SAMPLE_RATE, LINEAR);
+VectorOscillator vec = VectorOscillator(SAMPLE_RATE);
 
 static frame data;
-float inc = 1.0f / (float)DURATION;
+float inc = 0.05f * 6.28 / float(SAMPLE_RATE);
 
+float transferPhase = 0.0f;
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,				// input
 						void* outputBuffer,								          // output
@@ -60,7 +52,6 @@ static int paCallback(  const void* inputBuffer,				// input
 	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
-  float transferPhase = 0.0f;
 
 	(void) inputBuffer; // prevent unused variable warning
 
@@ -69,22 +60,16 @@ static int paCallback(  const void* inputBuffer,				// input
     // float mono = carrier.interpolate() * envelope.interpolate();
     // float car = carrier.play(modulator.play());
     // float env = envelope.play();
-    
-    float temp = vec.play(transferPhase) * envelope.play();
-    data->left = temp;
-    data->right = temp;
-
-    // data -> left = car * env;
-    // data -> right = car * env;
-    // write data to the out buffer
-    *out++ = data -> left; 
-    *out++ = data -> right;
+    float mod = cos(transferPhase); 
+    float temp = clamp(vec.play(mod), -1.f, 1.f);
+    *out++ = temp; 
+    *out++ = temp;
 
     // the modulator modulates the carriers phase
     // carrier.movePointer(modulator.interpolate());
     // modulator.movePointer();
     // envelope.movePointer(); 
-    transferPhase+=inc;
+    transferPhase = fmod((transferPhase + inc), 6.28);
 
 	}
 	return 0;
@@ -93,10 +78,7 @@ static int paCallback(  const void* inputBuffer,				// input
 
 int main(int argc, char** argv) {
 
-  carrier.setFreq(FREQ);
-  modulator.setFreq(FM_FREQ);
-  vec.setFreq(FREQ);
-  envelope.setFreq(ENV_FREQ);
+  vec.setFreq(200);
     if ( argc > 3 && argc < 8 ) {
       argc--;
       argv++;
@@ -114,7 +96,7 @@ int main(int argc, char** argv) {
             case 'e':{
               argc--;
               argv++;
-              envelope.setFreq(std::stof(*argv));
+    //          envelope.setFreq(std::stof(*argv));
               break;
             }
             // case 'm':{

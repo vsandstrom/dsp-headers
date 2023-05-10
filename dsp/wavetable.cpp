@@ -2,6 +2,8 @@
 #include "wavetable.hpp"
 #include "interpolation.hpp"
 
+#include <memory>
+
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 
 
@@ -39,7 +41,12 @@ using namespace dspheaders;
       position = 0;
     };
 
-
+    WaveTable& WaveTable::operator=(const WaveTable& w) {
+        memcpy(&table, &w.table, sizeof(float) * w.tableLength);
+        frequency = w.frequency;
+        position = w.position;
+        return *this;
+    }
 
     WaveTable::~WaveTable() {
     }

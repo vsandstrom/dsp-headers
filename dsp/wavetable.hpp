@@ -96,6 +96,9 @@ class WaveTable {
     // pointer. All float-arrays given should be dynamically allocated.
     WaveTable(float* wavetable, int samplerate, INTERPOLATION interpolation);
 
+
+    WaveTable& operator=(const WaveTable& w);
+
     void setWave(WAVESHAPE shape) { populateTable(shape);}
 
     void setFreq(float f) {frequency = f;}

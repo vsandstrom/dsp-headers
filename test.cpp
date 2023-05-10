@@ -33,12 +33,11 @@ float FREQ =           200.0f;
 float FM_FREQ =        180.0f;
 float ENV_FREQ =       4.0f;
 
+WaveTable mod = WaveTable(SAMPLE_RATE);
 VectorOscillator vec = VectorOscillator(SAMPLE_RATE);
 
 static frame data;
-float inc = 0.05f * 6.28 / float(SAMPLE_RATE);
 
-float transferPhase = 0.0f;
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,				// input
 						void* outputBuffer,								          // output
@@ -60,8 +59,7 @@ static int paCallback(  const void* inputBuffer,				// input
     // float mono = carrier.interpolate() * envelope.interpolate();
     // float car = carrier.play(modulator.play());
     // float env = envelope.play();
-    float mod = cos(transferPhase); 
-    float temp = clamp(vec.play(mod), -1.f, 1.f);
+    float temp = clamp(vec.play(mod.play()), -1.f, 1.f);
     *out++ = temp; 
     *out++ = temp;
 
@@ -69,7 +67,6 @@ static int paCallback(  const void* inputBuffer,				// input
     // carrier.movePointer(modulator.interpolate());
     // modulator.movePointer();
     // envelope.movePointer(); 
-    transferPhase = fmod((transferPhase + inc), 6.28);
 
 	}
 	return 0;
@@ -78,6 +75,8 @@ static int paCallback(  const void* inputBuffer,				// input
 
 int main(int argc, char** argv) {
 
+  mod.setFreq(0.05);
+  mod.setWave(TRIANGLE);
   vec.setFreq(200);
     if ( argc > 3 && argc < 8 ) {
       argc--;

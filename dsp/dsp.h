@@ -2,7 +2,6 @@
 
 #ifndef DSP_H
 #define DSP_H
-#endif
 
 #include <cmath>
 
@@ -16,7 +15,7 @@ namespace dspheaders {
       return (omax - omin) * (x - imin)/(imax - imin) + omin;
     }
 
-    void range(float * x, int xLen, float imin, float imax, float omin, float omax) {
+   inline  void range(float * x, int xLen, float imin, float imax, float omin, float omax) {
         for (int i = 0; i < xLen; ++i) {
             x[i] = scale(x[i], imin, imax, omin, omax); 
         }
@@ -31,3 +30,5 @@ namespace dspheaders {
     }
 
 } /* namespace dspheaders */
+
+#endif

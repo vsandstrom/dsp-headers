@@ -59,7 +59,7 @@ static int paCallback(  const void* inputBuffer,				// input
     // float mono = carrier.interpolate() * envelope.interpolate();
     // float car = carrier.play(modulator.play());
     // float env = envelope.play();
-    float temp = clamp(vec.play(mod.play()), -1.f, 1.f);
+    float temp = clamp(vec.play(scale(mod.play(), -1.f, 1.f, 0.f, 1.f)), -1.f, 1.f);
     *out++ = temp; 
     *out++ = temp;
 

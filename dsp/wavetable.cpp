@@ -40,8 +40,8 @@ float WaveTable::play(float phase) {
 	return out;
 }
   
-void WaveTable::unipolar() {
-  dspheaders::unipolar(table, tableLength);
+void WaveTable::normalize() {
+  dspheaders::range(table, tableLength, -1.f, 1.f, 0.f, 1.f);
 }
 
 void WaveTable::movePointer(float phase) {

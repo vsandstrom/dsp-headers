@@ -42,7 +42,7 @@ class WaveTable {
   public:
   float frequency;
 
-  void unipolar();
+  void normalize();
 
 
 	// Entry-point to let the WaveTable oscillator play. Does interpolation and movement of

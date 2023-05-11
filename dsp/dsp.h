@@ -12,8 +12,14 @@ namespace dspheaders {
         return fmax(bot, (fmin(x, top)));
     }
 
-    inline float scale(float x, float a, float  b) {
-        return (b-a)*x + a;
+    inline float scale(float x, float imin, float imax, float omin, float  omax) {
+      return (omax - omin) * (x - imin)/(imax - imin) + omin;
+    }
+
+    int void range(float * x, int xLen, float imin, float imax, float omin, float omax) {
+        for (int i = 0; i < xLen; ++i) {
+            x[i] = scale(x[i], imin, imax, omin, omax); 
+        }
     }
 
     inline float dcblock(float x, float xm1, float ym1) {

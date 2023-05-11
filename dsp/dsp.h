@@ -9,11 +9,6 @@
 
 
 namespace dspheaders {
-  // struct MinMax {
-  //   float minimum;
-  //   float maximum;
-  // }
-
     inline float clamp(float x, float bot, float top) {
         return fmax(bot, (fmin(x, top)));
     }

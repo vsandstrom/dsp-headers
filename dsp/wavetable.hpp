@@ -1,12 +1,16 @@
+#include "interpolation.hpp"
+#include "dsp.h"
+
 #ifndef PI
-const float pi = 3.14159265358979323846;
-#define PI
+  #define PI 
+  const float pi = 3.14159265358979323846f;
 #endif
 
-struct frame {
-  float left;
-  float right;
-};
+#ifndef WAVETABLE_HPP
+#define WAVETABLE_HPP
+
+
+namespace dspheaders {
 
 enum WAVESHAPE {
   SINE,
@@ -14,13 +18,6 @@ enum WAVESHAPE {
   SAW,
   SQUARE,
   ENV
-};
-
-enum INTERPOLATION {
-  LINEAR,
-  COSINE,
-  CUBIC,
-  HERMITE
 };
 
 class WaveTable {
@@ -43,6 +40,11 @@ class WaveTable {
     void populateTable(WAVESHAPE waveshape);
 
   public:
+  float frequency;
+
+  void unipolar();
+
+
 	// Entry-point to let the WaveTable oscillator play. Does interpolation and movement of
     // readpointer under the hood.
 	float play();
@@ -56,7 +58,6 @@ class WaveTable {
     // Frequency Modulation
 	float play(float phase);
 	
-    float frequency;
 
 
     // Performs an interpolation between samples to determine what value to return when the 
@@ -104,6 +105,8 @@ class WaveTable {
     // pointer. All float-arrays given should be dynamically allocated.
     WaveTable(float* wavetable, int tableLength, int samplerate, INTERPOLATION interpolation);
 
-    // Frees the float-array
-    ~WaveTable();
+    WaveTable(int sampleRate);
 };
+
+}
+#endif

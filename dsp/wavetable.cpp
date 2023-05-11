@@ -1,21 +1,23 @@
 #include <cmath>
 #include "wavetable.hpp"
-#include "../interpolation/interpolation.hpp"
+#include "interpolation.hpp"
 
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 
 
-
+namespace dspheaders{
 WaveTable::WaveTable(
 	WAVESHAPE waveshape, int tableLength, int samplerate, INTERPOLATION interpolation)
   : tableLength(tableLength), samplerate(samplerate), interpolationType(interpolation)
 {
   // Requests a +1 memory block to do one less comparison in linear interpolation
-  table = new float[tableLength];
+  table = new float[tableLength+1];
   position = 0;
   populateTable(waveshape);
 
 };
+
+WaveTable::WaveTable(int samplerate): samplerate((float) samplerate){}
 
 WaveTable::WaveTable(
 	float* wavetable, int tableLength, int samplerate, INTERPOLATION interpolation)
@@ -25,10 +27,6 @@ WaveTable::WaveTable(
   position = 0;
 };
 
-
-WaveTable::~WaveTable() {
-  delete [] table;
-}
 
 float WaveTable::play(){
 	float out = interpolate();
@@ -40,6 +38,10 @@ float WaveTable::play(float phase) {
 	float out = interpolate();
 	movePointer(phase);
 	return out;
+}
+  
+void WaveTable::unipolar() {
+  dspheaders::unipolar(table, tableLength);
 }
 
 void WaveTable::movePointer(float phase) {
@@ -63,7 +65,7 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
 
   switch (waveshape) {
     case (SINE) : {
-      inc = pi * 2  / numSamples;
+      inc = pi * 2.0f  / numSamples;
       for (int i = 0; i < tableLength; ++i) {
         table[i] = sin(angle);
         angle += inc;
@@ -144,6 +146,8 @@ float WaveTable::interpolate() {
     }
   }
 }
+
+};
 
 #endif
 

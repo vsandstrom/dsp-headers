@@ -1,6 +1,7 @@
 #include <math.h>
 #include "interpolation.hpp"
 
+using namespace dspheaders;
 float Interpolation::linear(float position, float* table){
   int prevPosition = position; // implicit cast
   int nextPosition = prevPosition + 1;

@@ -58,7 +58,6 @@ static int paCallback(  const void* inputBuffer,				// input
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    // float mono = carrier.interpolate() * envelope.interpolate();
     float car = carrier.play(modulator.play());
     float env = envelope.play();
     
@@ -121,9 +120,6 @@ int main(int argc, char** argv) {
 	PaStream* stream;
 	PaError err;
 
-  // initialize first value, no wierd garbage value
-  // if they are initialized here, make sure to give the variables the correct values
-  // before using it, otherwise there will be an unwanted '0'-sample at the first block
 	data.left = data.right = 0.0f;
 
 	err = Pa_Initialize();

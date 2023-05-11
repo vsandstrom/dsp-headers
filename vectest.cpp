@@ -66,29 +66,13 @@ static int paCallback(  const void* inputBuffer,				// input
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    // float mono = carrier.interpolate() * envelope.interpolate();
-    // float car = carrier.play(modulator.play());
-    // float env = envelope.play();
-    
-    float temp = vec.play(
-        map(
-          transfer.play(), -1.f, 1.f, 0.f, 1.f
-        )
-      ) * envelope.play();
-    data->left = temp;
-    data->right = temp;
+    float tosc = map(transfer.play(), -1.f, 1.f, 0.f, 1.f);
+    float vosc = vec.play(tosc);
+    float env =  envelope.play();
+    data -> right = data->left = vosc * env;
 
-    // data -> left = car * env;
-    // data -> right = car * env;
-    // write data to the out buffer
     *out++ = data -> left; 
     *out++ = data -> right;
-
-    // the modulator modulates the carriers phase
-    // carrier.movePointer(modulator.interpolate());
-    // modulator.movePointer();
-    // envelope.movePointer(); 
-
 	}
 	return 0;
 }

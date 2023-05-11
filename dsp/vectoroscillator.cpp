@@ -1,9 +1,7 @@
 #include "vectoroscillator.hpp"
 #include <cstdio>
 #include <vector>
-
-namespace dspheaders {
-
+using namespace dspheaders;
 VectorOscillator::VectorOscillator(int sampleRate) : sampleRate(sampleRate) {}
 
 VectorOscillator::VectorOscillator(
@@ -40,6 +38,5 @@ float VectorOscillator::play(float phase, float transfer) {
   }
 
   return Interpolation::linear(weight, crossection);
-}
 
 }

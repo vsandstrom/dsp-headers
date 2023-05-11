@@ -1,29 +1,26 @@
+postclean: compile
+	cd build/ && rm -f *.o
 
-compile: 
-	# test.o wavetable.o interpolation.o vectoroscillator.o
+compile: vectest.o wavetable.o interpolation.o vectoroscillator.o
 	clang++ -g -O0 -fno-inline \
-		./test.cpp \
-		./dsp/wavetable.cpp \
-		./dsp/vectoroscillator.cpp \
-		./dsp/interpolation.cpp \
-		-I/usr/local/include -L/usr/local/lib/ -lportaudio -o ./build/test \
-		&& cd build/ \
-		&& rm *.o
+		build/vectest.o build/wavetable.o build/interpolation.o build/vectoroscillator.o \
+		-I/usr/local/include -L/usr/local/lib/ -lportaudio \
+		-o build/vectest
 
-# test.o: 
-# 	g++ -o ./build/test.o -c -g test.cpp 
+vectest.o: 
+	clang++ -o ./build/vectest.o -c vectest.cpp 
 #
-# vectoroscillator.o:
-# 	g++ -o ./build/vectoroscillator.o -c -g ./dsp/vectoroscillator.cpp
+vectoroscillator.o:
+	clang++ -o ./build/vectoroscillator.o -c ./dsp/vectoroscillator.cpp
 #
-# wavetable.o:
-# 	g++ -o ./build/wavetable.o -c -g ./dsp/wavetable.cpp
+wavetable.o:
+	clang++ -o ./build/wavetable.o -c ./dsp/wavetable.cpp
 #
-# interpolation.o:
-# 	g++ -o ./build/interpolation.o -c -g ./dsp/interpolation.cpp
+interpolation.o:
+	clang++ -o ./build/interpolation.o -c ./dsp/interpolation.cpp
 
 clean:
-	rm -r ./build/*
+	rm -r build/*
 
 dir:
 	mkdir -p build

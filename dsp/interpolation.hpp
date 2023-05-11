@@ -6,6 +6,8 @@
 #ifndef INTERPOLATION_HPP
 #define INTERPOLATION_HPP
 
+namespace dspheaders {
+
 enum INTERPOLATION {
   LINEAR,
   COSINE,
@@ -18,4 +20,5 @@ class Interpolation {
     static float linear(float position, float* table);
     static float cosine(float position, float* table);
 };
+}
 #endif

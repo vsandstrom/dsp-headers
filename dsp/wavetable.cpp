@@ -5,7 +5,7 @@
 #ifndef WAVETABLE_CPP
 #define WAVETABLE_CPP 
 
-namespace dspheaders{
+using namespace dspheaders;
 WaveTable::WaveTable(
 	WAVESHAPE waveshape, int tableLength, int samplerate, INTERPOLATION interpolation)
   : tableLength(tableLength), samplerate(samplerate), interpolationType(interpolation)
@@ -146,8 +146,6 @@ float WaveTable::interpolate() {
     }
   }
 }
-
-};
 
 #endif
 

@@ -10,9 +10,9 @@ namespace dspheaders {
 class VectorOscillator {
   private:
     std::vector<WaveTable> tables;
-    int sampleRate;
+    uint32_t sampleRate;
     INTERPOLATION transferInterpolation;
-    int tableWidth;
+    uint32_t tableWidth;
     // a vertical crossection containing all current samples from all tables in *tables*
     float* crossection;
     float weight;
@@ -20,9 +20,9 @@ class VectorOscillator {
   public:
     float frequency;
 
-    VectorOscillator(int sampleRate);
+    VectorOscillator(uint32_t sampleRate);
     // Feed the VectorOscillator with a vector of 'n' WaveTables
-    VectorOscillator(std::vector<WaveTable> tables, int sampleRate, INTERPOLATION transferInterpolation);
+    VectorOscillator(std::vector<WaveTable> tables, uint32_t sampleRate, INTERPOLATION transferInterpolation);
 
 
     float play(float transfer);

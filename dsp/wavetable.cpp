@@ -7,7 +7,7 @@
 
 using namespace dspheaders;
 WaveTable::WaveTable(
-	WAVESHAPE waveshape, int tableLength, int samplerate, INTERPOLATION interpolation)
+	WAVESHAPE waveshape, uint32_t tableLength, uint32_t samplerate, INTERPOLATION interpolation)
   : tableLength(tableLength), samplerate(samplerate), interpolationType(interpolation)
 {
   // Requests a +1 memory block to do one less comparison in linear interpolation
@@ -17,10 +17,10 @@ WaveTable::WaveTable(
 
 };
 
-WaveTable::WaveTable(int samplerate): samplerate((float) samplerate){}
+WaveTable::WaveTable(uint32_t samplerate): samplerate((float) samplerate){}
 
 WaveTable::WaveTable(
-	float* wavetable, int tableLength, int samplerate, INTERPOLATION interpolation)
+	float* wavetable, uint32_t tableLength, uint32_t samplerate, INTERPOLATION interpolation)
   : tableLength(tableLength), samplerate(samplerate), interpolationType(interpolation) 
 {
   table = wavetable;

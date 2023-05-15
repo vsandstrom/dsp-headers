@@ -3,11 +3,11 @@
 #include <vector>
 using namespace dspheaders;
 
-VectorOscillator::VectorOscillator(int sampleRate) : sampleRate(sampleRate) {}
+VectorOscillator::VectorOscillator(uint32_t sampleRate) : sampleRate(sampleRate) {}
 
 VectorOscillator::VectorOscillator(
                                   std::vector<WaveTable> tables,
-                                  int sampleRate,
+                                  uint32_t sampleRate,
                                   INTERPOLATION transferInterpolation
                                   ): 
                                 tables(tables),

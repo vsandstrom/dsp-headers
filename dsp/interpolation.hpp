@@ -7,18 +7,17 @@
 #define INTERPOLATION_HPP
 
 namespace dspheaders {
+  enum INTERPOLATION {
+    LINEAR,
+    COSINE,
+    CUBIC,
+    HERMITE
+  };
 
-enum INTERPOLATION {
-  LINEAR,
-  COSINE,
-  CUBIC,
-  HERMITE
-};
-
-class Interpolation {
-  public:
-    static float linear(float position, float* table);
-    static float cosine(float position, float* table);
-};
+  class Interpolation {
+    public:
+      static float linear(float position, float* table);
+      static float cosine(float position, float* table);
+  };
 }
 #endif

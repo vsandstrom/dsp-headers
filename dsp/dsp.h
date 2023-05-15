@@ -5,9 +5,6 @@
 #endif
 
 #include <cmath>
-
-
-
 namespace dspheaders {
     inline float clamp(float x, float bot, float top) {
         return fmax(bot, (fmin(x, top)));

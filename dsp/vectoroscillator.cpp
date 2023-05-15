@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <vector>
 using namespace dspheaders;
+
 VectorOscillator::VectorOscillator(int sampleRate) : sampleRate(sampleRate) {}
 
 VectorOscillator::VectorOscillator(

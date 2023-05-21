@@ -22,6 +22,14 @@ namespace dspheaders {
         return base * pow(2,(n/12));
     }
 
+    inline float dBToVolume(float dB) {
+      return powf(10.f, 0.05f * dB);
+    }
+
+    inline float volumeTodB(float volume) {
+      return 20.f * log10f(volume);
+    }
+
     inline void range(float* x, uint32_t xLen, float inmin, float inmax, float outmin, float outmax) {
       for (int i = 0; i < xLen; i++) {
         x[i] = map(x[i], inmin, inmax, outmin, outmax);

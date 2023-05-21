@@ -22,10 +22,25 @@ namespace dspheaders {
       float speed;
       // Constructor:
       Delay(uint32_t samplerate, float seconds);
+      // Writes input signal to next sample in buffer
+      // ----
+      //
+      // float sample - Current sample to be written to delay buffer
       void write(float sample);
-      float read(float speed);
-      float play(float sample, float speed);
+      // Reads from delay buffer.
+      // ----
+      //
+      // float delay - The amount of delay in seconds.
+      // float speed - Speed of readptr, pitching up or down.
+      float read(float delay, float speed);
+      // End-point for delay class.
+      // ----
+      //
+      // float delay - The amount of delay in seconds.
+      // float speed - Speed of readptr, pitching up or down.
+      // float input - Input sample to write to buffer.
+      float play(float delay, float speed, float input);
   };
-}
+} // namespace dspheaders
 
 #endif

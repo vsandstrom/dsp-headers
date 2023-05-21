@@ -20,7 +20,6 @@ Delay::Delay(uint32_t samplerate, float seconds) {
 }
 
 void Delay::write(float sample) {
-  // Writes input signal to next sample in buffer
   buffer[writeptr] = sample;
   writeptr++;
   while (writeptr > bufferLength) {
@@ -28,17 +27,20 @@ void Delay::write(float sample) {
   }
 }
 
-float Delay::read(float speed) {
-  // if regular speed == 1 : 1, double speed == 2 samples : 1 sample
-  readptr += speed;
+float Delay::read(float delay, float speed) {
+  readptr += speed + delay;
   while (readptr > bufferLength) {
     readptr -= bufferLength;
+  }
+  while (readptr < 0) {
+    // allow for negative pointer wraparound
+    readptr += bufferLength;
   }
   return Interpolation::linear(readptr, buffer);
 }
 
-float Delay::play(float sample, float speed) {
-  write(sample);
-  return read(speed);
+float Delay::play(float delay, float speed, float input) {
+  write(input);
+  return read(delay, speed);
 }
 

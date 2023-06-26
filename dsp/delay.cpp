@@ -6,41 +6,38 @@
 #define LIMIT 16.f
 // Hard limit for length of buffer
 
+/// Todo: 
+/// Soft limit the range of what is used in the buffer, minimum 1 sample offset?
+///
+/// Adjustable speed through the buffer? should the taps also compensate? 
+/// could that lead to some nice fluttering effects?
+
 using namespace dspheaders;
 
-Delay::Delay(uint32_t samplerate, float seconds) {
-  // Initialize a buffer with the length of N seconds
-  if (seconds < LIMIT && seconds > 0) {
-    // Prevent too long buffers or buffers with negative length
-    bufferLength = samplerate * seconds;
-  } else {
-    bufferLength = samplerate * LIMIT;
+// A bunch of different initializers
+Delay::Delay(uint32_t samplerate, float delay): delay(delay), samplerate(samplerate), buffer(Buffer<float>(delay * 2, samplerate)) {}
+
+Delay::Delay(uint32_t samplerate, float delay, uint32_t delay_taps): delay(delay), samplerate(samplerate), buffer(Buffer<float>(delay * 2, samplerate)) {}
+
+Delay::Delay(uint32_t samplerate, Buffer<float> buffer, uint32_t delay_taps): samplerate(samplerate), buffer(buffer) {}
+
+void Delay::write(float sample) { buffer.writeSample(sample, writeptr); }
+
+float Delay::read(float delaytime) {
+  float output = 0.f;
+  float timeInSamples = delaytime * samplerate;
+  for (int i = 1; 1 <= delay_taps; i++) {
+    float tap = (float)writeptr - (timeInSamples * i);
+    output += buffer.readSample(tap);
   }
-  buffer = new float[bufferLength];
+  return output;
 }
 
-void Delay::write(float sample) {
-  buffer[writeptr] = sample;
-  writeptr++;
-  while (writeptr > bufferLength) {
-    writeptr -= bufferLength;
-  }
+float Delay::play(float input, float delaytime, float wet, float feedback) {
+  float output = read(delaytime);
+  // write the delay back to write head with feedback
+  write(input + ( output * feedback ));
+  writeptr+=1.f;
+  // wet controls dry/wet balance of delay
+  return output * wet;
 }
-
-float Delay::read(float delay, float speed) {
-  readptr += speed + delay;
-  while (readptr > bufferLength) {
-    readptr -= bufferLength;
-  }
-  while (readptr < 0) {
-    // allow for negative pointer wraparound
-    readptr += bufferLength;
-  }
-  return Interpolation::linear(readptr, buffer);
-}
-
-float Delay::play(float delay, float speed, float input) {
-  write(input);
-  return read(delay, speed);
-}
-

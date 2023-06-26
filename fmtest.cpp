@@ -12,10 +12,6 @@
 #include "dsp/vectoroscillator.hpp"
 #include <vector>
 
-struct frame {
-  float left;
-  float right;
-};
 
 
 // MASTER VOLUME OF THE GENERATED TONE

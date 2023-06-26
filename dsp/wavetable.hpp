@@ -1,11 +1,6 @@
 #include "interpolation.hpp"
 #include "dsp.h"
 
-#ifndef PI
-  #define PI 
-  const float pi = 3.14159265358979323846f;
-#endif
-
 #ifndef WAVETABLE_HPP
 #define WAVETABLE_HPP
 

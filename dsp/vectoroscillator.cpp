@@ -1,6 +1,7 @@
 #include "vectoroscillator.hpp"
 #include <cstdio>
 #include <vector>
+
 using namespace dspheaders;
 
 VectorOscillator::VectorOscillator(uint32_t sampleRate) : sampleRate(sampleRate) {}

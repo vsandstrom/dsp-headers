@@ -1,6 +1,7 @@
 #include "interpolation.hpp"
 #include "wavetable.hpp"
 #include <vector>
+#include "dsp.h"
 
 #ifndef VECTOROSCILLATOR_HPP
 #define VECTOROSCILLATOR_HPP

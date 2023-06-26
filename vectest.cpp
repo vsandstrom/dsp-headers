@@ -1,4 +1,3 @@
-
 #include "dsp/dsp.h"
 #include "portaudio.h"
 #include <chrono>
@@ -34,27 +33,25 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
+
 WaveTable sine = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
 WaveTable triangle = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
 WaveTable square = WaveTable(SQUARE, TABLE_LEN, SAMPLE_RATE, LINEAR);
 WaveTable saw = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, LINEAR);
-
 WaveTable transfer = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, LINEAR);
 WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
-
 std::vector<WaveTable> vecTables = {sine, triangle, square, saw};
-
 VectorOscillator vec = VectorOscillator(vecTables, SAMPLE_RATE, LINEAR);
 
 static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
-static int paCallback(  const void* inputBuffer,				// input
-						void* outputBuffer,								          // output
-						unsigned long framesPerBuffer,					    // length of buffer in frames
-						const PaStreamCallbackTimeInfo* timeinfo,		//
-						PaStreamCallbackFlags statusFlags,          //
-						void* userdata )								            // "void"-type can be typecast to other 
+static int paCallback(  const void* inputBuffer,	
+						void* outputBuffer,								      
+						unsigned long framesPerBuffer,					 
+						const PaStreamCallbackTimeInfo* timeinfo,	
+						PaStreamCallbackFlags statusFlags,         
+						void* userdata )								            
 {
 
 	// cast data passing through stream
@@ -64,7 +61,6 @@ static int paCallback(  const void* inputBuffer,				// input
 
 	(void) inputBuffer; // prevent unused variable warning
 
-    
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     float tosc = map(transfer.play(), -1.f, 1.f, 0.f, 1.f);
     float vosc = vec.play(tosc);

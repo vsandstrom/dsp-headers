@@ -1,9 +1,6 @@
 #include <cstdint>
-
-#ifndef PI 
-  #define PI 
-  const float pi = 3.14159265358979323846f;
-#endif
+#include "dsp.h"
+#include "buffer.hpp"
 
 #ifndef DELAY_HPP
 #define DELAY_HPP
@@ -11,35 +8,40 @@
 namespace dspheaders {
   class Delay {
     private:
-      float* buffer;
-      uint32_t bufferLength;
+      Buffer<float> buffer;
+      // float* buffer;
       uint32_t samplerate;
-      int writeptr = 0;
-      float readptr = 0.f;
-      float time = 0.2f;        // Default delay time 0.2 seconds
+      float writeptr;
+      uint32_t delay_taps = 1;
 
     public:
-      float speed;
+      float delay = 0.2f;        // Default delay time 0.2 seconds
+      Delay(uint32_t samplerate, float delay);
       // Constructor:
-      Delay(uint32_t samplerate, float seconds);
-      // Writes input signal to next sample in buffer
+      Delay(uint32_t samplerate, float delay, uint32_t delay_taps);
+
+      // Easiest way to init, uses ready-made, preinitialized memory
+      Delay(uint32_t samplerate, Buffer<float> buffer, uint32_t delay_taps);
+
+      // Writes the current sample,
       // ----
       //
-      // float sample - Current sample to be written to delay buffer
+      // Uses linear interpolation to write signal to the delay buffer.
       void write(float sample);
+
       // Reads from delay buffer.
       // ----
       //
-      // float delay - The amount of delay in seconds.
-      // float speed - Speed of readptr, pitching up or down.
-      float read(float delay, float speed);
+      // float time - Duration before first delay bounce.
+      float read(float time);
       // End-point for delay class.
       // ----
       //
-      // float delay - The amount of delay in seconds.
-      // float speed - Speed of readptr, pitching up or down.
       // float input - Input sample to write to buffer.
-      float play(float delay, float speed, float input);
+      // float time - Length before first delay.
+      // float wet - Dry / wet balance.
+      // float feedback - Amount of output reintroduced into delay buffer.
+      float play(float input, float time, float wet, float feedback);
   };
 } // namespace dspheaders
 

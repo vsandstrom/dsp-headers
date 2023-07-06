@@ -55,6 +55,12 @@ namespace dspheaders {
   inline void unipolar(float sample) {
     map(sample, -1.f, 1.f, 0.f, 1.f);
   } 
+
+  inline int wrap(int x, uint32_t len) {
+    while (x < 0) x += len;
+    while (x >= len) x -= len;
+    return x;
+  }
     
 } /* namespace dspheaders */
 

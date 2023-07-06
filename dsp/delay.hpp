@@ -8,20 +8,25 @@
 namespace dspheaders {
   class Delay {
     private:
-      Buffer<float> buffer;
+      Buffer buffer;
       // float* buffer;
       uint32_t samplerate;
-      float writeptr;
       uint32_t delay_taps = 1;
+      int writeptr = 0;
+
+      inline void initBuffer() {
+        for (int i = 0; i < buffer.bufferLength; ++i) {
+          buffer.buffer[i] = 0.0f;
+        }
+      }
 
     public:
       float delay = 0.2f;        // Default delay time 0.2 seconds
-      Delay(uint32_t samplerate, float delay);
       // Constructor:
       Delay(uint32_t samplerate, float delay, uint32_t delay_taps);
 
       // Easiest way to init, uses ready-made, preinitialized memory
-      Delay(uint32_t samplerate, Buffer<float> buffer, uint32_t delay_taps);
+      Delay(uint32_t samplerate, Buffer buffer, uint32_t delay_taps);
 
       // Writes the current sample,
       // ----
@@ -34,6 +39,7 @@ namespace dspheaders {
       //
       // float time - Duration before first delay bounce.
       float read(float time);
+
       // End-point for delay class.
       // ----
       //
@@ -42,6 +48,7 @@ namespace dspheaders {
       // float wet - Dry / wet balance.
       // float feedback - Amount of output reintroduced into delay buffer.
       float play(float input, float time, float wet, float feedback);
+
   };
 } // namespace dspheaders
 

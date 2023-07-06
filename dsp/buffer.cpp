@@ -7,8 +7,11 @@ Buffer::Buffer(float seconds, uint32_t samplerate) {
 }
 
 float Buffer::readSample(int readptr) {
-  // return Interpolation::linear(readptr, buffer);
   return buffer[readptr];
+}
+
+float Buffer::readInterpolatedSample(float readptr) {
+  return Interpolation::linear(readptr, buffer);
 }
 
 void Buffer::writeSample(float sample, int ptr) {

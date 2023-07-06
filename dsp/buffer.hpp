@@ -13,7 +13,7 @@ namespace dspheaders {
       Buffer(float seconds, uint32_t samplerate);
       // reading bck in buffer: n++ - delay
       float readSample(int readptr);
-
+      float readInterpolatedSample(float readptr);
       // Writing fwd in buffer: n++
       void writeSample(float sample, int writeptr);
   };

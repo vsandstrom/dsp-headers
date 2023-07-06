@@ -29,6 +29,7 @@ void Delay::write(float sample) {
 }
 
 float Delay::read(float delaytime) {
+  // Non-interpolating read function
   float output = 0.f;
   int timeInSamples = (delaytime * samplerate);
   for (int i = 1; i <= delay_taps; i++) {
@@ -38,8 +39,20 @@ float Delay::read(float delaytime) {
   return output;
 }
 
+float Delay::readInterpolated(float delaytime) {
+  float output = 0.f;
+  float timeInSamples = (delaytime * samplerate);
+  for (int i = 1; i <= delay_taps; i++) {
+    float tap = (float)writeptr - (timeInSamples * i);
+    output += buffer.readInterpolatedSample(wrapf(tap, (float)buffer.bufferLength));
+  }
+  return output;
+
+
+}
+
 float Delay::play(float input, float delaytime, float wet, float feedback) {
-  float output = read(delaytime);
+  float output = readInterpolated(delaytime);
   // write the delay back to write head with feedback
   write(input + ( output * feedback ));
   // wet controls dry/wet balance of delay

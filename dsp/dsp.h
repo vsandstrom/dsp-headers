@@ -61,6 +61,15 @@ namespace dspheaders {
     while (x >= len) x -= len;
     return x;
   }
+
+  inline float wrapf(float x, uint32_t len) {
+    float lenf = (float)len;
+    while (x < 0.f) x += lenf;
+    while (x >= lenf) x -= lenf;
+    return x;
+
+
+  }
     
 } /* namespace dspheaders */
 

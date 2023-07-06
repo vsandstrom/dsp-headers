@@ -40,6 +40,8 @@ namespace dspheaders {
       // float time - Duration before first delay bounce.
       float read(float time);
 
+      float readInterpolated(float time);
+
       // End-point for delay class.
       // ----
       //

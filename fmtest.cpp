@@ -52,20 +52,16 @@ static int paCallback(  const void* inputBuffer,				// input
 
 	(void) inputBuffer; // prevent unused variable warning
 
-    
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     float car = carrier.play(modulator.play());
     float env = envelope.play();
-    
-    data -> left = car * env;
-    data -> right = car * env;
-    // write data to the out buffer
-    *out++ = data -> left; 
-    *out++ = data -> right;
+
+    // Stereo frame: two increments of out buffer
+    *out++ = car * env; 
+    *out++ = car * env;
 	}
 	return 0;
 }
-
 
 int main(int argc, char** argv) {
   carrier.frequency = FREQ;

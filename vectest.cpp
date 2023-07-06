@@ -32,8 +32,11 @@ float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
+static frame data;
+
 using namespace dspheaders;
 
+// SETUP:
 WaveTable sine = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
 WaveTable triangle = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
 WaveTable square = WaveTable(SQUARE, TABLE_LEN, SAMPLE_RATE, LINEAR);
@@ -42,8 +45,6 @@ WaveTable transfer = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, LINEAR);
 WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
 std::vector<WaveTable> vecTables = {sine, triangle, square, saw};
 VectorOscillator vec = VectorOscillator(vecTables, SAMPLE_RATE, LINEAR);
-
-static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,	
@@ -55,24 +56,17 @@ static int paCallback(  const void* inputBuffer,
 {
 
 	// cast data passing through stream
-	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
-
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float tosc = map(transfer.play(), -1.f, 1.f, 0.f, 1.f);
-    float vosc = vec.play(tosc);
-    float env =  envelope.play();
-    data -> right = data->left = vosc * env;
-
-    *out++ = data -> left; 
-    *out++ = data -> right;
+    float vosc = vec.play( map( transfer.play(), -1.f, 1.f, 0.f, 1.f)) * envelope.play();
+    *out++ = clamp(vosc, -1.f, 1.f); 
+    *out++ = clamp(vosc, -1.f, 1.f); 
 	}
 	return 0;
 }
-
 
 int main(int argc, char** argv) {
   vec.frequency = FREQ;

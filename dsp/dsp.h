@@ -13,22 +13,29 @@ namespace dspheaders {
 
 
   inline float clamp(float x, float bot, float top) {
+    // Set hard min- and max amplitude limits on signal
       return fmax(bot, (fmin(x, top)));
   }
 
   inline float map(float x, float inmin, float inmax, float outmin, float outmax) {
+    // Convert input value within input range to new range
       return (outmax-outmin)*(x - inmin)/(inmax-inmin)+outmin;
   }
 
   inline float dcblock(float x, float xm1, float ym1) {
+    // x - current input sample: x[n]
+    // xm1 - previous input sample - FIR
+    // ym1 - previous output sample - IIR
       return  x - xm1 + 0.995 * ym1;
   }
 
-  inline float mtof(int n, float base = 440.f) {
-      return base * pow(2,(n/12));
+  inline float mtof(int midinum, float base = 440.f) {
+    // Converts midinumber to frequency
+    return base * pow(2,(midinum/12));
   }
 
   inline float dBToVolume(float dB) {
+    // 
     return powf(10.f, 0.05f * dB);
   }
 
@@ -37,6 +44,7 @@ namespace dspheaders {
   }
 
   inline void range(float* buffer, uint32_t bufferLength, float inmin, float inmax, float outmin, float outmax) {
+    // Convert values in input buffer within input range to new range
     for (int i = 0; i < bufferLength; i++) {
       buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
     }

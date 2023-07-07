@@ -18,6 +18,7 @@ namespace dspheaders {
     public:
       static float linear(float position, float* table);
       static float cosine(float position, float* table);
+      static float cubic(float position, float* table, int tableLength);
   };
 }
 #endif

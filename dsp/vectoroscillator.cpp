@@ -21,7 +21,7 @@ VectorOscillator::VectorOscillator(
 }
 
 float VectorOscillator::play(float transfer) {
-  float weight = transfer* (float)tableWidth;
+  float weight = transfer * (float)tableWidth;
 
   for (int i = 0; i < tables.size(); ++i) {
     tables[i].frequency = frequency;
@@ -31,7 +31,7 @@ float VectorOscillator::play(float transfer) {
   return Interpolation::linear(weight, crossection);
 }
 
-float VectorOscillator::play(float phase, float transfer) {
+float VectorOscillator::play(float transfer, float phase) {
   float weight = transfer * (float)tableWidth;
 
   for (int i = 0; i < tables.size(); ++i) {

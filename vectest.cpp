@@ -37,14 +37,14 @@ static frame data;
 using namespace dspheaders;
 
 // SETUP:
-WaveTable sine = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable triangle = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable square = WaveTable(SQUARE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable saw = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable transfer = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
+WaveTable sine = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable triangle = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable square = WaveTable(SQUARE, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable saw = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable transfer = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
 std::vector<WaveTable> vecTables = {sine, triangle, square, saw};
-VectorOscillator vec = VectorOscillator(vecTables, SAMPLE_RATE, LINEAR);
+VectorOscillator vec = VectorOscillator(vecTables, SAMPLE_RATE, CUBIC);
 
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,	

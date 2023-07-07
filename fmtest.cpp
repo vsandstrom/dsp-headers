@@ -19,7 +19,7 @@ const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
 const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-constexpr int TABLE_LEN =      512;
+const int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
@@ -29,10 +29,10 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
+WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, CUBIC);
 
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
+WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
 
 static frame data;
 
@@ -154,6 +154,3 @@ error:
 	std::fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ));
 	return err;
 }
-
-
-

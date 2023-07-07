@@ -19,7 +19,7 @@ class WaveTable {
   private:
     float position;
     //WAVESHAPE waveshape;
-    float tableLength;
+    uint32_t tableLength;
     float samplerate;
     float* table;
     INTERPOLATION interpolationType;

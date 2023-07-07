@@ -47,22 +47,23 @@ void WaveTable::normalize() {
 void WaveTable::movePointer(float phase) {
 	// This phase modulation cannot handle negative phase.
 	float normalizedPhase = fabs((phase + 1) * 0.5);
-    position += tableLength / (samplerate / (frequency * normalizedPhase));
-    while (position > tableLength) {
-      position -= tableLength;
-    }
+  position += tableLength / (samplerate / (frequency * normalizedPhase));
+  position = wrapf(position, tableLength);
+  // while (position > tableLength) {
+  //   position -= tableLength;
+  // }
 }
 
 void WaveTable::movePointer() {
   position += tableLength / (samplerate / frequency);
-  while (position > tableLength) {
-    position -= tableLength;
-  }
+  position = wrapf(position, tableLength);
+  // while (position > tableLength) {
+  //   position -= tableLength;
+  // }
 }
 
 void WaveTable::populateTable(WAVESHAPE waveshape) {
   float inc = 0, angle = 0, numSamples = (float) tableLength;
-
   switch (waveshape) {
     case (SINE) : {
       inc = pi * 2.0f  / numSamples;
@@ -132,14 +133,10 @@ float WaveTable::interpolate() {
     case (COSINE) : {
       return Interpolation::cosine(position, table);
     }
-
-    // case (CUBIC) : {
-    //   // TODO
-    //   printf("CUBIC INTERPOLATION NOT IMPLEMENTED");
-    //   exit(1);
-    //   D(printf("CUBIC\n"));
-    //   break;
-    // }
+  
+    case (CUBIC) : {
+      return Interpolation::cubic(position, table, tableLength);
+    }
 
     default: {
       return table[(int)position];

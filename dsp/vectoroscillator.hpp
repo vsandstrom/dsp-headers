@@ -32,7 +32,7 @@ class VectorOscillator {
     //
     // transfer - set the position of the readpointer in the transfer table
 
-    float play(float phase, float transfer);
+    float play(float transfer, float phase);
     // Returns the next sample from the vector oscillator. FM enabled 
     // ----
     //

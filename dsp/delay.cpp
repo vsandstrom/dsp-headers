@@ -2,14 +2,8 @@
 #include "delay.hpp"
 #include "interpolation.hpp"
 
-/// Todo: 
-/// Soft limit the range of what is used in the buffer, minimum 1 sample offset?
-///
-/// Adjustable speed through the buffer? should the taps also compensate? 
-/// could that lead to some nice fluttering effects?
-
 using namespace dspheaders;
-// A bunch of different initializers
+// A bunch of different constructors
 Delay::Delay(uint32_t samplerate, float delay, uint32_t delay_taps): 
   delay(delay),
   samplerate(samplerate),
@@ -31,9 +25,9 @@ void Delay::write(float sample) {
 float Delay::read(float delaytime) {
   // Non-interpolating read function
   float output = 0.f;
-  int timeInSamples = (delaytime * samplerate);
+  int tapdelaytime = (delaytime * samplerate);
   for (int i = 1; i <= delay_taps; i++) {
-    int tap = writeptr - (timeInSamples * i);
+    int tap = writeptr - (tapdelaytime * i);
     output += buffer.readSample(wrap(tap, buffer.bufferLength));
   }
   return output;
@@ -41,9 +35,9 @@ float Delay::read(float delaytime) {
 
 float Delay::readInterpolated(float delaytime) {
   float output = 0.f;
-  float timeInSamples = (delaytime * samplerate);
+  float tapdelaytime = (delaytime * samplerate);
   for (int i = 1; i <= delay_taps; i++) {
-    float tap = (float)writeptr - (timeInSamples * i);
+    float tap = (float)writeptr - (tapdelaytime * i);
     output += buffer.readInterpolatedSample(wrapf(tap, (float)buffer.bufferLength));
   }
   return output;

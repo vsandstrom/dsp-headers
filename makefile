@@ -1,20 +1,20 @@
 postclean: compile
 	cd build/ && rm -f *.o
 
-compile: delaytest.o wavetable.o interpolation.o vectoroscillator.o delay.o buffer.o
+compile: vectest.o wavetable.o interpolation.o vectoroscillator.o
 	clang++ -g -O0 -fno-inline \
-		build/delaytest.o build/wavetable.o build/interpolation.o build/vectoroscillator.o build/buffer.o build/delay.o \
+		build/vectest.o build/wavetable.o build/interpolation.o build/vectoroscillator.o \
 		-I/usr/local/include -L/usr/local/lib/ -lportaudio -ggdb \
-		-o build/delaytest
+		-o build/vectest
 
-delay.o: buffer.o
-	clang++ -o ./build/delay.o -c ./dsp/delay.cpp
+# delay.o: buffer.o
+# 	clang++ -o ./build/delay.o -c ./dsp/delay.cpp
+#
+# buffer.o: 
+# 	clang++ -o ./build/buffer.o -c ./dsp/buffer.cpp
 
-buffer.o: 
-	clang++ -o ./build/buffer.o -c ./dsp/buffer.cpp
-
-delaytest.o: 
-	clang++ -o ./build/delaytest.o -c delaytest.cpp 
+vectest.o: 
+	clang++ -o ./build/vectest.o -c vectest.cpp 
 #
 vectoroscillator.o:
 	clang++ -o ./build/vectoroscillator.o -c ./dsp/vectoroscillator.cpp

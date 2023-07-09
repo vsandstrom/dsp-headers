@@ -56,26 +56,26 @@ namespace dspheaders {
 
   class Delay: public BaseDelay<Buffer> {
     public:
-      Delay(unsigned int samplerate, float delay, unsigned int delay_taps);
+      Delay(unsigned int samplerate, float delay, unsigned int delay_taps) : BaseDelay<Buffer>(samplerate, delay, delay_taps) {};
 
       // Easiest way to init, uses ready-made, preinitialized memory
-      Delay(unsigned int samplerate, Buffer buffer, unsigned int delay_taps);
+      Delay(unsigned int samplerate, Buffer buffer, unsigned int delay_taps) : BaseDelay<Buffer>(samplerate, buffer, delay_taps) {};
       float read(float time) override;
   };
   
   class DelayL: public BaseDelay<BufferL> {
     public:
-      DelayL(unsigned int samplerate, float delay, unsigned int delay_taps);
+      DelayL(unsigned int samplerate, float delay, unsigned int delay_taps) : BaseDelay<BufferL>(samplerate, delay, delay_taps) {};
       // Easiest way to init, uses ready-made, preinitialized memory
-      DelayL(unsigned int samplerate, BufferL buffer, unsigned int delay_taps);
+      DelayL(unsigned int samplerate, BufferL buffer, unsigned int delay_taps) : BaseDelay<BufferL>(samplerate, buffer, delay_taps) {};
       float read(float time) override;
   };
   
   class DelayC: public BaseDelay<BufferC> {
     public:
-      DelayC(unsigned int samplerate, float delay, unsigned int delay_taps);
+      DelayC(unsigned int samplerate, float delay, unsigned int delay_taps) : BaseDelay<BufferC>(samplerate, delay, delay_taps) {};
       // Easiest way to init, uses ready-made, preinitialized memory
-      DelayC(unsigned int samplerate, BufferC buffer, unsigned int delay_taps);
+      DelayC(unsigned int samplerate, BufferC buffer, unsigned int delay_taps) : BaseDelay<BufferC>(samplerate, buffer, delay_taps) {};
       float read(float time) override;
   };
 

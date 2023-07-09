@@ -1,19 +1,23 @@
 #include "./buffer.hpp"
 
 using namespace dspheaders;
-Buffer::Buffer(float seconds, unsigned int samplerate) {
+BaseBuffer::BaseBuffer(float seconds, unsigned int samplerate) {
   bufferLength = samplerate * seconds;
   buffer = new float[bufferLength+1];
 }
 
-float Buffer::readSample(int readptr) {
+float BaseBuffer::readSample(int readptr) {
   return buffer[readptr];
 }
 
-float Buffer::readInterpolatedSample(float readptr) {
+float BufferL::readSample(float readptr) {
   return Interpolation::linear(readptr, buffer);
 }
 
-void Buffer::writeSample(float sample, int ptr) {
+float BufferC::readSample(float readptr) {
+  return Interpolation::cubic(readptr, buffer, bufferLength);
+}
+
+void BaseBuffer::writeSample(float sample, int ptr) {
   buffer[ptr] = sample;
 }

@@ -6,9 +6,10 @@
 #define DELAY_HPP
 
 namespace dspheaders {
-  class Delay {
-    private:
-      Buffer buffer;
+  template <typename T>
+  class BaseDelay {
+    protected:
+      T buffer;
       // float* buffer;
       unsigned int samplerate;
       unsigned int delay_taps = 1;
@@ -23,10 +24,10 @@ namespace dspheaders {
     public:
       float delay = 0.2f;        // Default delay time 0.2 seconds
       // Constructor:
-      Delay(unsigned int samplerate, float delay, unsigned int delay_taps);
+      BaseDelay(unsigned int samplerate, float delay, unsigned int delay_taps);
 
       // Easiest way to init, uses ready-made, preinitialized memory
-      Delay(unsigned int samplerate, Buffer buffer, unsigned int delay_taps);
+      BaseDelay(unsigned int samplerate, T buffer, unsigned int delay_taps);
 
       // Writes the current sample,
       // ----
@@ -38,9 +39,9 @@ namespace dspheaders {
       // ----
       //
       // float time - Duration before first delay bounce.
-      float read(float time);
+      virtual float read(float time);
 
-      float readInterpolated(float time);
+      // float readInterpolated(float time);
 
       // End-point for delay class.
       // ----
@@ -52,6 +53,33 @@ namespace dspheaders {
       float play(float input, float time, float wet, float feedback);
 
   };
+
+  class Delay: public BaseDelay<Buffer> {
+    public:
+      Delay(unsigned int samplerate, float delay, unsigned int delay_taps);
+
+      // Easiest way to init, uses ready-made, preinitialized memory
+      Delay(unsigned int samplerate, Buffer buffer, unsigned int delay_taps);
+      float read(float time) override;
+  };
+  
+  class DelayL: public BaseDelay<BufferL> {
+    public:
+      DelayL(unsigned int samplerate, float delay, unsigned int delay_taps);
+      // Easiest way to init, uses ready-made, preinitialized memory
+      DelayL(unsigned int samplerate, BufferL buffer, unsigned int delay_taps);
+      float read(float time) override;
+  };
+  
+  class DelayC: public BaseDelay<BufferC> {
+    public:
+      DelayC(unsigned int samplerate, float delay, unsigned int delay_taps);
+      // Easiest way to init, uses ready-made, preinitialized memory
+      DelayC(unsigned int samplerate, BufferC buffer, unsigned int delay_taps);
+      float read(float time) override;
+  };
+
+
 } // namespace dspheaders
 
 #endif

@@ -4,14 +4,14 @@
 
 using namespace dspheaders;
 // A bunch of different constructors
-Delay::Delay(uint32_t samplerate, float delay, uint32_t delay_taps): 
+Delay::Delay(unsigned int samplerate, float delay, unsigned int delay_taps): 
   delay(delay),
   samplerate(samplerate),
   buffer(Buffer(delay * 2, samplerate)) {
   initBuffer();
 }
 
-Delay::Delay(uint32_t samplerate, Buffer buffer, uint32_t delay_taps):
+Delay::Delay(unsigned int samplerate, Buffer buffer, unsigned int delay_taps):
   samplerate(samplerate), 
   buffer(buffer) {
   initBuffer();

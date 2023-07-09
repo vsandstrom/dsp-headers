@@ -49,7 +49,7 @@ namespace dspheaders {
   }
 
   // Mutate values in array with dspheaders::map, for each value
-  inline void range(float* buffer, uint32_t bufferLength, float inmin, float inmax, float outmin, float outmax) {
+  inline void range(float* buffer, unsigned int bufferLength, float inmin, float inmax, float outmin, float outmax) {
     // Convert values in input buffer within input range to new range
     for (int i = 0; i < bufferLength; i++) {
       buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
@@ -63,7 +63,7 @@ namespace dspheaders {
   inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
 
   // Makes sure that x is within range of 0 - n 
-  inline int wrap(int x, uint32_t length) {
+  inline int wrap(int x, unsigned int length) {
     while (x < 0) x += length;
     while (x >= length) x -= length;
     return x;
@@ -72,7 +72,7 @@ namespace dspheaders {
   // Makes sure that x is within range of 0.0 - n
   //
   // x is a kept as float for interpolation purposes.
-  inline float wrapf(float x, uint32_t length) {
+  inline float wrapf(float x, unsigned int length) {
     float lengthf = (float)length;
     while (x < 0.f) x += lengthf;
     while (x >= lengthf) x -= lengthf;

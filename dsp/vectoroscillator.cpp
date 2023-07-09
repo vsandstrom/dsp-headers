@@ -4,15 +4,13 @@
 
 using namespace dspheaders;
 
-VectorOscillator::VectorOscillator(uint32_t sampleRate) : sampleRate(sampleRate) {}
+VectorOscillator::VectorOscillator(){}
 
 VectorOscillator::VectorOscillator(
                                   std::vector<WaveTable> tables,
-                                  uint32_t sampleRate,
                                   INTERPOLATION transferInterpolation
                                   ): 
                                 tables(tables),
-                                sampleRate(sampleRate),
                                 transferInterpolation(transferInterpolation)
 {
   tableWidth = tables.size() -1;

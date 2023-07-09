@@ -10,8 +10,8 @@ namespace dspheaders {
     private:
       Buffer buffer;
       // float* buffer;
-      uint32_t samplerate;
-      uint32_t delay_taps = 1;
+      unsigned int samplerate;
+      unsigned int delay_taps = 1;
       int writeptr = 0;
 
       inline void initBuffer() {
@@ -23,10 +23,10 @@ namespace dspheaders {
     public:
       float delay = 0.2f;        // Default delay time 0.2 seconds
       // Constructor:
-      Delay(uint32_t samplerate, float delay, uint32_t delay_taps);
+      Delay(unsigned int samplerate, float delay, unsigned int delay_taps);
 
       // Easiest way to init, uses ready-made, preinitialized memory
-      Delay(uint32_t samplerate, Buffer buffer, uint32_t delay_taps);
+      Delay(unsigned int samplerate, Buffer buffer, unsigned int delay_taps);
 
       // Writes the current sample,
       // ----

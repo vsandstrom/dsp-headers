@@ -1,7 +1,7 @@
 #include "./buffer.hpp"
 
 using namespace dspheaders;
-Buffer::Buffer(float seconds, uint32_t samplerate) {
+Buffer::Buffer(float seconds, unsigned int samplerate) {
   bufferLength = samplerate * seconds;
   buffer = new float[bufferLength+1];
 }

@@ -27,10 +27,10 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
-WaveTable delaymod = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, LINEAR);
+WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
+WaveTable delaymod = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
 
 Buffer buf = Buffer(4.f, (uint32_t)SAMPLE_RATE);
 Delay delay = Delay(SAMPLE_RATE, buf, 2);

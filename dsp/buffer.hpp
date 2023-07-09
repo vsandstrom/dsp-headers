@@ -10,7 +10,7 @@ namespace dspheaders {
     public: 
       float* buffer;
       uint32_t bufferLength;
-      Buffer(float seconds, uint32_t samplerate);
+      Buffer(float seconds, unsigned int samplerate);
       // reading bck in buffer: n++ - delay
       float readSample(int readptr);
       float readInterpolatedSample(float readptr);

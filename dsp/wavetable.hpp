@@ -19,7 +19,7 @@ class WaveTable {
   private:
     float position;
     //WAVESHAPE waveshape;
-    uint32_t tableLength;
+    unsigned int tableLength;
     float samplerate;
     float* table;
     INTERPOLATION interpolationType;
@@ -89,7 +89,7 @@ class WaveTable {
     //
     // The float-array will be +1 of the tableLength, to mediate the check for out of bounds when
     // interpolation between last and first sample. 
-    WaveTable(WAVESHAPE waveshape, uint32_t tableLength, uint32_t samplerate, INTERPOLATION interpolation);
+    WaveTable(WAVESHAPE waveshape, unsigned int tableLength, unsigned int samplerate, INTERPOLATION interpolation);
     
     // Initializes the WaveTable with a user supplied float-array of size 
     // **tableLength**, and sets the member variable
@@ -98,9 +98,9 @@ class WaveTable {
     //
     // !! BEWARE !! - When the WaveTable object goes out of scope, it will try to free the table
     // pointer. All float-arrays given should be dynamically allocated.
-    WaveTable(float* wavetable, uint32_t tableLength, uint32_t samplerate, INTERPOLATION interpolation);
+    WaveTable(float* wavetable, unsigned int tableLength, unsigned int samplerate, INTERPOLATION interpolation);
 
-    WaveTable(uint32_t sampleRate);
+    WaveTable(unsigned int sampleRate);
 };
 
 }

@@ -5,6 +5,10 @@
 #ifndef DELAY_HPP
 #define DELAY_HPP
 
+// TODO: 
+// [  ] - interpolation of the delaytime, change need to be smoother but is instant now.
+// [  ] - delaytime should be implemented with SIMD
+
 namespace dspheaders {
   template <typename T>
   class BaseDelay {
@@ -39,6 +43,10 @@ namespace dspheaders {
         initBuffer();
       }
 
+      void taps(float taps) {
+        delay_taps = taps;
+      }
+
       // Writes the current sample,
       // ----
       //
@@ -62,8 +70,6 @@ namespace dspheaders {
         }
         return output;
       }
-
-      // float readInterpolated(float time);
 
       // End-point for delay class.
       // ----

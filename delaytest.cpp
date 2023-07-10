@@ -15,7 +15,7 @@
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
-const int DURATION =           10000; // milliseconds
+const int DURATION =           30000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
 constexpr int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
@@ -27,19 +27,13 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable delaymod = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
-
-Buffer buf = Buffer(4.f, (uint32_t)SAMPLE_RATE);
-Delay delay = Delay(SAMPLE_RATE, buf, 2);
+DelayL delay = DelayL(SAMPLE_RATE, 4.f, 2);
 
 static frame data;
 
-
 // callback function must contain these inputs as PortAudio expects it.
-static int paCallback(  const void* inputBuffer,				// input
+static int paCallback(
+            const void* inputBuffer,             				// input
 						void* outputBuffer,								          // output
 						unsigned long framesPerBuffer,					    // length of buffer in frames
 						const PaStreamCallbackTimeInfo* timeinfo,		//
@@ -51,63 +45,19 @@ static int paCallback(  const void* inputBuffer,				// input
 	float* out = (float*)outputBuffer;
 	unsigned int i;
 
-	(void) inputBuffer; // prevent unused variable warning
+	float* in = (float*)inputBuffer; // prevent unused variable warning
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float env = envelope.play();
-    float sig = carrier.play(modulator.play()) * env;
-    // float del = 0.0f;
-    float del = delay.play(sig, map(delaymod.play(), 0.f, 1.f, 1.2f, 3.f), 0.8f, 0.7f);
-    
-    // write data to the out buffer
-    *out++ = sig + del; 
-    *out++ = sig + del;
+    // write and increment output and input buffer simultaneously. 
+    // hardcoded for a stereo i/o setup
+    *out++ = delay.play(*in++, 1.2f, 0.8f, 0.7f); 
+    *out++ = delay.play(*in++, 1.2f, 0.8f, 0.7f); 
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
-  carrier.frequency = FREQ;
-  modulator.frequency = FM_FREQ;
-  envelope.frequency = ENV_FREQ;
-  delaymod.frequency = 0.05;
-    // if ( argc > 3 && argc < 8 ) {
-    //   argc--;
-    //   argv++;
-    //   while (argc > 0){
-    //     if ((*argv)[0] == '-') {
-    //       printf("%c\n", (*argv)[1]);
-    //       switch ((*argv)[1]){
-    //         case 'v': {
-    //           argc--;
-    //           argv++;
-    //           // carrier.frequency = std::stof(*argv);
-    //           vec.frequency = std::stof(*argv);
-    //           break;
-    //         }
-    //         case 'e':{
-    //           argc--;
-    //           argv++;
-    //           envelope.frequency = std::stof(*argv);
-    //           break;
-    //         }
-    //         default:{
-    //           argc--;
-    //           argv++;
-    //           break;
-    //
-    //         }
-    //       }
-    //     }
-    //     argc--;
-    //     argv++;
-    //   }
-    //   printf("running user input frequencies\n");
-    // } else {
-    //   printf("running on default frequencies\n");
-    // }
-
   // transfer is used as guide wave to determine where between the tables in the vectoroscillator
   // we want to read.
   // This readpointer needs to be positive
@@ -126,7 +76,7 @@ int main(int argc, char** argv) {
 
 	// open an audio I/O stream:
 	err = Pa_OpenDefaultStream( &stream,  // < --- Callback is in err
-								0, 
+								2, 
 								2,
 								paFloat32,
 								(int)SAMPLE_RATE,

@@ -9,7 +9,7 @@ namespace dspheaders {
   class BaseBuffer {
     public: 
       float* buffer;
-      uint32_t bufferLength;
+      unsigned int bufferLength;
       BaseBuffer(float seconds, unsigned int samplerate);
       // reading bck in buffer: n++ - delay
       virtual float readSample(int readptr);
@@ -20,18 +20,18 @@ namespace dspheaders {
 
   class Buffer: public BaseBuffer { 
     public: 
-      Buffer(float seconds, unsigned int samplerate);
+      Buffer(float seconds, unsigned int samplerate) : BaseBuffer(seconds, samplerate) {};
   };
 
   class BufferL: public BaseBuffer {
     public:
-      BufferL(float seconds, unsigned int samplerate);
+      BufferL(float seconds, unsigned int samplerate) : BaseBuffer(seconds, samplerate) {};
       float readSample(float readptr);
   };
 
   class BufferC: public BaseBuffer {
     public:
-      BufferC(float seconds, unsigned int samplerate);
+      BufferC(float seconds, unsigned int samplerate) : BaseBuffer(seconds, samplerate) {};
       float readSample(float readptr);
   };
 }

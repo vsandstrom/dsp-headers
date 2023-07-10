@@ -3,6 +3,7 @@
 using namespace dspheaders;
 BaseBuffer::BaseBuffer(float seconds, unsigned int samplerate) {
   bufferLength = samplerate * seconds;
+  // To simplify interpolation, table is made n+1 sample long
   buffer = new float[bufferLength+1];
 }
 

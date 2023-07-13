@@ -4,6 +4,7 @@
 
 using namespace dspheaders;
 float Interpolation::linear(float position, float* table) {
+  if (table==NULL) return 0.f;
   int a1 = position; // implicit cast
   int b1 = a1 + 1;
   float diff = position - a1;
@@ -13,6 +14,7 @@ float Interpolation::linear(float position, float* table) {
 }
 
 float Interpolation::cosine(float position, float *table) {
+  if (table==NULL) return 0.f;
   int a1 = position; // implicit cast
   int b1 = a1 + 1;
   float diff = position - a1;
@@ -22,6 +24,7 @@ float Interpolation::cosine(float position, float *table) {
 }
 
 float Interpolation::cubic(float position, float* table, int tableLength) {
+  if (table==NULL) return 0.f;
   // a - samples "behind", b - samples "ahead"
   int a1 = position; // implicit cast
   int b1 = a1 + 1;

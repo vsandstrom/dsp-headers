@@ -8,7 +8,8 @@ float DelayL::read(float delaytime) {
   float tapdelaytime = (delaytime * samplerate);
   for (int i = 1; i <= delay_taps; i++) {
     float tap = (float)writeptr - (tapdelaytime * i);
-    output += buffer.readSample(wrapf(tap, (float)buffer.bufferLength));
+    // Within bounds-checking is handled in the Buffer object
+    output += buffer.readSample(tap);
   }
   return output;
 }
@@ -18,7 +19,8 @@ float DelayC::read(float delaytime) {
   float tapdelaytime = (delaytime * samplerate);
   for (int i = 1; i <= delay_taps; i++) {
     float tap = (float)writeptr - (tapdelaytime * i);
-    output += buffer.readSample(wrapf(tap, (float)buffer.bufferLength));
+    // Within bounds-checking is handled in the Buffer object
+    output += buffer.readSample(tap);
   }
   return output;
 }

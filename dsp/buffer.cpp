@@ -1,4 +1,5 @@
 #include "./buffer.hpp"
+#include "dsp.h"
 
 using namespace dspheaders;
 BaseBuffer::BaseBuffer(float seconds, unsigned int samplerate) {
@@ -8,17 +9,17 @@ BaseBuffer::BaseBuffer(float seconds, unsigned int samplerate) {
 }
 
 float BaseBuffer::readSample(int readptr) {
-  return buffer[readptr];
+  return buffer[wrap(readptr, bufferLength)];
 }
 
 float BufferL::readSample(float readptr) {
-  return Interpolation::linear(readptr, buffer);
+  return Interpolation::linear(wrapf(readptr, bufferLength), buffer);
 }
 
 float BufferC::readSample(float readptr) {
-  return Interpolation::cubic(readptr, buffer, bufferLength);
+  return Interpolation::cubic(wrapf(readptr, bufferLength), buffer, bufferLength);
 }
 
 void BaseBuffer::writeSample(float sample, int ptr) {
-  buffer[ptr] = sample;
+  buffer[wrap(ptr, bufferLength)] = sample;
 }

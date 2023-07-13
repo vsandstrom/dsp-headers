@@ -52,7 +52,8 @@ namespace dspheaders {
       //
       // Uses linear interpolation to write signal to the delay buffer.
       void write(float sample) {
-        buffer.writeSample(sample, wrap(writeptr, buffer.bufferLength));
+        // Within bounds-checking is handled in the Buffer object
+        buffer.writeSample(sample, writeptr);
         writeptr++;
       }
 
@@ -66,7 +67,8 @@ namespace dspheaders {
         int tapdelaytime = (delaytime * samplerate);
         for (int i = 1; i <= delay_taps; i++) {
           int tap = writeptr - (tapdelaytime * i);
-          output += buffer.readSample(wrap(tap, buffer.bufferLength));
+          // Within bounds-checking is handled in the Buffer object
+          output += buffer.readSample(tap);
         }
         return output;
       }

@@ -7,7 +7,6 @@
 
 // TODO: 
 // [  ] - interpolation of the delaytime, change need to be smoother but is instant now.
-// [  ] - delaytime should be implemented with SIMD
 
 namespace dspheaders {
   template <typename T>
@@ -45,6 +44,10 @@ namespace dspheaders {
 
       void taps(float taps) {
         delay_taps = taps;
+      }
+
+      void delaytime(float delaytime) {
+        delay = delaytime;
       }
 
       // Writes the current sample,

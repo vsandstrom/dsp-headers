@@ -16,13 +16,14 @@ enum WAVESHAPE {
 };
 
 class WaveTable {
-  private:
+  protected:
     float position;
     //WAVESHAPE waveshape;
     unsigned int tableLength;
     float samplerate;
     float* table;
     INTERPOLATION interpolationType;
+    // INTERPOLATION interpolationType;
     
     // Creates one of several simple WaveTable shapes, chosen by the WAVESHAPE argument
     //
@@ -62,7 +63,8 @@ class WaveTable {
     // ----
     //
     // Uses the WaveTable member **interpolationType** 
-    float interpolate();
+    // float interpolate();
+  float interpolate();
 
     // Determines which sample to read next, taking into account the oscillators frequency and the
     // global samplerate, then updates the WaveTable-structs *position* member. 
@@ -101,6 +103,14 @@ class WaveTable {
     WaveTable(float* wavetable, unsigned int tableLength, unsigned int samplerate, INTERPOLATION interpolation);
 
     WaveTable(unsigned int sampleRate);
+};
+
+class WaveTableL : WaveTable {
+  float interpolate();
+};
+
+class WaveTableC : WaveTable {
+  float interpolate();
 };
 
 }

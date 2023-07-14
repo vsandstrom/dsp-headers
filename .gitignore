@@ -1,0 +1,8 @@
+test.o
+bkup*/
+build/
+.DS_Store
+t.cpp
+fm.cpp
+tests/
+

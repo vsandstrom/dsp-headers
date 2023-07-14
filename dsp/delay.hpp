@@ -114,6 +114,16 @@ namespace dspheaders {
       float read(float time);
   };
   
+  class DelayL2: public BaseDelay<BufferL2> {
+    public:
+      DelayL2(unsigned int samplerate, float delay, unsigned int delay_taps) :
+        BaseDelay<BufferL2>(samplerate, delay, delay_taps) {};
+      // Easiest way to init, uses ready-made, preinitialized memory
+      DelayL2(unsigned int samplerate, BufferL2 buffer, unsigned int delay_taps) : 
+        BaseDelay<BufferL2>(samplerate, buffer, delay_taps) {};
+      float read(float time);
+  };
+  
   class DelayC: public BaseDelay<BufferC> {
     public:
       DelayC(unsigned int samplerate, float delay, unsigned int delay_taps) :
@@ -123,7 +133,16 @@ namespace dspheaders {
         BaseDelay<BufferC>(samplerate, buffer, delay_taps) {};
       float read(float time);
   };
-
+  
+  class DelayH: public BaseDelay<BufferH> {
+    public:
+      DelayH(unsigned int samplerate, float delay, unsigned int delay_taps) :
+        BaseDelay<BufferH>(samplerate, delay, delay_taps) {};
+      // Easiest way to init, uses ready-made, preinitialized memory
+      DelayH(unsigned int samplerate, BufferH buffer, unsigned int delay_taps) : 
+        BaseDelay<BufferH>(samplerate, buffer, delay_taps) {};
+      float read(float time);
+  };
 
 } // namespace dspheaders
 

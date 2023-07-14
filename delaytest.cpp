@@ -27,7 +27,7 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-DelayL delay = DelayL(SAMPLE_RATE, 4.f, 2);
+DelayL2 delay = DelayL2(SAMPLE_RATE, 4.f, 2);
 
 static frame data;
 

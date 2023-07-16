@@ -1,12 +1,12 @@
 #include "dsp/dsp.h"
 #include "portaudio.h"
-#include <chrono>
+// #include <chrono>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
+// #include <cstdlib>
+// #include <cstring>
 #include <iostream>
-#include <cmath>
-#include <string>
+// #include <cmath>
+// #include <string>
 #include "dsp/wavetable.hpp"
 #include "dsp/vectoroscillator.hpp"
 #include "dsp/buffer.hpp"
@@ -27,7 +27,7 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-DelayL2 delay = DelayL2(SAMPLE_RATE, 4.f, 2);
+DelayC delay = DelayC(SAMPLE_RATE, 4.f, 2);
 
 static frame data;
 

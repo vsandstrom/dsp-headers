@@ -2,9 +2,6 @@
 #include "wavetable.hpp"
 #include "interpolation.hpp"
 
-#ifndef WAVETABLE_CPP
-#define WAVETABLE_CPP 
-
 using namespace dspheaders;
 WaveTable::WaveTable(
 	WAVESHAPE waveshape, unsigned int tableLength, unsigned int samplerate, INTERPOLATION interpolation)
@@ -126,6 +123,3 @@ float WaveTableL::interpolate() {
 float WaveTableC::interpolate() {
     return Interpolation::cubic(wrapf(position, tableLength), table, tableLength);
 }
-
-#endif
-

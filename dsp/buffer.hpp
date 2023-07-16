@@ -1,9 +1,9 @@
+#pragma once
+
 #include "dsp.h"
 #include "interpolation.hpp"
 #include <cmath>
 #include <iostream>
-#ifndef BUFFER_HPP
-#define BUFFER_HPP
 
 namespace dspheaders {
   // Self-wrapping and interpolating Buffer
@@ -14,6 +14,10 @@ namespace dspheaders {
       unsigned int bufferLength;
       BaseBuffer(float seconds, unsigned int samplerate) : bufferLength(seconds * samplerate) {
         // To simplify interpolation, table is made n+1 sample long
+        if (bufferLength < 4) {
+          // Allow for mini-buffers, but still not in conflict with interpolation
+          bufferLength = 4;
+        }
         buffer = new T[bufferLength+1];
       };
       // reading bck in buffer: n++ - delay
@@ -58,5 +62,3 @@ namespace dspheaders {
       float readSample(float readptr);
   };
 }
-
-#endif

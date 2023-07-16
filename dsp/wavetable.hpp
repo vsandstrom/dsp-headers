@@ -1,9 +1,7 @@
+#pragma once
+
 #include "interpolation.hpp"
 #include "dsp.h"
-
-#ifndef WAVETABLE_HPP
-#define WAVETABLE_HPP
-
 
 namespace dspheaders {
 
@@ -114,4 +112,3 @@ class WaveTableC : WaveTable {
 };
 
 }
-#endif

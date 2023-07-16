@@ -1,10 +1,4 @@
-#ifndef PI 
-  #define PI 
-  const float pi = 3.14159265358979323846f;
-#endif
-
-#ifndef INTERPOLATION_HPP
-#define INTERPOLATION_HPP
+#pragma once
 
 namespace dspheaders {
   enum INTERPOLATION {
@@ -28,4 +22,3 @@ namespace dspheaders {
 
   };
 }
-#endif

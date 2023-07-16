@@ -1,10 +1,9 @@
+#pragma once
+
 #include "interpolation.hpp"
 #include "wavetable.hpp"
 #include <vector>
 #include "dsp.h"
-
-#ifndef VECTOROSCILLATOR_HPP
-#define VECTOROSCILLATOR_HPP
 
 namespace dspheaders {
 
@@ -39,4 +38,3 @@ class VectorOscillator {
     // transfer - set the position of the readpointer in the transfer table
 };
 }
-#endif

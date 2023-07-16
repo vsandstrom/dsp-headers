@@ -1,12 +1,10 @@
-#include <cstdint>
+#pragma once
+
 #include "dsp.h"
 #include "buffer.hpp"
 
-#ifndef DELAY_HPP
-#define DELAY_HPP
-
 // TODO: 
-// [  ] - interpolation of the delaytime, change need to be smoother but is instant now.
+// [  ] - interpolation of the delaytime, change of time could be smoother? 
 
 namespace dspheaders {
   template <typename T>
@@ -145,5 +143,3 @@ namespace dspheaders {
   };
 
 } // namespace dspheaders
-
-#endif

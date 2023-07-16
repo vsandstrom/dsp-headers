@@ -1,10 +1,8 @@
 #pragma once
 
-#ifndef DSP_H
-#define DSP_H
-
 #include <cmath>
 namespace dspheaders {
+  const float pi = 3.14159265358979323846f;
 
   struct frame {
     float left;
@@ -79,5 +77,3 @@ namespace dspheaders {
     return x;
   }
 } /* namespace dspheaders */
-
-#endif

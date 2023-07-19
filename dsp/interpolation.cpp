@@ -51,23 +51,23 @@ float Interpolation::cosine(float position, float *table) {
    */
   
 // 4 point linear interpolation
-float Interpolation::bilinear(float position, float* table, int tableLength) {
-  int a1, a2, b1, b2 = 0;
-  float aw, bw, diff, ax, bx = 0.f; 
-  // a - samples "behind", b - samples "ahead"
-  a2 = position; // implicit cast
-  b1 = a2 + 1;
-  diff = position - a2;
-  bw = diff;
-  aw = 1 - diff;
-  // Since table is constructed with an n+1 size, we only need to
-  // make sure samples read 2 steps removed is within bounds.
-  a1 = wrap(a2-1, tableLength);
-  b2 = wrap(b1+1, tableLength);
-  ax = table[a1] * aw + table[a2] * bw;
-  bx = table[b1] * aw + table[b2] * bw;
-  return ax * aw + bx * bw;
-}
+// float Interpolation::bilinear(float position, float* table, int tableLength) {
+//   int a1, a2, b1, b2 = 0;
+//   float aw, bw, diff, ax, bx = 0.f; 
+//   // a - samples "behind", b - samples "ahead"
+//   a2 = position; // implicit cast
+//   b1 = a2 + 1;
+//   diff = position - a2;
+//   bw = diff;
+//   aw = 1 - diff;
+//   // Since table is constructed with an n+1 size, we only need to
+//   // make sure samples read 2 steps removed is within bounds.
+//   a1 = wrap(a2-1, tableLength);
+//   b2 = wrap(b1+1, tableLength);
+//   ax = table[a1] * aw + table[a2] * bw;
+//   bx = table[b1] * aw + table[b2] * bw;
+//   return ax * aw + bx * bw;
+// }
 
 // 4 point cubic interpolation
 float Interpolation::cubic(float position, float* table, int tableLength) {
@@ -77,6 +77,8 @@ float Interpolation::cubic(float position, float* table, int tableLength) {
   // positions
   a2 = position;
   b1 = a2+1;
+  // Since table is constructed with an n+1 size, we only need to
+  // make sure samples read 2 steps removed is within bounds.
   a1 = wrap(a2-1, tableLength);
   b2 = wrap(b1+1, tableLength);
 

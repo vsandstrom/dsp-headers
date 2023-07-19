@@ -33,3 +33,12 @@ $ clang++ -o build/fmtest \
     && ./build/fmtest -c <carrier freq> -m <modulator freq> -e <volume LFO freq>
 
 ```
+
+## Delay test:
+Runs a 30 sec demo of a delay patch using a buffer and cubic interpolation. (beware of feedback)
+```bash
+$ clang++ -o build/delaytest \
+    delaytest.cpp dsp/interpolation.cpp dsp/delay.cpp dsp/buffer.cpp \
+    -I/usr/local/include -L/usr/local/lib/ -lportaudio \
+    && ./build/delaytest
+```

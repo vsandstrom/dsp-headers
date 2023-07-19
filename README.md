@@ -40,5 +40,5 @@ Runs a 30 sec demo of a delay patch using a buffer and cubic interpolation. (bew
 $ clang++ -o build/delaytest \
     delaytest.cpp dsp/interpolation.cpp dsp/delay.cpp dsp/buffer.cpp \
     -I/usr/local/include -L/usr/local/lib/ -lportaudio \
-    && ./build/delaytest
+    && ./build/delaytest -t <delaytime> -f <feedback>
 ```

@@ -21,10 +21,8 @@ constexpr int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
-// CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-float FREQ =                300.0f;
-float FM_FREQ =             180.0f;
-float ENV_FREQ =              4.0f;
+static float delaytime = 0.0f;
+static float fb = 0.0f;
 
 using namespace dspheaders;
 DelayC delay = DelayC(SAMPLE_RATE, 4.f, 2);
@@ -51,8 +49,8 @@ static int paCallback(
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    *out++ = delay.play(*in++, 1.2f, 0.8f, 0.7f); 
-    *out++ = delay.play(*in++, 1.2f, 0.8f, 0.7f); 
+    *out++ = delay.play(*in++, delaytime, 0.8f, fb); 
+    *out++ = delay.play(*in++, delaytime, 0.8f, fb); 
 	}
 	return 0;
 }
@@ -62,6 +60,40 @@ int main(int argc, char** argv) {
   // we want to read.
   // This readpointer needs to be positive
   // transfer.frequency = 0.2f;
+    if ( argc > 2 && argc <= 5 ) {
+      argc--;
+      argv++;
+      while (argc > 0){
+        if ((*argv)[0] == '-') {
+          printf("%c\n", (*argv)[1]);
+          switch ((*argv)[1]){
+            case 't': {
+              argc--;
+              argv++;
+              // carrier.frequency = std::stof(*argv);
+              delaytime = std::stof(*argv);
+              break;
+            }
+            case 'f':{
+              argc--;
+              argv++;
+              fb = std::stof(*argv);
+              break;
+            }
+            default:{
+              argc--;
+              argv++;
+              break;
+            }
+          }
+        }
+        argc--;
+        argv++;
+      }
+      printf("running user input frequencies\n");
+    } else {
+      printf("running on default frequencies\n");
+    }
 
 	PaStream* stream;
 	PaError err;

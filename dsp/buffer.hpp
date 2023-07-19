@@ -44,11 +44,11 @@ namespace dspheaders {
   };
 
   // Self-wrapping and interpolating buffer for audio DSP
-  class BufferL2: public BaseBuffer<float> {
-    public:
-      BufferL2(float seconds, unsigned int samplerate) : BaseBuffer(seconds, samplerate) {};
-      float readSample(float readptr);
-  };
+  // class BufferL2: public BaseBuffer<float> {
+  //   public:
+  //     BufferL2(float seconds, unsigned int samplerate) : BaseBuffer(seconds, samplerate) {};
+  //     float readSample(float readptr);
+  // };
   
   class BufferC: public BaseBuffer<float> {
     public:

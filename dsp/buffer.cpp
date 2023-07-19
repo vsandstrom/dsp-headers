@@ -8,9 +8,9 @@ float BufferL::readSample(float readptr) {
 }
 
 // Faulty - does sometimes give strange values
-float BufferL2::readSample(float readptr) {
-  return Interpolation::bilinear(wrapf(readptr, bufferLength), buffer, bufferLength);
-}
+// float BufferL2::readSample(float readptr) {
+//   return Interpolation::bilinear(wrapf(readptr, bufferLength), buffer, bufferLength);
+// }
 
 float BufferC::readSample(float readptr) {
   return Interpolation::cubic(wrapf(readptr, bufferLength), buffer, bufferLength);

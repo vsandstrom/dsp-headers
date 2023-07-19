@@ -73,46 +73,49 @@ def wrap(pos: int, tableLen: int):
 
 l: list[float] = [
         0.0, 0.08, 0.2, 0.45, 0.7, 0.92, 1.0, 0.92, 0.7, 0.45, 0.2, 0.08, 0.0, -0.08 -0.2, -0.45,
-        -0.7, -0.92, -1.0, -0.92, -0.7, -0.45, -0.2, -0.08
+        -0.7, -0.92, -1.0, -0.92, -0.7, -0.45, -0.2, -0.08, 0.0
         ]
 
+
+inc = 1/8
+tri: list[float] = [0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0, 0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0, -0.125, -0.25, -0.375, -0.5, -0.625, -0.75, -0.875, -1.0, -0.875, -0.75, -0.625, -0.5, -0.375, -0.25, -0.125, 0.0]
 
 ip: dict[str, list[float]] = dict()
 
 ip["floored"] = list()
-pos = 1.05
-while pos < len(l):
-    ip["floored"].append(l[math.floor(pos)])
+pos = 0.0
+while pos < len(tri):
+    ip["floored"].append(tri[math.floor(pos)])
     pos += 1.05
 
 ip["linear"] = list()
-pos = 1.05
-while pos < len(l):
-    ip["linear"].append(linear(pos, l))
+pos = 0.0
+while pos < len(tri):
+    ip["linear"].append(linear(pos, tri))
     pos += 1.05
 
 ip["cubic"] = list()
-pos = 1.05
-while pos < len(l):
-    ip["cubic"].append(cubic(pos, l))
+pos = 0.0
+while pos < len(tri):
+    ip["cubic"].append(cubic(pos, tri))
     pos += 1.05
 
 ip["hermetic"] = list()
-pos = 1.05
-while pos < len(l):
-    ip["hermetic"].append(hermetic(pos, l))
+pos = 0.0
+while pos < len(tri):
+    ip["hermetic"].append(hermetic(pos, tri))
     pos += 1.05
 
 ip["bilinear"] = list()
-pos = 1.05
-while pos < len(l):
-    ip["bilinear"].append(bilinear(pos, l))
+pos = 0.0
+while pos < len(tri):
+    ip["bilinear"].append(bilinear(pos, tri))
     pos += 1.05
 
 ip["cosine"] = list()
-pos = 1.05
-while pos < len(l):
-    ip["cosine"].append(cosine(pos, l))
+pos = 0.0
+while pos < len(tri):
+    ip["cosine"].append(cosine(pos, tri))
     pos += 1.05
 
 df = pd.DataFrame(ip)

@@ -14,7 +14,7 @@ namespace dspheaders {
 
       static float cosine(float position, float* table);
 
-      static float bilinear(float position, float* table, int tableLength);
+      // static float bilinear(float position, float* table, int tableLength);
 
       static float cubic(float position, float* table, int tableLength);
 

@@ -10,7 +10,7 @@ $ ./<program name>  [-c <carrier frequency>] [-m <modulator frequency>]
 ```
 
 The builds below expects the portaudio headers be located in "/usr/local/".
-Change the directory to maych your configuration*
+Change the directory to match your configuration*
 
 ## Vector Oscillator test:
 vectest.cpp runs a demo of a VectorOscillator class, scrolling through all waveform types defined in the

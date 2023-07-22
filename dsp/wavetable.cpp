@@ -1,4 +1,5 @@
 #include <cmath>
+#include "dsp.h"
 #include "wavetable.hpp"
 #include "interpolation.hpp"
 
@@ -112,14 +113,14 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
 }
 
 float WaveTable::interpolate() {
-  return table[(int)position];
+  return Interpolation::linear(wrapf(position, tableLength), table);
 }
 
-float WaveTableL::interpolate() {
-    return Interpolation::linear(wrapf(position, tableLength), table);
-}
-
-
-float WaveTableC::interpolate() {
-    return Interpolation::cubic(wrapf(position, tableLength), table, tableLength);
-}
+// float WaveTableL::interpolate() {
+//     return Interpolation::linear(wrapf(position, tableLength), table);
+// }
+//
+//
+// float WaveTableC::interpolate() {
+//     return Interpolation::cubic(wrapf(position, tableLength), table, tableLength);
+// }

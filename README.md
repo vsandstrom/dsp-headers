@@ -12,33 +12,28 @@ $ ./<program name>  [-c <carrier frequency>] [-m <modulator frequency>]
 The builds below expects the portaudio headers be located in "/usr/local/".
 Change the directory to match your configuration*
 
+Run:
+```bash
+# run make to compile examples - fmtest, vectest & delaytest
+$ make
+
+```
+
 ## Vector Oscillator test:
 vectest.cpp runs a demo of a VectorOscillator class, scrolling through all waveform types defined in the
 WaveTable class. 
 ```bash
-$ clang++ -o build/fmtest \
-    fmtest.cpp dsp/interpolation.cpp dsp/vectoroscillator.cpp dsp/wavetable.cpp \
-    -I/usr/local/include -L/usr/local/lib/ -lportaudio \
-    && ./build/vectest -v <vector oscillator freq> -e <volume LFO freq>
-
-
+$ ./build/vectest -v <vector oscillator freq> -e <volume LFO freq>
 ```
 
 ## FM / AM test:
 fmtest.cpp runs a demo of an FM / AM synth patch, using the WaveTable class
 ```bash
-$ clang++ -o build/fmtest \
-    fmtest.cpp dsp/interpolation.cpp dsp/vectoroscillator.cpp dsp/wavetable.cpp \
-    -I/usr/local/include -L/usr/local/lib/ -lportaudio \
-    && ./build/fmtest -c <carrier freq> -m <modulator freq> -e <volume LFO freq>
-
+$ ./build/fmtest -c <carrier freq> -m <modulator freq> -e <volume LFO freq>
 ```
 
 ## Delay test:
 Runs a 30 sec demo of a delay patch using a buffer and cubic interpolation. (beware of feedback)
 ```bash
-$ clang++ -o build/delaytest \
-    delaytest.cpp dsp/interpolation.cpp dsp/delay.cpp dsp/buffer.cpp \
-    -I/usr/local/include -L/usr/local/lib/ -lportaudio \
-    && ./build/delaytest -t <delaytime> -f <feedback>
+$ ./build/delaytest -t <delaytime> -f <feedback>
 ```

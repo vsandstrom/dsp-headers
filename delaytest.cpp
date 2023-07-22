@@ -1,5 +1,5 @@
 #include "dsp/dsp.h"
-#include "portaudio.h"
+#include "portaudio/include/portaudio.h"
 // #include <chrono>
 #include <cstdio>
 // #include <cstdlib>
@@ -90,9 +90,9 @@ int main(int argc, char** argv) {
         argc--;
         argv++;
       }
-      printf("running user input frequencies\n");
+      printf("running user input settings\n");
     } else {
-      printf("running on default frequencies\n");
+      printf("running on default settings\n");
     }
 
 	PaStream* stream;

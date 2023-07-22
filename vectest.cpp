@@ -1,5 +1,5 @@
 #include "dsp/dsp.h"
-#include "portaudio.h"
+#include "portaudio/include/portaudio.h"
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -23,7 +23,7 @@ const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
 const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-constexpr int TABLE_LEN =      512;
+const int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
@@ -44,7 +44,7 @@ WaveTable saw = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, CUBIC);
 WaveTable transfer = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, CUBIC);
 WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
 std::vector<WaveTable> vecTables = {sine, triangle, square, saw};
-VectorOscillator vec = VectorOscillator(vecTables, SAMPLE_RATE, CUBIC);
+VectorOscillator vec = VectorOscillator(vecTables, CUBIC);
 
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,	

@@ -14,7 +14,7 @@ enum WAVESHAPE {
 };
 
 class WaveTable {
-  protected:
+  private:
     float position;
     //WAVESHAPE waveshape;
     unsigned int tableLength;
@@ -103,12 +103,12 @@ class WaveTable {
     WaveTable(unsigned int sampleRate);
 };
 
-class WaveTableL : WaveTable {
-  float interpolate();
-};
+// class WaveTableL : WaveTable {
+//   float interpolate();
+// };
 
-class WaveTableC : WaveTable {
-  float interpolate();
-};
+// class WaveTableC : WaveTable {
+//   float interpolate();
+// };
 
 }

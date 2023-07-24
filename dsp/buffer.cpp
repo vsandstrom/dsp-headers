@@ -9,7 +9,6 @@ float BufferL::readSample(float readptr) {
   );
 }
 
-
 float BufferC::readSample(float readptr) {
   return Interpolation::cubic(
     wrapf(readptr, bufferlength), buffer, bufferlength

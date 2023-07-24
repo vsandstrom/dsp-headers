@@ -48,8 +48,8 @@ namespace dspheaders {
       // Uses linear interpolation to write signal to the time buffer.
       void write(float sample) {
         // Within bounds-checking is handled in the Buffer object
-        buffer.writeSample(sample, writeptr);
-        writeptr++;
+        buffer.writeSample(sample, writeptr++);
+        writeptr = wrap(writeptr, buffer.bufferlength);
       }
 
       // Reads from time buffer.

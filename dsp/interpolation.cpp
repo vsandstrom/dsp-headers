@@ -98,7 +98,7 @@ float Interpolation::cubic(float position, float* table, int tableLength) {
   // float c1 = x0 - x1 - c0;
   // float c2 = x2 - x0;
   // float c3 = x1;
-  return (c0 * pow(diff, 3)) + (c1 * (diff*diff)) + (c2 * diff) + table[a2]; // + c3;
+  return (c0 * pow(diff, 3)) + (c1 * (diff*diff)) + (c2 * diff) + table[a2];
 }
 
 // 4 point hermetic interpolation

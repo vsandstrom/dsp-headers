@@ -5,22 +5,29 @@
 
 using namespace dspheaders;
 WaveTable::WaveTable(
-	WAVESHAPE waveshape, unsigned int tableLength, unsigned int samplerate, INTERPOLATION interpolation)
-  : tableLength(tableLength), samplerate(samplerate), interpolationType(interpolation)
-{
+	WAVESHAPE waveshape, 
+  unsigned tablelength,
+  unsigned samplerate, 
+  INTERPOLATION interpolation)
+  : tablelength(tablelength),
+    samplerate(samplerate), 
+    interpolation(interpolation) {
   // Requests a +1 memory block to do one less comparison in linear interpolation
-  table = new float[tableLength+1];
+  table = new float[tablelength+1];
   position = 0;
   populateTable(waveshape);
-
 };
 
 WaveTable::WaveTable(unsigned int samplerate): samplerate((float) samplerate){}
 
 WaveTable::WaveTable(
-	float* wavetable, unsigned int tableLength, unsigned int samplerate, INTERPOLATION interpolation)
-  : tableLength(tableLength), samplerate(samplerate), interpolationType(interpolation) 
-{
+	float* wavetable,
+  unsigned tablelength,
+  unsigned samplerate,
+  INTERPOLATION interpolation)
+  : tablelength(tablelength), 
+    samplerate(samplerate), 
+    interpolation(interpolation) {
   table = wavetable;
   position = 0;
 };
@@ -39,26 +46,26 @@ float WaveTable::play(float phase) {
 }
   
 void WaveTable::normalize() {
-  dspheaders::range(table, tableLength, -1.f, 1.f, 0.f, 1.f);
+  dspheaders::range(table, tablelength, -1.f, 1.f, 0.f, 1.f);
 }
 
 void WaveTable::movePointer(float phase) {
 	float normalizedPhase = (phase + 1) * 0.5;
-  position += tableLength / (samplerate / (frequency * normalizedPhase));
-  position = wrapf(position, tableLength);
+  position += tablelength / (samplerate / (frequency * normalizedPhase));
+  position = wrapf(position, tablelength);
 }
 
 void WaveTable::movePointer() {
-  position += tableLength / (samplerate / frequency);
-  position = wrapf(position, tableLength);
+  position += tablelength / (samplerate / frequency);
+  position = wrapf(position, tablelength);
 }
 
 void WaveTable::populateTable(WAVESHAPE waveshape) {
-  float inc = 0, angle = 0, numSamples = (float) tableLength;
+  float inc = 0, angle = 0, numSamples = (float) tablelength;
   switch (waveshape) {
     case (SINE) : {
       inc = pi * 2.0f  / numSamples;
-      for (int i = 0; i < tableLength; ++i) {
+      for (int i = 0; i < tablelength; ++i) {
         table[i] = sin(angle);
         angle += inc;
       }
@@ -67,7 +74,7 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
 
     case (SAW) : {
       inc = 2.0 / numSamples;
-      for (int i = 0; i < tableLength; ++i) {
+      for (int i = 0; i < tablelength; ++i) {
         table[i] =  angle - 1.0;
         angle += inc;
       }
@@ -77,7 +84,7 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
     case (ENV) : {
       // A hanning window style envelope (squared sine)
       inc = pi / numSamples;
-      for (int i = 0; i < tableLength; ++i) {
+      for (int i = 0; i < tablelength; ++i) {
         table[i] = 1.0 - cos(angle) * cos(angle); 
         angle += inc;
       }
@@ -86,7 +93,7 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
 
     case (TRIANGLE) : {
       inc = 2.0 / (numSamples / 2);
-      for (int i = 0; i < tableLength; ++i) {
+      for (int i = 0; i < tablelength; ++i) {
         if ( angle > 1.0 || angle < -1.0) {
           inc *= -1.0;
         }
@@ -98,9 +105,9 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
 
     case (SQUARE) : {
       float value = 1.0f;
-      for (int i = 0; i < tableLength; ++i) {
+      for (int i = 0; i < tablelength; ++i) {
         table[i] = value;
-        if(i == tableLength/2) {
+        if(i == tablelength/2) {
           value = -1.0f;
         }
       }
@@ -113,14 +120,14 @@ void WaveTable::populateTable(WAVESHAPE waveshape) {
 }
 
 float WaveTable::interpolate() {
-  return Interpolation::linear(wrapf(position, tableLength), table);
+  return Interpolation::linear(wrapf(position, tablelength), table);
 }
 
 // float WaveTableL::interpolate() {
-//     return Interpolation::linear(wrapf(position, tableLength), table);
+//     return Interpolation::linear(wrapf(position, tablelength), table);
 // }
 //
 //
 // float WaveTableC::interpolate() {
-//     return Interpolation::cubic(wrapf(position, tableLength), table, tableLength);
+//     return Interpolation::cubic(wrapf(position, tablelength), table, tablelength);
 // }

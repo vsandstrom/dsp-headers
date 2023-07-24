@@ -12,7 +12,7 @@ class VectorOscillator {
     std::vector<WaveTable> tables;
     INTERPOLATION transferInterpolation;
     uint32_t tableWidth;
-    // a vertical crossection containing all current samples from all tables in *tables*
+    // crossection is the current sample across tables
     float* crossection;
     float weight;
 
@@ -21,7 +21,9 @@ class VectorOscillator {
 
     VectorOscillator();
     // Feed the VectorOscillator with a vector of 'n' WaveTables
-    VectorOscillator(std::vector<WaveTable> tables, INTERPOLATION transferInterpolation);
+    VectorOscillator(
+      std::vector<WaveTable> tables, INTERPOLATION transferInterpolation
+    );
 
 
     float play(float transfer);

@@ -47,7 +47,10 @@ namespace dspheaders {
   }
 
   // Mutate values in array with dspheaders::map, for each value
-  inline void range(float* buffer, unsigned int bufferLength, float inmin, float inmax, float outmin, float outmax) {
+  inline void range(
+      float* buffer, unsigned int bufferLength,
+      float inmin, float inmax,
+      float outmin, float outmax) {
     // Convert values in input buffer within input range to new range
     for (int i = 0; i < bufferLength; i++) {
       buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);

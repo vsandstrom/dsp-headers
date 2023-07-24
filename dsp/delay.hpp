@@ -17,7 +17,7 @@ namespace dspheaders {
       int writeptr = 0;
 
       inline void initBuffer() {
-        for (int i = 0; i < buffer.bufferLength; ++i) {
+        for (int i = 0; i < buffer.bufferlength; ++i) {
           buffer.buffer[i] = 0.0f;
         }
       }
@@ -54,8 +54,8 @@ namespace dspheaders {
       // Uses linear interpolation to write signal to the time buffer.
       void write(float sample) {
         // Within bounds-checking is handled in the Buffer object
-        buffer.writeSample(sample, writeptr);
-        writeptr++;
+        buffer.writeSample(sample, writeptr++);
+        writeptr = wrap(writeptr, buffer.bufferlength);
       }
 
       // Reads from time buffer.

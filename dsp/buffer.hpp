@@ -16,8 +16,8 @@ namespace dspheaders {
   class BaseBuffer {
     protected:
       T* buffer;
-      unsigned int bufferlength;
     public: 
+      unsigned int bufferlength;
       BaseBuffer(float seconds, unsigned int samplerate) 
         : bufferlength(seconds * samplerate) {
         // To simplify interpolation, table is made n+1 sample long

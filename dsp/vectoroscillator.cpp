@@ -7,12 +7,9 @@ using namespace dspheaders;
 VectorOscillator::VectorOscillator(){}
 
 VectorOscillator::VectorOscillator(
-                                  std::vector<WaveTable> tables,
-                                  INTERPOLATION transferInterpolation
-                                  ): 
-                                tables(tables),
-                                transferInterpolation(transferInterpolation)
-{
+    std::vector<WaveTable> tables,
+    INTERPOLATION transferInterpolation)
+  : tables(tables), transferInterpolation(transferInterpolation) {
   tableWidth = tables.size() -1;
   weight = 0.0f;
   crossection = new float[tables.size()]();

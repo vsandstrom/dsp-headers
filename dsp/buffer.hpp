@@ -11,22 +11,22 @@ namespace dspheaders {
   class BaseBuffer {
     public: 
       T* buffer;
-      unsigned int bufferLength;
-      BaseBuffer(float seconds, unsigned int samplerate) : bufferLength(seconds * samplerate) {
+      unsigned int bufferlength;
+      BaseBuffer(float seconds, unsigned int samplerate) : bufferlength(seconds * samplerate) {
         // To simplify interpolation, table is made n+1 sample long
-        if (bufferLength < 4) {
+        if (bufferlength < 4) {
           // Allow for mini-buffers, but still not in conflict with interpolation
-          bufferLength = 4;
+          bufferlength = 4;
         }
-        buffer = new T[bufferLength+1];
+        buffer = new T[bufferlength+1];
       };
       // reading bck in buffer: n++ - delay
       float readSample(int readptr) {
-        return buffer[wrap(readptr, bufferLength)];
+        return buffer[wrap(readptr, bufferlength)];
       };
       // Writing fwd in buffer: n++
       void writeSample(T sample, int writeptr) {
-        buffer[wrap(writeptr, bufferLength)] = sample;
+        buffer[wrap(writeptr, bufferlength)] = sample;
       };
   };
 

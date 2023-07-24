@@ -13,6 +13,12 @@
  * */
 
 namespace dspheaders {
+  enum GATE {
+    on = 1, 
+    off = 0,
+  };
+
+
   template<typename T>
   class BaseEnvelope {
     protected:
@@ -22,6 +28,7 @@ namespace dspheaders {
       unsigned pointlength;
       unsigned timeslength;
       unsigned samplerate;
+      float readptr = 0.f;
       void populateEnvelope() {
         float* pts = breakpoints;
         T* b = buffer;
@@ -61,6 +68,17 @@ namespace dspheaders {
         time += 0.5f;
         *buffer = T(time, samplerate);
       }
+
+      // Returns current value from table
+      float play() {
+      };
+
+      // Resets envelope to start and returns the first value from table
+      float play(GATE trigger) {
+        if (trigger) {
+          readptr = 0.f;
+        }
+      };
   };
 
   class Envelope : public BaseEnvelope<Buffer> {

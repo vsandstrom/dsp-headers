@@ -1,4 +1,5 @@
 
+#include "dsp/interpolation.hpp"
 #include "portaudio/include/portaudio.h"
 #include <chrono>
 #include <cstdio>
@@ -8,8 +9,9 @@
 #include <cmath>
 #include <string>
 // #include "sound.hpp"
-#include "dsp/wavetable.hpp"
-#include "dsp/vectoroscillator.hpp"
+// #include "dsp/wavetable.hpp"
+#include "dsp/wave.hpp"
+// #include "dsp/vectoroscillator.hpp"
 #include <vector>
 
 
@@ -29,10 +31,10 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-WaveTable carrier = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable modulator = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, CUBIC);
+Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
 
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
+Wavetable envelope = Wavetable(ENV, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
 
 static frame data;
 

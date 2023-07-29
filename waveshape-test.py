@@ -4,6 +4,7 @@ import pandas as pd
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 import sys
+import random
 
 shapes: set[str] = set()
 shapes.update(
@@ -61,23 +62,31 @@ def hanning(table: list[float], length: int) -> list[float]:
         angle = angle + inc
     return table
 
-len = 16
+def noise(table: list[float], length: int) -> list[float]:
+    for _ in range(length):
+        table.append(random.random())
+    return table
+
+length = 16
+if len(sys.argv) > 2:
+    length = int(sys.argv[2])
+
 ws: dict[str, list[float]] = dict()
 
 t1 = list()
-ws['sine'] = sine(t1, len)
+ws['sine'] = sine(t1, length)
 t2 = list()
-ws['square'] = square(t2, len)
+ws['square'] = square(t2, length)
 t3 = list()
-ws['triangle'] = triangle(t3, len)
+ws['triangle'] = triangle(t3, length)
 t4 = list()
-ws['saw'] = saw(t4, len)
+ws['saw'] = saw(t4, length)
 t5 = list()
-ws['hanning'] = hanning(t5, len)
+ws['hanning'] = hanning(t5, length)
+t6 = list()
+ws['noise'] = noise(t6, length)
 
 df = pd.DataFrame(ws)
-print(sys.argv[1])
-print(ws[sys.argv[1]])
 
 if sys.argv[1] in ws:
 # print(tabulate(df, headers = 'keys', tablefmt= 'github'))
@@ -86,9 +95,9 @@ if sys.argv[1] in ws:
     plt.rcParams["figure.figsize"]=[7.50, 3.50]
     plt.rcParams["figure.autolayout"] = True
 
-    plt.scatter(range(len), ws[sys.argv[1]])
-    plt.plot(range(len), ws[sys.argv[1]])
+    plt.scatter(range(length), ws[sys.argv[1]])
+    plt.plot(range(length), ws[sys.argv[1]])
     plt.title(sys.argv[1])
     plt.show()
 else:
-    print("failed")
+    print("waveshape unrecognized")

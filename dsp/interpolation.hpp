@@ -8,17 +8,12 @@ namespace dspheaders {
     HERMITE
   };
 
-  class Interpolation {
-    public:
-      static float linear(float position, float* table);
+  namespace interpolation {
+    float none(float position, float* table, unsigned tablelength);
+    float linear(float position, float* table, unsigned tablelength);
+    float cosine(float position, float* table, unsigned tablelength);
+    float cubic(float position, float* table, unsigned tableLength);
+    float hermetic(float position, float* table, unsigned tableLength);
 
-      static float cosine(float position, float* table);
-
-      // static float bilinear(float position, float* table, int tableLength);
-
-      static float cubic(float position, float* table, int tableLength);
-
-      static float hermetic(float position, float* table, int tableLength);
-
-  };
+  }
 }

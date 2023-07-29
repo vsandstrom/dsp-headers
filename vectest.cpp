@@ -8,7 +8,8 @@
 #include <cmath>
 #include <string>
 // #include "sound.hpp"
-#include "dsp/wavetable.hpp"
+// #include "dsp/wavetable.hpp"
+#include "dsp/wave.hpp"
 #include "dsp/vectoroscillator.hpp"
 #include <vector>
 
@@ -37,14 +38,14 @@ static frame data;
 using namespace dspheaders;
 
 // SETUP:
-WaveTable sine = WaveTable(SINE, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable triangle = WaveTable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable square = WaveTable(SQUARE, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable saw = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable transfer = WaveTable(SAW, TABLE_LEN, SAMPLE_RATE, CUBIC);
-WaveTable envelope = WaveTable(ENV, TABLE_LEN, SAMPLE_RATE, CUBIC);
-std::vector<WaveTable> vecTables = {sine, triangle, square, saw};
-VectorOscillator vec = VectorOscillator(vecTables, CUBIC);
+Wavetable sine = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable triangle = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable square = Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable saw = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable transfer = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable envelope = Wavetable(ENV, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+std::vector<Wavetable> vecTables = {sine, triangle, square, saw};
+VectorOscillator vec = VectorOscillator(vecTables, interpolation::cubic);
 
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,	

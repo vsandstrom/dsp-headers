@@ -10,16 +10,15 @@ enum WAVESHAPE {
   TRIANGLE,
   SAW,
   SQUARE,
-  ENV
+  ENV,
+  HANNING
 };
 
 class WaveTable {
   private:
     float position;
     //WAVESHAPE waveshape;
-    unsigned int tablelength;
     float samplerate;
-    float* table;
     INTERPOLATION interpolation;
     
     // Creates one of several simple WaveTable shapes, 
@@ -35,6 +34,8 @@ class WaveTable {
 
   public:
     float frequency;
+    float* table;
+    unsigned int tablelength;
 
     void normalize();
 

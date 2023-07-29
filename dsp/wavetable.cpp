@@ -1,6 +1,7 @@
 #include <cmath>
 #include "dsp.h"
-#include "wavetable.hpp"
+#include "waveshape.h"
+// #include "wavetable.hpp"
 #include "interpolation.hpp"
 
 using namespace dspheaders;
@@ -60,67 +61,115 @@ void WaveTable::movePointer() {
   position = wrapf(position, tablelength);
 }
 
+// void WaveTable::populateTable(WAVESHAPE waveshape) {
+//   switch (waveshape) {
+//     case (SINE):
+//       sine(table, tablelength); break;
+//     case (TRIANGLE):
+//       triangle(table, tablelength); break;
+//     case (SQUARE):
+//       square(table, tablelength); break;
+//     case (SAW):
+//       saw(table, tablelength); break;
+//     case (HANNING):
+//       hanning(table, tablelength); break;
+//     case (ENV):
+//       hanning(table, tablelength); break;
+//     default:
+//       break;
+//   }
+// }
+
 void WaveTable::populateTable(WAVESHAPE waveshape) {
-  float inc = 0, angle = 0, numSamples = (float) tablelength;
+  float inc = 0.f, angle = 0.f, numSamples = (float) tablelength;
   switch (waveshape) {
-    case (SINE) : {
-      inc = pi * 2.0f  / numSamples;
-      for (int i = 0; i < tablelength; ++i) {
-        table[i] = sin(angle);
-        angle += inc;
+    case (SINE):
+      {
+        inc = pi * 2.f  / numSamples;
+        for (int i = 0; i < tablelength; ++i) {
+          table[i] = sin(angle);
+          angle += inc;
+        }
+        break;
       }
-      break;
-    }
 
-    case (SAW) : {
-      inc = 2.0 / numSamples;
-      for (int i = 0; i < tablelength; ++i) {
-        table[i] =  angle - 1.0;
-        angle += inc;
+    case (SAW):
+      {
+        inc = 2.f / numSamples;
+        angle = -1.f;
+        for (int i = 0; i < tablelength; ++i) {
+          table[i] =  angle;
+          angle += inc;
+        }
+        break;
       }
-      break;
-    }
 
-    case (ENV) : {
+
+    case (TRIANGLE):
+      {
+        inc = 2.0 / (numSamples / 2);
+        for (int i = 0; i < tablelength; ++i) {
+          if ( angle > 1.f || angle < -1.f) {
+            inc *= -1.f;
+          }
+          table[i] = angle;
+          angle += inc;
+        }
+        break;
+      }
+
+    case (SQUARE):
+      {
+        float value = 1.0f;
+        for (int i = 0; i < tablelength; ++i) {
+          table[i] = value;
+          if(i == tablelength/2) {
+            value = -1.0f;
+          }
+        }
+        break;
+      }
+    
+    case (ENV):
       // A hanning window style envelope (squared sine)
-      inc = pi / numSamples;
-      for (int i = 0; i < tablelength; ++i) {
-        table[i] = 1.0 - cos(angle) * cos(angle); 
-        angle += inc;
+      {
+        inc = pi / numSamples;
+        for (int i = 0; i < tablelength; ++i) {
+          table[i] = 1.f - cos(angle) * cos(angle); 
+          angle += inc;
+        }
+        break;
       }
-      break;
-    }
-
-    case (TRIANGLE) : {
-      inc = 2.0 / (numSamples / 2);
-      for (int i = 0; i < tablelength; ++i) {
-        if ( angle > 1.0 || angle < -1.0) {
-          inc *= -1.0;
+    
+    case (HANNING):
+      // A hanning window style envelope (squared sine)
+      {
+        inc = pi / numSamples;
+        for (int i = 0; i < tablelength; ++i) {
+          table[i] = 1.f - cos(angle) * cos(angle); 
+          angle += inc;
         }
-        table[i] = angle;
-        angle += inc;
-        }
-      break;
-    }
-
-    case (SQUARE) : {
-      float value = 1.0f;
-      for (int i = 0; i < tablelength; ++i) {
-        table[i] = value;
-        if(i == tablelength/2) {
-          value = -1.0f;
-        }
+        break;
       }
-      break;
-    }
-
-    default:
-      break;
   }
 }
 
+
 float WaveTable::interpolate() {
-  return Interpolation::linear(wrapf(position, tablelength), table);
+  switch (interpolation) {
+    case (LINEAR):
+      return interpolation::linear(wrapf(position, tablelength), table, tablelength);
+
+    case (CUBIC):
+      return interpolation::cubic(wrapf(position, tablelength), table, tablelength);
+
+    case (HERMITE):
+      return interpolation::hermetic(wrapf(position, tablelength), table, tablelength);
+
+    default:
+      return table[(unsigned)position];
+  }
+  return 0.f;
 }
 
 // float WaveTableL::interpolate() {

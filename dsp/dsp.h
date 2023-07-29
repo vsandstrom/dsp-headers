@@ -79,4 +79,8 @@ namespace dspheaders {
     while (x >= lengthf) x -= lengthf;
     return x;
   }
+
+  inline void initBuffer(float* buffer, unsigned bufferlength) {
+    for (unsigned i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
+  }
 } /* namespace dspheaders */

@@ -5,3 +5,6 @@ build/
 t.cpp
 fm.cpp
 tests/
+vmakefile
+fmakefile
+dmakefile

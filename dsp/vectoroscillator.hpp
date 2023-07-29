@@ -1,7 +1,8 @@
 #pragma once
 
 #include "interpolation.hpp"
-#include "wavetable.hpp"
+// #include "wavetable.hpp"
+#include "wave.hpp"
 #include <vector>
 #include "dsp.h"
 
@@ -9,9 +10,9 @@ namespace dspheaders {
 
 class VectorOscillator {
   private:
-    std::vector<WaveTable> tables;
-    INTERPOLATION transferInterpolation;
-    uint32_t tableWidth;
+    std::vector<Wavetable> tables;
+    float (*interpolate)(float position, float* table, unsigned tablelength) = nullptr;
+    unsigned tablelength;
     // crossection is the current sample across tables
     float* crossection;
     float weight;
@@ -22,7 +23,8 @@ class VectorOscillator {
     VectorOscillator();
     // Feed the VectorOscillator with a vector of 'n' WaveTables
     VectorOscillator(
-      std::vector<WaveTable> tables, INTERPOLATION transferInterpolation
+      std::vector<Wavetable> tables, 
+      float (*interpolate)(float pos, float* buffer, unsigned length)
     );
 
 

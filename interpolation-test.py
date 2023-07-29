@@ -4,6 +4,56 @@ from tabulate import tabulate
 import matplotlib.pyplot as plt
 import sys
 
+####
+def sine(table: list[float], length: int):
+    angle = 0.0
+    inc = (math.pi*2) / length
+    for i in range(length):
+        table[i] = math.sin(angle)
+        angle = angle + inc
+    return table
+
+####
+def triangle(table: list[float], length: int):
+    angle = 0.0
+    inc = 4.0 / length 
+    for i in range(length):
+        if angle > 1.0 or angle < -1.0:
+            inc = inc * -1.0
+        table[i] = angle
+        angle = angle + inc
+    return table
+
+####
+def square(table: list[float], length: int):
+    val = 1.0
+    for i in range(length):
+        if i == length/2:
+            val = -1.0
+        table[i] = val 
+    return table
+
+####
+def saw(table: list[float], length: int):
+    angle = -1.0
+    inc = 2.0 / length
+    for i in range(length):
+        table[i] = angle
+        angle = angle + inc
+    return table
+
+####
+def hanning(table: list[float], length: int):
+    angle = 0.0
+    inc = math.pi / length
+    for i in range(length):
+        table[i] = -1.0 - pow(math.cos(angle), 2)
+        angle = angle + inc
+    return table
+
+################################################################################
+################################################################################
+
 def cubic(pos: float, table: list[float]):
     x1: int = math.floor(pos)
     x0: int = wrap(x1-1, len(table))

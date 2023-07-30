@@ -8,7 +8,7 @@
 // #include <cmath>
 // #include <string>
 #include "dsp/wavetable.hpp"
-#include "dsp/vectoroscillator.hpp"
+// #include "dsp/vectoroscillator.hpp"
 #include "dsp/buffer.hpp"
 #include "dsp/delay.hpp"
 
@@ -25,7 +25,7 @@ static float delaytime = 0.0f;
 static float fb = 0.0f;
 
 using namespace dspheaders;
-DelayC delay = DelayC(SAMPLE_RATE, 4.f, 2);
+Delay delay = Delay(SAMPLE_RATE, 4.f, 2, interpolation::cubic);
 
 static frame data;
 

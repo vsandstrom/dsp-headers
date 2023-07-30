@@ -1,61 +1,36 @@
 CC = clang++
-CFLAGS = -std=c++14 -g -O1
-FINAL = compile_fm compile_delay
-
 INCLUDES = -I/usr/local/include -L/usr/local/lib/ -lportaudio 
 
+SRC_DIR := dsp
+BUILD_DIR := build
 
-postclean: $(FINAL)
-	cd build/ && rm -f *.o
+SRCS := $(wildcard $(SRC_DIR)/*.cpp)
+OBJS := $(patsubst $(SRC_DIR)/*.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 
-compile_fm: fmtest.o wavetable.o interpolation.o vectoroscillator.o
-	$(CC) $(CFLAGS) \
-		build/fmtest.o build/wavetable.o build/interpolation.o \
-		$(INCLUDES) \
-		-o build/fmtest
+TARGETS = $(BUILD_DIR)/vectest $(BUILD_DIR)/fmtest $(BUILD_DIR)/delaytest
 
-compile_vec: vectest.o wavetable.o interpolation.o vectoroscillator.o
-	CC $(CFLAGS) \
-		build/vectest.o build/wavetable.o build/interpolation.o build/vectoroscillator.o \
-		-I/usr/local/include -L/usr/local/lib/ -lportaudio \
-		$(INCLUDES) \
-		-o build/vectest
+CFLAGS := -std=c++14 -g -O1 -I$(SRC_DIR) $(INCLUDES)
+LDFLAGS :=
+
+.PHONY: all clean
+
+all: $(TARGETS)
+
+$(BUILD_DIR)/fmtest: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) fmtest.cpp -o $@
+
+$(BUILD_DIR)/vectest: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) vectest.cpp -o $@
+
+$(BUILD_DIR)/delaytest: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) delaytest.cpp -o $@
  
-compile_delay: delaytest.o interpolation.o buffer.o delay.o
-	$(CC) $(CFLAGS) \
-		build/delaytest.o build/interpolation.o build/delay.o build/buffer.o \
-		$(INCLUDES) \
-		-o build/delaytest
 
-
-
-delaytest.o: delay.o buffer.o
-	$(CC) -o ./build/delaytest.o -c delaytest.cpp
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
  
-delay.o: buffer.o
-	$(CC) -o ./build/delay.o -c ./dsp/delay.cpp
- 
-buffer.o: 
-	$(CC) -o ./build/buffer.o -c ./dsp/buffer.cpp
-
- 
-vectest.0: wavetable.o vectoroscillator.o
-	$(CC) -o ./build/vectest.o -c vectest.cpp
- 
-fmtest.o: wavetable.o
-	$(CC) -o ./build/fmtest.o -c fmtest.cpp
-# 
-vectoroscillator.o:
-	$(CC) -o ./build/vectoroscillator.o -c ./dsp/vectoroscillator.cpp
- 
-wavetable.o:
-	$(CC) -o ./build/wavetable.o -c ./dsp/wavetable.cpp
-# 
-interpolation.o:
-	$(CC) -o ./build/interpolation.o -c ./dsp/interpolation.cpp
+$(BUILD_DIR):
+	mkdir -p $@
 
 clean:
-	rm -r build/*
-
-dir:
-	mkdir -p build
+	rm -r $(BUILD_DIR)/*

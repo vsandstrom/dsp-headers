@@ -12,8 +12,8 @@ namespace dspheaders {
 // Self-wrapping and interpolating Buffer
   class Buffer{
     private:
-      float* buffer;
       float (*interpolate)(float, float*, unsigned);
+      float* buffer;
     public:
       unsigned bufferlength;
       float readsample(float readptr);

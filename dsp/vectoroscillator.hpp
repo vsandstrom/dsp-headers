@@ -1,8 +1,7 @@
 #pragma once
 
 #include "interpolation.hpp"
-// #include "wavetable.hpp"
-#include "wave.hpp"
+#include "wavetable.hpp"
 #include <vector>
 #include "dsp.h"
 

@@ -31,10 +31,10 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
-Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 
-Wavetable envelope = Wavetable(ENV, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+Wavetable envelope = Wavetable(ENV, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 
 static frame data;
 

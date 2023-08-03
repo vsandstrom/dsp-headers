@@ -4,6 +4,7 @@
 #include <iostream>
 #include "dsp/wavetable.hpp"
 #include "dsp/envelope.hpp"
+#include "dsp/delay.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -19,15 +20,20 @@ float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
-float breakpoints[] = {0.f, 0.8f, 0.45f, 0.f};
-float breaktimes[] = {0.1f, 0.2f, 2.5f};
+float breakpoints[] = {0.f, 0.8f, 0.3f, 0.f};
+float breaktimes[] = {0.01f, 0.1f, 0.4};
+ 
+float fund = 200.f;
+float score[] = {fund * 0.8f, fund, 176.f * 2.0f, fund/3.f, fund*5.f/3.f};
 
 unsigned timeline = 0;
+unsigned scoreptr = 0;
 
 using namespace dspheaders;
 Envelope envelope = Envelope(breakpoints, 5, breaktimes, 4, SAMPLE_RATE, interpolation::linear);
-Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
 
 static frame data;
 
@@ -50,17 +56,35 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier.play(modulator.play());
 
-    if (timeline == 48000 || timeline == 48000*6) {
+    if (
+        timeline == 48000 || 
+        timeline == 48000*1.2 ||
+        timeline == 48000*1.4 ||
+        timeline == 48000*2.0 ||
+        timeline == 48000*2.2 ||
+        timeline == 48000*2.6 ||
+        timeline == 48000*3.8 ||
+        timeline == 48000*4.0 ||
+        timeline == 48000*4.1 ||
+        timeline == 48000*4.2 ||
+        timeline == 48000*4.3 ||
+        timeline == 48000*4.7 
+    ) {
       env = envelope.play(GATE::on);
+      carrier.frequency = score[scoreptr % 4];
+      modulator.frequency = score[scoreptr % 4] * 9/2; 
+      scoreptr++;
     } else {
       env = envelope.play(GATE::off);
     }
+    float car = carrier.play(modulator.play());
+    float output = car*env;
+    output += delay.play(output, 0.25, 0.2, 0.2);
 
     // Stereo frame: two increments of out buffer
-    *out++ = car * env; 
-    *out++ = car * env;
+    *out++ = output; 
+    *out++ = output;
 
     timeline++;
 	}

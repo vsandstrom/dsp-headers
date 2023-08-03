@@ -13,16 +13,23 @@ namespace dspheaders {
   class Buffer{
     private:
       float (*interpolate)(float, float*, unsigned);
-      float* buffer;
     public:
+      float* buffer;
       unsigned bufferlength;
       float readsample(float readptr);
+      float readsample(int readptr);
       void writesample(float sample, int writeptr);
       void initbuffer();
       Buffer(
         float seconds,
         unsigned samplerate,
         float (*interpolate)(float, float*, unsigned)
+      );
+      Buffer(
+        unsigned samples,
+        unsigned samplerate,
+        float (*interpolate)(float, float*, unsigned)
+
       );
   };
 }

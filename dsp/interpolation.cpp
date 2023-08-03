@@ -78,10 +78,12 @@ float interpolation::cubic(float position, float* table, unsigned tableLength) {
   // positions
   a2 = position;
   b1 = a2+1;
+  a1 = a2-1;
+  b2 = a2-1;
   // Since table is constructed with an n+1 size, we only need to
   // make sure samples read 2 steps removed is within bounds.
-  a1 = wrap(a2-1, tableLength);
-  b2 = wrap(b1+1, tableLength);
+  wrap(&a1, tableLength);
+  wrap(&b2, tableLength);
 
   diff = position - a2;
   // values
@@ -109,8 +111,10 @@ float interpolation::hermetic(float position, float *table, unsigned tableLength
   float c1, c2, c3, sub, diff;
   a2 = position;
   b1 = position + 1;
-  a1 = wrap(a2-1, tableLength);
-  b2 = wrap(b1+1, tableLength);
+  a1 = a2-1;
+  b2 = b1+1;
+  wrap(&a1, tableLength);
+  wrap(&b2, tableLength);
 
   diff = position - a2;
 

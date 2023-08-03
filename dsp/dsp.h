@@ -9,6 +9,19 @@ namespace dspheaders {
     float right;
   };
 
+  inline float sum(float* buffer, unsigned size) {
+    float sum = 0.f;
+    for (unsigned i = 0; i < size; i++) {
+      sum += ceil(buffer[i]);
+    }
+    return sum;
+  }
+
+  inline unsigned int findpow2(unsigned size) {
+    unsigned val = 1;
+    while (size < val) val <<= 1;
+    return val;
+  }
 
   // Set hard min- and max amplitude limits on signal, where 'x' is signal
   inline float clamp(float x, float bot, float top) {
@@ -64,20 +77,20 @@ namespace dspheaders {
   inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
 
   // Makes sure that x is within range of 0 - n 
-  inline int wrap(int x, unsigned int length) {
-    while (x < 0) x += length;
-    while (x >= length) x -= length;
-    return x;
+  inline int wrap(int* x, unsigned int length) {
+    while (*x < 0) *x += length;
+    while (*x >= length) *x -= length;
+    return *x;
   }
 
   // Makes sure that x is within range of 0.0 - n
   //
   // x is a kept as float for interpolation purposes.
-  inline float wrapf(float x, unsigned int length) {
+  inline float wrapf(float* x, unsigned int length) {
     float lengthf = (float)length;
-    while (x < 0.f) x += lengthf;
-    while (x >= lengthf) x -= lengthf;
-    return x;
+    while (*x < 0.f) *x += lengthf;
+    while (*x >= lengthf) *x -= lengthf;
+    return *x;
   }
 
   inline void initBuffer(float* buffer, unsigned bufferlength) {

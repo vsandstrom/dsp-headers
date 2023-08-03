@@ -19,97 +19,49 @@ namespace dspheaders {
   };
 
 
-  template<typename T>
-  class BaseEnvelope {
+  class Envelope {
     protected:
-      T* buffer = nullptr;
+      Buffer buffer;
       float* breakpoints;
       float* breaktimes;
       unsigned pointlength;
       unsigned timeslength;
-      unsigned samplerate;
-      float readptr = 0.f;
-      void populateEnvelope() {
-        float* pts = breakpoints;
-        T* b = buffer;
-        for (unsigned i = 1; i < pointlength; ++i) {
-          // works because breakpoints need to be only positive. 
-          // needs testing at construction
-          float slope = breakpoints[i-1] - breakpoints[i];
-          unsigned numsamples = breaktimes[i-1] * samplerate;
-          float inc = slope / (float)numsamples;
-          for (unsigned i = 0; i < numsamples; ++i) {
-            // write function to apply curve on envelope segment here.
-            *b -> buffer++ = i * inc;
-          }
-        }
-      };
+      float samplerate;
+      float readptr;
+      void generate();
     public: 
-      BaseEnvelope(
-          float* breakpoints,
-          unsigned pointlength,
-          float* breaktimes,
-          unsigned timeslength,
-          unsigned samplerate) : 
-        breakpoints(breakpoints),
-        pointlength(pointlength),
-        breaktimes(breaktimes),
-        timeslength(timeslength) {
-        float time = 0.f;
-        for (unsigned int i = 0; i < timeslength; ++i) {
-          // convert seconds to a length of samples
-          time += breaktimes[i];
-          // breaktimes[i] = size;
-          // Find minimal pow2 size of buffer
-        } 
-
-        // quickfix to make sure that duration of envelope can be contained in 
-        // buffer
-        time += 0.5f;
-        *buffer = T(time, samplerate);
-      }
+      Envelope(
+        float* breakpoints,
+        unsigned pointlength,
+        float* breaktimes,
+        unsigned timeslength,
+        float samplerate,
+        float (*interpolate)(float, float*, unsigned)
+      );
 
       // Returns current value from table
-      float play() {
-      };
+      // float play();
 
       // Resets envelope to start and returns the first value from table
-      float play(GATE trigger) {
-        if (trigger) {
-          readptr = 0.f;
-        }
-      };
+      float play(GATE trigger);
+
+      void repr();
   };
 
-  class Envelope : public BaseEnvelope<Buffer> {
-    Envelope(
-      float* breakpoints, unsigned pointlength, 
-      float* breaktimes, unsigned timeslength, 
-      unsigned samplerate
-      );
-  };
-
-  class EnvelopeL : public BaseEnvelope<BufferL> {
-    EnvelopeL(
-      float* breakpoints, unsigned pointlength, 
-      float* breaktimes, unsigned timeslength, 
-      unsigned samplerate
-      );
-  };
-
-  class EnvelopeC : public BaseEnvelope<BufferC> {
-    EnvelopeC(
-      float* breakpoints, unsigned pointlength,
-      float* breaktimes, unsigned timeslength,
-      unsigned samplerate
-      );
-  };
-
-  class EnvelopeH : public BaseEnvelope<BufferH> {
-    EnvelopeH(
-      float* breakpoints, unsigned pointlength,
-      float* breaktimes, unsigned timeslength,
-      unsigned samplerate
-      );
+  class PercEnv {
+    private:
+      Buffer buffer;
+      float attack;
+      float decay;
+      float samplerate;
+      float readptr;
+      void generate();
+    public: 
+      float play();
+      float play(GATE trigger);
+      PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned));
   };
 } // namespace dspheaders
+  //
+
+

@@ -20,7 +20,7 @@ float Delay::read(float delaytime) {
 void Delay::write(float sample) {
   // Within bounds-checking is handled in the Buffer object
   buffer.writesample(sample, writeptr++);
-  writeptr = wrap(writeptr, buffer.bufferlength);
+  wrap(&writeptr, buffer.bufferlength);
 }
 void Delay::taps(unsigned taps) {
   delay_taps = taps;

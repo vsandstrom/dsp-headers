@@ -14,9 +14,14 @@ Change the directory to match your configuration*
 
 Run:
 ```bash
-# run make to compile examples - fmtest, vectest & delaytest
+# run make to compile dependencies and examples
 $ make
 
+```
+## DEMO:
+demotest showcases some of the sounding objects, suchas wavetable FM, envelopes and delay.
+```bash
+$ ./build/demotest
 ```
 
 ## Vector Oscillator test:
@@ -36,4 +41,10 @@ $ ./build/fmtest -c <carrier freq> -m <modulator freq> -e <volume LFO freq>
 Runs a 30 sec demo of a delay patch using a buffer and cubic interpolation. (beware of feedback)
 ```bash
 $ ./build/delaytest -t <delaytime> -f <feedback>
+```
+
+## Envelope test:
+A demo of a volume envelope, triggering twice on a timeline.
+```bash
+$ ./build/envtest
 ```

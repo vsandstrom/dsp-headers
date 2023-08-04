@@ -13,14 +13,12 @@ Envelope::Envelope(
     float samplerate,
     float (*interpolate)(float, float*, unsigned)) 
   : breakpoints(breakpoints), breaktimes(breaktimes), pointlength(pointlength), timeslength(timeslength), buffer(Buffer(sum(breaktimes, timeslength), samplerate, interpolate)), samplerate(samplerate) {
-  // printf("hello fron constructor");
   generate();
 };
 
 void Envelope::generate() {
-  printf("hello fron generator");
   unsigned pos = 0;
-  float prev = 0.f, min = 0.f, max = 0.f;
+  float min = 0.f, max = 0.f;
 
   for (unsigned i = 0; i < pointlength-1; i++) {
     // works because breakpoints need to be only positive. 
@@ -28,21 +26,11 @@ void Envelope::generate() {
     max = breakpoints[i] >= breakpoints[i+1] ? breakpoints[i] : breakpoints[i+1];
     min = breakpoints[i] >= breakpoints[i+1] ? breakpoints[i+1] : breakpoints[i];
 
-    printf("min: %f --- max: %f\n", min, max);
 
     float time = breaktimes[i];
     float numsamples = time * samplerate;
-    
-    printf("dur: %f --------\n", breaktimes[i]);
-    printf("segsamples: %f --------\n", samplerate * breaktimes[i]);
-
     float inc = (max - min) / numsamples;
-
-    printf("inc: %f --------\n", inc);
-
     for (unsigned j = 0; j < (int)numsamples; j++) {
-      if (numsamples != prev) printf("numsamples %f\n", numsamples); prev = numsamples;
-      
       // write function to apply curve on envelope segment here.
       float slope = j * inc;
       if (breakpoints[i] > breakpoints[i+1]) {
@@ -54,6 +42,8 @@ void Envelope::generate() {
       }
     }
   }
+  readptr = pos;
+  
 };
 
 // Returns current value from table

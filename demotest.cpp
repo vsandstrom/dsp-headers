@@ -23,6 +23,13 @@ float ENV_FREQ =              4.0f;
 float breakpoints[] = {0.f, 0.8f, 0.3f, 0.f};
 float breaktimes[] = {0.01f, 0.1f, 0.4};
 
+// Fundamental pitch
+float fund = 200.f;
+// Pitch score
+float score[] = {fund * 0.8f, fund, 176.f * 2.0f, fund/3.f, fund*5.f/3.f};
+// Duration before retriggering the envelope, in seconds
+float dur[] = {1.2, 1.4, 2.0, 2.2, 2.6, 3.8, 4.0, 4.1, 4.2, 4.3, 4.7};
+
 // keeps track of the number of the current sample
 unsigned timeline = 0;
 // Progresses the score
@@ -56,13 +63,17 @@ static int paCallback(  const void* inputBuffer,				// input
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
 
-    if ( timeline == 48000 || timeline == 48000 * 6) {
+    if ( timeline == (int)(48000 * dur[scoreptr])) {
       env = envelope.play(GATE::on);
+      carrier.frequency = score[scoreptr % 4];
+      modulator.frequency = score[scoreptr % 3] * 7/2; 
+      scoreptr++;
     } else {
       env = envelope.play(GATE::off);
     }
     float car = carrier.play(modulator.play());
     float sig = car*env;
+    sig += delay.play(sig, 1.2, 0.2, 0.f);
 
     // Stereo frame: two increments of out buffer
     *out++ = sig; 

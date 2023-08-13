@@ -15,7 +15,6 @@ namespace dspheaders {
     HANNING
   };
 
-
   class Wavetable {
     private:
     float position;

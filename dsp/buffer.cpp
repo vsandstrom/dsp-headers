@@ -1,5 +1,6 @@
 #include "buffer.hpp"
 #include "dsp.h"
+#include "dsp_math.h"
 #include "interpolation.hpp"
 
 using namespace dspheaders;
@@ -15,6 +16,7 @@ Buffer::Buffer(
     // interpolation
     bufferlength = 4;
   }
+
   buffer = new float[bufferlength+1];
 }
 
@@ -47,7 +49,5 @@ void Buffer::writesample(float sample, int writeptr) {
 };
 
 void Buffer::initbuffer() {
-  for (unsigned i = 0; i < bufferlength; i++) {
-    buffer[i] = 0.f;
-  }
+  dspheaders::initbuffer(buffer, bufferlength);
 }

@@ -1,4 +1,5 @@
 #include "wavetable.hpp"
+#include "waveshape.h"
 
 using namespace dspheaders;
 
@@ -51,36 +52,39 @@ void Wavetable::populatetable(WAVESHAPE waveshape) {
   switch (waveshape) {
     case (SINE):
       {
-        inc = pi * 2.f  / numSamples;
-        for (int i = 0; i < tablelength; ++i) {
-          table[i] = sin(angle);
-          angle += inc;
-        }
+        sine(table, tablelength);
+        // inc = pi * 2.f  / numSamples;
+        // for (int i = 0; i < tablelength; ++i) {
+        //   table[i] = sin(angle);
+        //   angle += inc;
+        // }
         break;
       }
 
     case (SAW):
       {
-        inc = 2.f / numSamples;
-        angle = -1.f;
-        for (int i = 0; i < tablelength; ++i) {
-          table[i] =  angle;
-          angle += inc;
-        }
+        saw(table, tablelength);
+        // inc = 2.f / numSamples;
+        // angle = -1.f;
+        // for (int i = 0; i < tablelength; ++i) {
+        //   table[i] =  angle;
+        //   angle += inc;
+        // }
         break;
       }
 
 
     case (TRIANGLE):
       {
-        inc = 2.0 / (numSamples / 2);
-        for (int i = 0; i < tablelength; ++i) {
-          if ( angle > 1.f || angle < -1.f) {
-            inc *= -1.f;
-          }
-          table[i] = angle;
-          angle += inc;
-        }
+        triangle(table, tablelength);
+        // inc = 2.0 / (numSamples / 2);
+        // for (int i = 0; i < tablelength; ++i) {
+        //   if ( angle > 1.f || angle < -1.f) {
+        //     inc *= -1.f;
+        //   }
+        //   table[i] = angle;
+        //   angle += inc;
+        // }
         break;
       }
 
@@ -99,22 +103,24 @@ void Wavetable::populatetable(WAVESHAPE waveshape) {
     case (ENV):
       // A hanning window style envelope (squared sine)
       {
-        inc = pi / numSamples;
-        for (int i = 0; i < tablelength; ++i) {
-          table[i] = 1.f - cos(angle) * cos(angle); 
-          angle += inc;
-        }
+        hanning(table, tablelength);
+        // inc = pi / numSamples;
+        // for (int i = 0; i < tablelength; ++i) {
+        //   table[i] = 1.f - cos(angle) * cos(angle); 
+        //   angle += inc;
+        // }
         break;
       }
     
     case (HANNING):
       // A hanning window style envelope (squared sine)
       {
-        inc = pi / numSamples;
-        for (int i = 0; i < tablelength; ++i) {
-          table[i] = 1.f - cos(angle) * cos(angle); 
-          angle += inc;
-        }
+        hanning(table, tablelength);
+        // inc = pi / numSamples;
+        // for (int i = 0; i < tablelength; ++i) {
+        //   table[i] = 1.f - cos(angle) * cos(angle); 
+        //   angle += inc;
+        // }
         break;
       }
   }

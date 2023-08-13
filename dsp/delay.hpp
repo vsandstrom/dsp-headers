@@ -4,15 +4,15 @@
 
 namespace dspheaders {
   class Delay {
-    private:
+    protected:
       Buffer buffer;
       unsigned samplerate;
       unsigned delay_taps = 1;
-      float time;
+      float time = 0.2;
       int writeptr = 0;
 
-      float read(float delaytime);
-      void write(float sample);
+      virtual float read(float delaytime);
+      virtual void write(float sample);
 
     public:
       void taps(unsigned taps);
@@ -23,6 +23,12 @@ namespace dspheaders {
         unsigned samplerate,
         float time,
         unsigned delay_taps,
+        float (*interpolate)(float, float*, unsigned)
+      );
+      
+      Delay(
+        unsigned samplerate,
+        float time,
         float (*interpolate)(float, float*, unsigned)
       );
 

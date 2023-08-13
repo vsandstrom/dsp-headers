@@ -4,7 +4,9 @@
 #include <iostream>
 #include "dsp/wavetable.hpp"
 #include "dsp/envelope.hpp"
+#include "dsp/verb.hpp"
 #include "dsp/delay.hpp"
+#include "dsp/dsp_math.h"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -22,11 +24,10 @@ float ENV_FREQ =              4.0f;
 
 float breakpoints[] = {0.f, 0.8f, 0.3f, 0.f};
 float breaktimes[] = {0.01f, 0.1f, 0.4};
-
 // Fundamental pitch
 float fund = 200.f;
 // Pitch score
-float score[] = {
+float score[11] = {
   fund * 0.8f, 
   fund, 176.f * 2.0f, 
   fund/3.f, 
@@ -39,7 +40,7 @@ float score[] = {
   176.f/3.f, 
 };
 // Duration before retriggering the envelope, in seconds from start
-float dur[] = {1.2, 1.4, 2.0, 2.2, 2.6, 3.8, 4.0, 4.1, 4.2, 4.3, 4.7, 5.1, 5.3, 5.6, 5.7, 6.2, 6.4, 7.2, 7.6, 8.0, 8.6};
+float dur[21] = {1.2, 1.4, 2.0, 2.2, 2.6, 3.8, 4.0, 4.1, 4.2, 4.3, 4.7, 5.1, 5.3, 5.6, 5.7, 6.2, 6.4, 7.2, 7.6, 8.0, 8.6};
 
 // keeps track of the number of the current sample
 unsigned timeline = 0;
@@ -52,6 +53,7 @@ Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::c
 Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
+// Verb verb = Verb(SAMPLE_RATE, 0.02, interpolation::linear);
 
 static frame data;
 
@@ -63,7 +65,6 @@ static int paCallback(  const void* inputBuffer,				// input
 						PaStreamCallbackFlags statusFlags,          //
 						void* userdata )								            // "void"-type can be typecast to other 
 {
-
 	// cast data passing through stream
 	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
@@ -75,7 +76,7 @@ static int paCallback(  const void* inputBuffer,				// input
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
 
-    if ( timeline == (int)(48000 * dur[scoreptr % 18])) {
+    if ( timeline == (int)(SAMPLE_RATE * dur[scoreptr % 18])) {
       env = envelope.play(GATE::on);
       carrier.frequency = score[scoreptr % 11];
       modulator.frequency = score[scoreptr % 7] * 7/2; 
@@ -86,6 +87,7 @@ static int paCallback(  const void* inputBuffer,				// input
     float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env;
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
+    // sig += verb.play(sig) * 0.5;
 
     // Stereo frame: two increments of out buffer
     *out++ = sig; 
@@ -97,6 +99,7 @@ static int paCallback(  const void* inputBuffer,				// input
 }
 
 int main(int argc, char** argv) {
+  printf("before after init of globals");
   carrier.frequency = FREQ;
   modulator.frequency = FM_FREQ;
   vib.frequency = 3.2f;

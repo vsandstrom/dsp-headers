@@ -9,19 +9,11 @@ namespace dspheaders {
     float right;
   };
 
-  inline float sum(float* buffer, unsigned size) {
-    float sum = 0.f;
-    for (unsigned i = 0; i < size; i++) {
-      sum += ceil(buffer[i]);
-    }
-    return sum;
-  }
 
-  inline unsigned int findpow2(unsigned size) {
-    unsigned val = 1;
-    while (size < val) val <<= 1;
-    return val;
-  }
+
+  ///////////////////////////////
+  // Discrete sample manipulation
+  ///////////////////////////////
 
   // Set hard min- and max amplitude limits on signal, where 'x' is signal
   inline float clamp(float x, float bot, float top) {
@@ -32,6 +24,12 @@ namespace dspheaders {
   inline float map(float x, float inmin, float inmax, float outmin, float outmax) {
       return (outmax-outmin)*(x - inmin)/(inmax-inmin)+outmin;
   }
+  
+  // Transform value in range -1.0 - 1.0 to 0.0 - 1.0
+  inline float tounipolar(float x) {return map(x, -1.f, 1.f, 0.f, 1.f);} 
+   
+  // Transform value in range 0.0 - 1.0 to -1.0 - 1.0
+  inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
 
   // Highpass filter removing DC-offset
   //
@@ -59,22 +57,10 @@ namespace dspheaders {
     return 20.f * log10f(volume);
   }
 
-  // Mutate values in array with dspheaders::map, for each value
-  inline void range(
-      float* buffer, unsigned int bufferLength,
-      float inmin, float inmax,
-      float outmin, float outmax) {
-    // Convert values in input buffer within input range to new range
-    for (int i = 0; i < bufferLength; i++) {
-      buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
-    }
-  }
-  
-  // Transform value in range -1.0 - 1.0 to 0.0 - 1.0
-  inline float tounipolar(float x) {return map(x, -1.f, 1.f, 0.f, 1.f);} 
-   
-  // Transform value in range 0.0 - 1.0 to -1.0 - 1.0
-  inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
+
+  /////////////////////////////
+  // Index out-of-bounds guards
+  /////////////////////////////
 
   // Makes sure that x is within range of 0 - n 
   inline int wrap(int* x, unsigned int length) {
@@ -93,7 +79,30 @@ namespace dspheaders {
     return *x;
   }
 
-  inline void initBuffer(float* buffer, unsigned bufferlength) {
+  ////////////////////////////
+  // Array/Buffer manipulation
+  ////////////////////////////
+
+  inline void initbuffer(float* buffer, unsigned bufferlength) {
     for (unsigned i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
+  }
+  
+  // Mutate values in array with dspheaders::map, for each value
+  inline void range(
+      float* buffer, unsigned int bufferLength,
+      float inmin, float inmax,
+      float outmin, float outmax) {
+    // Convert values in input buffer within input range to new range
+    for (int i = 0; i < bufferLength; i++) {
+      buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
+    }
+  }
+  
+  inline float sum(float* buffer, unsigned size) {
+    float sum = 0.f;
+    for (unsigned i = 0; i < size; i++) {
+      sum += ceil(buffer[i]);
+    }
+    return sum;
   }
 } /* namespace dspheaders */

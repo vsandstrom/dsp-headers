@@ -11,7 +11,8 @@ namespace dspheaders {
     TRIANGLE,
     SAW,
     SQUARE,
-    HANNING
+    HANNING,
+    ENV
   };
 
   class Wavetable {
@@ -46,8 +47,5 @@ namespace dspheaders {
       unsigned samplerate,
       float (*interpolate)(float, float*, unsigned)
     );
-
   };
 } // namespace dspheaders
-
-

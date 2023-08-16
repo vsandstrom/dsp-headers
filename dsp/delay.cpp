@@ -7,7 +7,7 @@ using namespace dspheaders;
 
 Delay::Delay(unsigned samplerate, float time, unsigned taps, float (*interpolate)(float, float*, unsigned)) : buffer(Buffer(time, samplerate, interpolate)), samplerate(samplerate), delay_taps(taps) { }
 
-Delay::Delay(unsigned samplerate, float time, float (*interpolate)(float, float*, unsigned)) : buffer(Buffer(time, samplerate, interpolate)), samplerate(samplerate) { }
+Delay::Delay(unsigned samplerate, float time, float (*interpolate)(float, float*, unsigned)) : buffer(Buffer(time, samplerate, interpolate)), samplerate(samplerate), delay_taps(0) { }
 
 float Delay::read(float delaytime) {
   float output = 0.f;

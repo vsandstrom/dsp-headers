@@ -69,6 +69,16 @@ namespace dspheaders {
       buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
     }
   }
+ 
+  inline void scale(float* buffer, unsigned length, float outmin, float outmax) {
+    float min = 0.f, max = 0.f;
+    for (int i=0; i<length; i++){
+      if (buffer[i] < min) {min = buffer[i];}
+      if (buffer[i] > max) {max = buffer[i];}
+    }
+    range(buffer, length, min, max, outmin, outmax);
+  } 
+
   
   // Transform value in range -1.0 - 1.0 to 0.0 - 1.0
   inline float tounipolar(float x) {return map(x, -1.f, 1.f, 0.f, 1.f);} 

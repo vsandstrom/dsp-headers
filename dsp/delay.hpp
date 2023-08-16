@@ -8,14 +8,14 @@ namespace dspheaders {
       Buffer buffer;
       unsigned samplerate;
       unsigned delay_taps = 1;
-      float time = 0.2;
+      float time;
       int writeptr = 0;
 
       // Read sample from delay buffer with 
       // delaytime * samplerate number of samples offset
-      virtual float read(float delaytime);
+      float read(float delaytime);
       // Write sample to delay buffer
-      virtual  void write(float sample);
+      void write(float sample);
 
     public:
       // Set the number of taps in the delay.
@@ -23,7 +23,6 @@ namespace dspheaders {
 
       // Set the duration between delay taps
       void delaytime(float delaytime);
-
 
       float play(float input, float delaytime, float wet, float feedback);
 

@@ -25,9 +25,8 @@ Wavetable::Wavetable(
 
 
 void Wavetable::movepointer(float phase) {
-	// float normalizedPhase = (phase + 1) * 0.5;
-  wrapf(&(position += tablelength / (samplerate / (frequency * phase))), tablelength);
-  // wrapf(&position, tablelength);
+	float normalizedPhase = (phase + 1) * 0.5;
+  wrapf(&(position += tablelength / (samplerate / (frequency * normalizedPhase))), tablelength);
 }
 
 void Wavetable::movepointer() {

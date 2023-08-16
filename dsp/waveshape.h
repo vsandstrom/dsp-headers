@@ -56,33 +56,35 @@ inline void triangle(float* table, unsigned tablelength) {
 // TODO: Can use phase
 // Create a Wavetable of a bunch of partials of sines, based on their amplitudes and phases
 //
-// inline float* complex_sine(
-//     float* table,
-//     unsigned tablelength, 
-//     float* amplitudes,
-//     unsigned amplength,
-//     float* phases
-//     ) {
-//   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
-//
-//   // Make sure amplitudes are within 0 & 1
-//   scale(amplitudes, amplength, 0.f, 1.f);
-//
-//   // where n = 1
-//   // inc = pi * 2.f * n / numsamples;
-//   // positionphase = inc + (numsamples * inc); 
-//   // value = positionphase * amplitude
-//   
-//   for (int n=1; n <= amplength; n++) {
-//     inc = pi * 2.f * n / numsamples;
-//     angle = inc * numsamples * phases[n-1];
-//
-//     for (int i=0; i<tablelength; i++) {
-//       table[i] += (sin(angle) * amplitudes[n-1]);
-//       angle += inc;
-//     }
-//   }
-//
-//   scale(table, tablelength, -1.f, 1.f);
-//   return table;
-// }
+inline float* complex_sine(
+    float* table,
+    unsigned tablelength, 
+    float* amplitudes,
+    unsigned amplength,
+    float* phases
+    ) {
+  float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
+
+  // Make sure amplitudes are within 0 & 1
+  scale(amplitudes, amplength, 0.f, 1.f);
+
+  // where n = 1
+  // inc = pi * 2.f * n / numsamples;
+  // positionphase = inc + (numsamples * inc); 
+  // value = positionphase * amplitude
+  
+  for (int n=1; n < amplength; n++) {
+    inc = pi * 2.f * n / numsamples;
+    angle = inc * numsamples * phases[n-1];
+
+    // magic extra length because of Buffer shenanigans
+    for (int i=0; i<tablelength+1; i++) {
+      table[i] += (sin(angle) * amplitudes[n-1]);
+      angle += inc;
+    }
+  }
+
+  // more shenanigans 
+  scale(table, tablelength+1, -1.f, 1.f);
+  return table;
+}

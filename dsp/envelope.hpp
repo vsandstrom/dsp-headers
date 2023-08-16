@@ -13,7 +13,6 @@
  * */
 
 namespace dspheaders {
-  // Silly representation of a Gate value
   enum GATE {
     on = 1, 
     off = 0,
@@ -29,10 +28,8 @@ namespace dspheaders {
       unsigned timeslength;
       float samplerate;
       float readptr;
-      // Generate the envelope based on initial values
       void generate();
     public: 
-
       Envelope(
         float* breakpoints,
         unsigned pointlength,
@@ -42,13 +39,12 @@ namespace dspheaders {
         float (*interpolate)(float, float*, unsigned)
       );
 
+      // Returns current value from table
       // float play();
 
-      // Returns current value from table
-      // trigger resets envelope to the start of the buffer
+      // Resets envelope to start and returns the first value from table
       float play(GATE trigger);
 
-      // prints a represenation of the envelope as values to stdout
       void repr();
   };
 

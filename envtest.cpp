@@ -1,20 +1,10 @@
-
 #include "dsp/interpolation.hpp"
 #include "portaudio/include/portaudio.h"
-#include <chrono>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <cmath>
-#include <string>
-// #include "sound.hpp"
 #include "dsp/wavetable.hpp"
-// #include "dsp/wave.hpp"
-// #include "dsp/vectoroscillator.hpp"
-#include <vector>
-
-
+#include "dsp/envelope.hpp"
+#include "dsp/delay.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -23,18 +13,26 @@ const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
 const int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
-const float  SAMPLE_RATE =   48000;
+const float  SAMPLE_RATE =   48000.f;
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
-using namespace dspheaders;
-Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+float breakpoints[] = {0.f, 0.8f, 0.3f, 0.f};
+float breaktimes[] = {0.01f, 0.1f, 0.4};
 
-Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+// keeps track of the number of the current sample
+unsigned timeline = 0;
+// Progresses the score
+unsigned scoreptr = 0;
+
+using namespace dspheaders;
+Envelope envelope = Envelope(breakpoints, 5, breaktimes, 4, SAMPLE_RATE, interpolation::linear);
+Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
 
 static frame data;
 
@@ -52,15 +50,25 @@ static int paCallback(  const void* inputBuffer,				// input
 	float* out = (float*)outputBuffer;
 	unsigned int i;
 
+  float env = 0.f;
+
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
+
+    if ( timeline == 48000 || timeline == 48000 * 6) {
+      env = envelope.play(GATE::on);
+    } else {
+      env = envelope.play(GATE::off);
+    }
     float car = carrier.play(modulator.play());
-    float env = envelope.play();
+    float sig = car*env;
 
     // Stereo frame: two increments of out buffer
-    *out++ = car * env; 
-    *out++ = car * env;
+    *out++ = sig; 
+    *out++ = sig;
+
+    timeline++;
 	}
 	return 0;
 }
@@ -68,7 +76,6 @@ static int paCallback(  const void* inputBuffer,				// input
 int main(int argc, char** argv) {
   carrier.frequency = FREQ;
   modulator.frequency = FM_FREQ;
-  envelope.frequency = ENV_FREQ;
     if ( argc > 3 && argc < 8 ) {
       argc--;
       argv++;
@@ -87,12 +94,6 @@ int main(int argc, char** argv) {
               argc--;
               argv++;
               modulator.frequency = std::stof(*argv);
-              break;
-            }
-            case 'e':{
-              argc--;
-              argv++;
-              envelope.frequency = std::stof(*argv);
               break;
             }
             default:{

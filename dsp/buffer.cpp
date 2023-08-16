@@ -1,5 +1,6 @@
 #include "buffer.hpp"
 #include "dsp.h"
+#include "dsp_math.h"
 #include "interpolation.hpp"
 
 using namespace dspheaders;
@@ -15,19 +16,44 @@ Buffer::Buffer(
     // interpolation
     bufferlength = 4;
   }
+
   buffer = new float[bufferlength+1];
+  // important for smaller systems that do not clear old memory
+  initbuffer();
 }
 
+Buffer::Buffer(
+  unsigned size,
+  unsigned samplerate,
+  float (*interpolate)(float, float*, unsigned))
+: bufferlength(size), interpolate(interpolate) {
+
+  if (bufferlength < 4) {
+    // Allow for mini-buffers, but still not in conflict with 
+    // interpolation
+    bufferlength = 4;
+  }
+  buffer = new float[bufferlength+1];
+  // important for smaller systems that do not clear old memory
+  initbuffer();
+}
+
+
 float Buffer::readsample(float readptr) {
-  return interpolate(wrapf(readptr, bufferlength), buffer, bufferlength);
+  return interpolate(wrapf(&readptr, bufferlength), buffer, bufferlength);
 };
+
+float Buffer::readsample(int readptr) {
+  return interpolate(wrap(&readptr, bufferlength), buffer, bufferlength);
+
+}
+
 
 void Buffer::writesample(float sample, int writeptr) {
-  buffer[wrap(writeptr, bufferlength)] = sample;
+  buffer[wrap(&writeptr, bufferlength)] = sample;
 };
 
+// important for smaller systems that do not clear old memory
 void Buffer::initbuffer() {
-  for (unsigned i = 0; i < bufferlength; i++) {
-    buffer[i] = 0.f;
-  }
+  dspheaders::initbuffer(buffer, bufferlength+1);
 }

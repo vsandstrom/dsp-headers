@@ -1,40 +1,58 @@
-
 #include "dsp/interpolation.hpp"
 #include "portaudio/include/portaudio.h"
-#include <chrono>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <cmath>
-#include <string>
-// #include "sound.hpp"
 #include "dsp/wavetable.hpp"
-// #include "dsp/wave.hpp"
-// #include "dsp/vectoroscillator.hpp"
-#include <vector>
-
-
+#include "dsp/envelope.hpp"
+#include "dsp/verb.hpp"
+#include "dsp/delay.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
-const int DURATION =           10000; // milliseconds
+const int DURATION =           30000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
 const int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
-const float  SAMPLE_RATE =   48000;
+const float  SAMPLE_RATE =   48000.f;
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
-using namespace dspheaders;
-Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+float breakpoints[] = {0.f, 0.8f, 0.3f, 0.f};
+float breaktimes[] = {0.01f, 0.1f, 0.4};
+// Fundamental pitch
+float fund = 200.f;
+// Pitch score
+float score[11] = {
+  fund * 0.8f, 
+  fund, 176.f * 2.0f, 
+  fund/3.f, 
+  fund*4.f/1.5f, 
+  fund/3.f, 
+  176.f/3.f, 
+  fund*9/4, 
+  fund*9/5.f,
+  fund*4/3.f,
+  176.f/3.f, 
+};
+// Duration before retriggering the envelope, in seconds from start
+float dur[21] = {1.2, 1.4, 2.0, 2.2, 2.6, 3.8, 4.0, 4.1, 4.2, 4.3, 4.7, 5.1, 5.3, 5.6, 5.7, 6.2, 6.4, 7.2, 7.6, 8.0, 8.6};
 
-Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+// keeps track of the number of the current sample
+unsigned timeline = 0;
+// Progresses the score
+unsigned scoreptr = 0;
+
+using namespace dspheaders;
+Envelope envelope = Envelope(breakpoints, 5, breaktimes, 4, SAMPLE_RATE, interpolation::linear);
+Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
+Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
+// Verb verb = Verb(SAMPLE_RATE, 0.4f, interpolation::linear);
 
 static frame data;
 
@@ -46,29 +64,44 @@ static int paCallback(  const void* inputBuffer,				// input
 						PaStreamCallbackFlags statusFlags,          //
 						void* userdata )								            // "void"-type can be typecast to other 
 {
-
 	// cast data passing through stream
 	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
 
+  float env = 0.f;
+
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier.play(modulator.play());
-    float env = envelope.play();
+
+    if ( timeline == (int)(SAMPLE_RATE * dur[scoreptr % 18])) {
+      env = envelope.play(GATE::on);
+      carrier.frequency = score[scoreptr % 11];
+      modulator.frequency = score[scoreptr % 7] * 7/2; 
+      scoreptr++;
+    } else {
+      env = envelope.play(GATE::off);
+    }
+    float car = carrier.play(modulator.play()+(vib.play() * 0.01));
+    float sig = car*env;
+    sig += delay.play(sig, 0.8, 0.2, 0.01f);
+    // sig += verb.play(sig) * 0.5;
 
     // Stereo frame: two increments of out buffer
-    *out++ = car * env; 
-    *out++ = car * env;
+    *out++ = sig; 
+    *out++ = sig;
+
+    timeline++;
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
+  printf("before after init of globals");
   carrier.frequency = FREQ;
   modulator.frequency = FM_FREQ;
-  envelope.frequency = ENV_FREQ;
+  vib.frequency = 3.2f;
     if ( argc > 3 && argc < 8 ) {
       argc--;
       argv++;
@@ -89,10 +122,10 @@ int main(int argc, char** argv) {
               modulator.frequency = std::stof(*argv);
               break;
             }
-            case 'e':{
+            case 'f':{
               argc--;
               argv++;
-              envelope.frequency = std::stof(*argv);
+              // verb.feedback(std::stof(*argv));
               break;
             }
             default:{

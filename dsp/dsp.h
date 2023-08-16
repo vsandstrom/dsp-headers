@@ -9,6 +9,9 @@ namespace dspheaders {
     float right;
   };
 
+  ///////////////////////////////
+  // Discrete sample manipulation
+  ///////////////////////////////
 
   // Set hard min- and max amplitude limits on signal, where 'x' is signal
   inline float clamp(float x, float bot, float top) {
@@ -19,6 +22,13 @@ namespace dspheaders {
   inline float map(float x, float inmin, float inmax, float outmin, float outmax) {
       return (outmax-outmin)*(x - inmin)/(inmax-inmin)+outmin;
   }
+  
+  // Transform value in range -1.0 - 1.0 to 0.0 - 1.0
+  inline float tounipolar(float x) {return map(x, -1.f, 1.f, 0.f, 1.f);} 
+   
+  // Transform value in range 0.0 - 1.0 to -1.0 - 1.0
+  inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
+
 
   // Highpass filter removing DC-offset
   //
@@ -46,6 +56,31 @@ namespace dspheaders {
     return 20.f * log10f(volume);
   }
 
+  // Makes sure that x is within range of 0 - n 
+  inline int wrap(int* x, unsigned int length) {
+    while (*x < 0) *x += length;
+    while (*x >= length) *x -= length;
+    return *x;
+  }
+
+  // Makes sure that x is within range of 0.0 - n
+  //
+  // x is a kept as float for interpolation purposes.
+  inline float wrapf(float* x, unsigned int length) {
+    float lengthf = (float)length;
+    while (*x < 0.f) *x += lengthf;
+    while (*x >= lengthf) *x -= lengthf;
+    return *x;
+  }
+
+  ////////////////////////////
+  // Array/Buffer manipulation
+  ////////////////////////////
+
+  inline void initbuffer(float* buffer, unsigned bufferlength) {
+    for (unsigned i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
+  }
+  
   // Mutate values in array with dspheaders::map, for each value
   inline void range(
       float* buffer, unsigned int bufferLength,
@@ -57,30 +92,21 @@ namespace dspheaders {
     }
   }
   
-  // Transform value in range -1.0 - 1.0 to 0.0 - 1.0
-  inline float tounipolar(float x) {return map(x, -1.f, 1.f, 0.f, 1.f);} 
-   
-  // Transform value in range 0.0 - 1.0 to -1.0 - 1.0
-  inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
-
-  // Makes sure that x is within range of 0 - n 
-  inline int wrap(int x, unsigned int length) {
-    while (x < 0) x += length;
-    while (x >= length) x -= length;
-    return x;
-  }
-
-  // Makes sure that x is within range of 0.0 - n
-  //
-  // x is a kept as float for interpolation purposes.
-  inline float wrapf(float x, unsigned int length) {
-    float lengthf = (float)length;
-    while (x < 0.f) x += lengthf;
-    while (x >= lengthf) x -= lengthf;
-    return x;
-  }
-
-  inline void initBuffer(float* buffer, unsigned bufferlength) {
-    for (unsigned i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
+  // Mutate
+  inline void scale(float* array, unsigned length, float outmin, float outmax) {
+    float min = 0.f, max = 0.f;
+    for (int i=0; i<length; i++){
+      if (array[i] < min) {min = array[i];}
+      if (array[i] > max) {max = array[i];}
+    }
+    range(array, length, min, max, outmin, outmax);
+  }   
+  
+  inline float sum(float* buffer, unsigned size) {
+    float sum = 0.f;
+    for (unsigned i = 0; i < size; i++) {
+      sum += ceil(buffer[i]);
+    }
+    return sum;
   }
 } /* namespace dspheaders */

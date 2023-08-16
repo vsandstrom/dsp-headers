@@ -53,7 +53,7 @@ Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::c
 Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
-Verb verb = Verb(SAMPLE_RATE, 0.4f, interpolation::linear);
+// Verb verb = Verb(SAMPLE_RATE, 0.4f, interpolation::linear);
 
 static frame data;
 
@@ -87,7 +87,7 @@ static int paCallback(  const void* inputBuffer,				// input
     float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env;
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
-    sig += verb.play(sig) * 0.5;
+    // sig += verb.play(sig) * 0.5;
 
     // Stereo frame: two increments of out buffer
     *out++ = sig; 
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
             case 'f':{
               argc--;
               argv++;
-              verb.feedback(std::stof(*argv));
+              // verb.feedback(std::stof(*argv));
               break;
             }
             default:{

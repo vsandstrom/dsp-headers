@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
   float* cartable = new float[513];
   float amps[] = {1.f, 0.72f, 0.2f, 0.9f};
   float phases[] = {0.f, 0.2f, 0.94f, 0.5f};
-  cartable = complex_sine(cartable, 512, amps, 4, phases);
+  // cartable = complex_sine(cartable, 512, amps, 4, phases);
 
   carrier = new Wavetable(cartable, 512, SAMPLE_RATE, interpolation::cubic);
   carrier -> frequency = FREQ;

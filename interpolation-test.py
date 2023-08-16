@@ -121,63 +121,64 @@ def wrap(pos: int, tableLen: int):
         return pos - tableLen
     return pos
 
-l: list[float] = [
-        0.0, 0.08, 0.2, 0.45, 0.7, 0.92, 1.0, 0.92, 0.7, 0.45, 0.2, 0.08, 0.0, -0.08 -0.2, -0.45,
-        -0.7, -0.92, -1.0, -0.92, -0.7, -0.45, -0.2, -0.08, 0.0
-        ]
+if __name__=="__main__":
+    l: list[float] = [
+            0.0, 0.08, 0.2, 0.45, 0.7, 0.92, 1.0, 0.92, 0.7, 0.45, 0.2, 0.08, 0.0, -0.08 -0.2, -0.45,
+            -0.7, -0.92, -1.0, -0.92, -0.7, -0.45, -0.2, -0.08, 0.0
+            ]
 
 
-inc = 1/8
-tri: list[float] = [0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0, 0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0, -0.125, -0.25, -0.375, -0.5, -0.625, -0.75, -0.875, -1.0, -0.875, -0.75, -0.625, -0.5, -0.375, -0.25, -0.125, 0.0]
+    inc = 1/8
+    tri: list[float] = [0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0, 0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0, -0.125, -0.25, -0.375, -0.5, -0.625, -0.75, -0.875, -1.0, -0.875, -0.75, -0.625, -0.5, -0.375, -0.25, -0.125, 0.0]
 
-ip: dict[str, list[float]] = dict()
+    ip: dict[str, list[float]] = dict()
 
-ip["floored"] = list()
-pos = 0.0
-while pos < len(tri):
-    ip["floored"].append(tri[math.floor(pos)])
-    pos += 1.05
+    ip["floored"] = list()
+    pos = 0.0
+    while pos < len(tri):
+        ip["floored"].append(tri[math.floor(pos)])
+        pos += 1.05
 
-ip["linear"] = list()
-pos = 0.0
-while pos < len(tri):
-    ip["linear"].append(linear(pos, tri))
-    pos += 1.05
+    ip["linear"] = list()
+    pos = 0.0
+    while pos < len(tri):
+        ip["linear"].append(linear(pos, tri))
+        pos += 1.05
 
-ip["cubic"] = list()
-pos = 0.0
-while pos < len(tri):
-    ip["cubic"].append(cubic(pos, tri))
-    pos += 1.05
+    ip["cubic"] = list()
+    pos = 0.0
+    while pos < len(tri):
+        ip["cubic"].append(cubic(pos, tri))
+        pos += 1.05
 
-ip["hermetic"] = list()
-pos = 0.0
-while pos < len(tri):
-    ip["hermetic"].append(hermetic(pos, tri))
-    pos += 1.05
+    ip["hermetic"] = list()
+    pos = 0.0
+    while pos < len(tri):
+        ip["hermetic"].append(hermetic(pos, tri))
+        pos += 1.05
 
-ip["bilinear"] = list()
-pos = 0.0
-while pos < len(tri):
-    ip["bilinear"].append(bilinear(pos, tri))
-    pos += 1.05
+    ip["bilinear"] = list()
+    pos = 0.0
+    while pos < len(tri):
+        ip["bilinear"].append(bilinear(pos, tri))
+        pos += 1.05
 
-ip["cosine"] = list()
-pos = 0.0
-while pos < len(tri):
-    ip["cosine"].append(cosine(pos, tri))
-    pos += 1.05
+    ip["cosine"] = list()
+    pos = 0.0
+    while pos < len(tri):
+        ip["cosine"].append(cosine(pos, tri))
+        pos += 1.05
 
-df = pd.DataFrame(ip)
+    df = pd.DataFrame(ip)
 
-if sys.argv[1] in ip.keys():
+    if sys.argv[1] in ip.keys():
 # print(tabulate(df, headers = 'keys', tablefmt= 'github'))
-    print(tabulate(df, headers = 'keys', tablefmt= 'fancy_grid'))
+        print(tabulate(df, headers = 'keys', tablefmt= 'fancy_grid'))
 
-    plt.rcParams["figure.figsize"]=[7.50, 3.50]
-    plt.rcParams["figure.autolayout"] = True
+        plt.rcParams["figure.figsize"]=[7.50, 3.50]
+        plt.rcParams["figure.autolayout"] = True
 
-    plt.scatter(range(len(ip[sys.argv[1]])), ip[sys.argv[1]])
-    plt.plot(range(len(ip[sys.argv[1]])), ip[sys.argv[1]])
-    plt.title(sys.argv[1])
-    plt.show()
+        plt.scatter(range(len(ip[sys.argv[1]])), ip[sys.argv[1]])
+        plt.plot(range(len(ip[sys.argv[1]])), ip[sys.argv[1]])
+        plt.title(sys.argv[1])
+        plt.show()

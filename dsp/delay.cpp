@@ -7,6 +7,8 @@ using namespace dspheaders;
 
 Delay::Delay(unsigned samplerate, float time, unsigned taps, float (*interpolate)(float, float*, unsigned)) : buffer(Buffer(time, samplerate, interpolate)), samplerate(samplerate), delay_taps(taps) { }
 
+Delay::Delay(unsigned samplerate, float time, float (*interpolate)(float, float*, unsigned)) : buffer(Buffer(time, samplerate, interpolate)), samplerate(samplerate), delay_taps(0) { }
+
 float Delay::read(float delaytime) {
   float output = 0.f;
   float taptime = (delaytime * samplerate);
@@ -20,7 +22,7 @@ float Delay::read(float delaytime) {
 void Delay::write(float sample) {
   // Within bounds-checking is handled in the Buffer object
   buffer.writesample(sample, writeptr++);
-  writeptr = wrap(writeptr, buffer.bufferlength);
+  wrap(&writeptr, buffer.bufferlength);
 }
 void Delay::taps(unsigned taps) {
   delay_taps = taps;

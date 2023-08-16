@@ -21,11 +21,9 @@ class VectorOscillator {
 
     VectorOscillator();
     // Feed the VectorOscillator with a vector of 'n' WaveTables
-    VectorOscillator(
-      std::vector<Wavetable> tables, 
-      float (*interpolate)(float pos, float* buffer, unsigned length)
-    );
-
+    VectorOscillator( 
+        std::vector<Wavetable> tables,
+        float (*interpolate)(float, float*, unsigned));
 
     float play(float transfer);
     // Returns the next sample from the vector oscillator. 

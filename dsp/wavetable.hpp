@@ -11,7 +11,6 @@ namespace dspheaders {
     TRIANGLE,
     SAW,
     SQUARE,
-    ENV,
     HANNING
   };
 

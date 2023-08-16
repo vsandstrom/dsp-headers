@@ -67,7 +67,20 @@ def noise(table: list[float], length: int) -> list[float]:
         table.append(random.random())
     return table
 
-length = 16
+def complex(table: list[float], length: int, ampl: list[float], phase: list[float], paramlength:
+            int):
+    for n in range(1, paramlength+1):
+        inc = (math.pi * 2 * n) / float(length)
+        angle = inc * float(length) * phase[n-1]
+        for i in range(length):
+            if len(table) == i:
+                table.append(math.sin(angle)*ampl[n-1])
+            else:
+                table[i] = table[i] + (math.sin(angle)*ampl[n-1])
+            angle = inc + angle
+    return table
+
+length = 512
 if len(sys.argv) > 2:
     length = int(sys.argv[2])
 
@@ -85,6 +98,8 @@ t5 = list()
 ws['hanning'] = hanning(t5, length)
 t6 = list()
 ws['noise'] = noise(t6, length)
+t7 = list()
+ws['complex'] = complex(t7, length, [1, 0.7, 0.24, 0.99, 0.3, 0.04], [0.2, 0.1, 0.7, 0, 0.5, 0.2], 4)
 
 df = pd.DataFrame(ws)
 

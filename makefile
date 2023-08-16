@@ -7,7 +7,7 @@ BUILD_DIR := build
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
-TARGETS = $(BUILD_DIR)/vectest $(BUILD_DIR)/fmtest $(BUILD_DIR)/delaytest $(BUILD_DIR)/envtest $(BUILD_DIR)/demotest
+TARGETS = $(BUILD_DIR)/vectest $(BUILD_DIR)/fmtest $(BUILD_DIR)/delaytest $(BUILD_DIR)/envtest $(BUILD_DIR)/complextest $(BUILD_DIR)/demotest
 
 CFLAGS := -std=c++14 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES)
 #-march=native -msse -msse2 -mssse3 -msse4.1 -msse4.2 -mavx512vl -I./$(SRC_DIR) $(INCLUDES)
@@ -21,6 +21,8 @@ all: $(TARGETS)
 # COMPILING EXECUTABLES
 $(BUILD_DIR)/fmtest: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) fmtest.cpp -o  $@
+$(BUILD_DIR)/complextest: $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) complextest.cpp -o  $@
 $(BUILD_DIR)/envtest: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) envtest.cpp -o $@
 $(BUILD_DIR)/vectest: $(OBJS)

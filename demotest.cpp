@@ -6,7 +6,6 @@
 #include "dsp/envelope.hpp"
 #include "dsp/verb.hpp"
 #include "dsp/delay.hpp"
-#include "dsp/dsp_math.h"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;

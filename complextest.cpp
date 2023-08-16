@@ -35,7 +35,7 @@ using namespace dspheaders;
 
 Wavetable* carrier = nullptr;
 // Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
-Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+// Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 
 static frame data;
@@ -57,7 +57,8 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier -> play(modulator.play());
+    float car = carrier -> play();
+        // modulator.play());
     float env = envelope.play();
 
     // Stereo frame: two increments of out buffer
@@ -71,11 +72,10 @@ int main(int argc, char** argv) {
   float* cartable = new float[513];
   float amps[] = {1.f, 0.72f, 0.2f, 0.9f};
   float phases[] = {0.f, 0.2f, 0.94f, 0.5f};
-  // cartable = complex_sine(cartable, 512, amps, 4, phases);
-
+  cartable = complex_sine(cartable, 512, amps, 4, phases);
   carrier = new Wavetable(cartable, 512, SAMPLE_RATE, interpolation::cubic);
   carrier -> frequency = FREQ;
-  modulator.frequency = FM_FREQ;
+  // modulator.frequency = FM_FREQ;
   envelope.frequency = ENV_FREQ;
     if ( argc > 3 && argc < 8 ) {
       argc--;
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
             case 'm':{
               argc--;
               argv++;
-              modulator.frequency = std::stof(*argv);
+              // modulator.frequency = std::stof(*argv);
               break;
             }
             case 'e':{

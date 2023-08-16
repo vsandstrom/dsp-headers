@@ -9,8 +9,6 @@ namespace dspheaders {
     float right;
   };
 
-
-
   ///////////////////////////////
   // Discrete sample manipulation
   ///////////////////////////////
@@ -30,6 +28,7 @@ namespace dspheaders {
    
   // Transform value in range 0.0 - 1.0 to -1.0 - 1.0
   inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
+
 
   // Highpass filter removing DC-offset
   //
@@ -97,6 +96,16 @@ namespace dspheaders {
       buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
     }
   }
+  
+  // Mutate
+  inline void scale(float* array, unsigned length, float outmin, float outmax) {
+    float min = 0.f, max = 0.f;
+    for (int i=0; i<length; i++){
+      if (array[i] < min) {min = array[i];}
+      if (array[i] > max) {max = array[i];}
+    }
+    range(array, length, min, max, outmin, outmax);
+  }   
   
   inline float sum(float* buffer, unsigned size) {
     float sum = 0.f;

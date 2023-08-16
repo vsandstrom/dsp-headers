@@ -18,6 +18,8 @@ Buffer::Buffer(
   }
 
   buffer = new float[bufferlength+1];
+  // important for smaller systems that do not clear old memory
+  initbuffer();
 }
 
 Buffer::Buffer(
@@ -32,6 +34,8 @@ Buffer::Buffer(
     bufferlength = 4;
   }
   buffer = new float[bufferlength+1];
+  // important for smaller systems that do not clear old memory
+  initbuffer();
 }
 
 
@@ -44,10 +48,12 @@ float Buffer::readsample(int readptr) {
 
 }
 
+
 void Buffer::writesample(float sample, int writeptr) {
   buffer[wrap(&writeptr, bufferlength)] = sample;
 };
 
+// important for smaller systems that do not clear old memory
 void Buffer::initbuffer() {
-  dspheaders::initbuffer(buffer, bufferlength);
+  dspheaders::initbuffer(buffer, bufferlength+1);
 }

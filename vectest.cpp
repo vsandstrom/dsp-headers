@@ -42,7 +42,7 @@ Wavetable triangle = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::
 Wavetable square = Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable saw = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable transfer = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable envelope = Wavetable(ENV, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 std::vector<Wavetable> vecTables = {sine, triangle, square, saw};
 VectorOscillator vec = VectorOscillator(vecTables, interpolation::cubic);
 

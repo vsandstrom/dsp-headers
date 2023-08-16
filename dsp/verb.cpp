@@ -16,11 +16,18 @@ Verb::Verb(
 };
 
 float Verb::play(float sample) {
-  int i = writeptr - 17;
-  writeptr++;
-  float out = read(wrap(&i, buffer.bufferlength));
+  float out = 0.f;
+  out = read(i[3]/samplerate) * k[3];
+  out += read(i[2]/samplerate) * k[2];
+  out += read(i[1]/samplerate) * k[1];
+  out += read(i[0]/samplerate) * k[0];
   write(sample + (out * fb));
+  writeptr++;
   return out;
+}
+
+void Verb::feedback(double feedback){
+  fb = feedback;
 }
 
 // float Verb::play(float sample) {

@@ -34,7 +34,7 @@ using namespace dspheaders;
 Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
 Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
 
-Wavetable envelope = Wavetable(ENV, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
 
 static frame data;
 

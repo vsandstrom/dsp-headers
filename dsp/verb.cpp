@@ -8,27 +8,27 @@
 
 using namespace dspheaders;
 
-Verb::Verb(
-    unsigned samplerate,
-    float feedback,
-    float (*interpolate)(float, float*, unsigned)
-  ): Delay(Delay(samplerate, 8.f, interpolate)), fb(feedback), samplerate(samplerate) {
-};
-
-float Verb::play(float sample) {
-  float out = 0.f;
-  out = read(i[3]/samplerate) * k[3];
-  out += read(i[2]/samplerate) * k[2];
-  out += read(i[1]/samplerate) * k[1];
-  out += read(i[0]/samplerate) * k[0];
-  write(sample + (out * fb));
-  writeptr++;
-  return out;
-}
-
-void Verb::feedback(double feedback){
-  fb = feedback;
-}
+// Verb::Verb(
+//     unsigned samplerate,
+//     float feedback,
+//     float (*interpolate)(float, float*, unsigned)
+//   ): Delay(Delay(samplerate, 8.f, interpolate)), fb(feedback), samplerate(samplerate) {
+// };
+//
+// float Verb::play(float sample) {
+//   float out = 0.f;
+//   out = read(i[3]/samplerate) * k[3];
+//   out += read(i[2]/samplerate) * k[2];
+//   out += read(i[1]/samplerate) * k[1];
+//   out += read(i[0]/samplerate) * k[0];
+//   write(sample + (out * fb));
+//   writeptr++;
+//   return out;
+// }
+//
+// void Verb::feedback(double feedback){
+//   fb = feedback;
+// }
 
 // float Verb::play(float sample) {
 //   buffer.writesample(sample, writeptr);

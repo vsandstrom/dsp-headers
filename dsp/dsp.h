@@ -93,13 +93,13 @@ namespace dspheaders {
   }
   
   // Mutate
-  inline void scale(float* array, unsigned length, float outmin, float outmax) {
+  inline void scale(float* buffer, unsigned length, float outmin, float outmax) {
     float min = 0.f, max = 0.f;
     for (int i=0; i<length; i++){
-      if (array[i] < min) {min = array[i];}
-      if (array[i] > max) {max = array[i];}
+      if (buffer[i] < min) {min = buffer[i];}
+      if (buffer[i] > max) {max = buffer[i];}
     }
-    range(array, length, min, max, outmin, outmax);
+    range(buffer, length, min, max, outmin, outmax);
   }   
   
   inline float sum(float* buffer, unsigned size) {

@@ -2,7 +2,6 @@
 #include <cmath>
 
 using namespace dspheaders;
-
 inline void sine(float* table, unsigned tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = pi * 2.f / numsamples;

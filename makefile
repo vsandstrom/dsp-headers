@@ -1,5 +1,6 @@
 CC = clang++
-INCLUDES = -I/usr/local/include 
+INCLUDES = 
+# -I/usr/local/include 
 
 SRC_DIR := dsp
 BUILD_DIR := build
@@ -12,7 +13,8 @@ TARGETS = $(BUILD_DIR)/vectest $(BUILD_DIR)/fmtest $(BUILD_DIR)/delaytest $(BUIL
 CFLAGS := -std=c++14 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES)
 #-march=native -msse -msse2 -mssse3 -msse4.1 -msse4.2 -mavx512vl -I./$(SRC_DIR) $(INCLUDES)
 #-I./$(SRC_DIR) $(INCLUDES)
-LDFLAGS := -L/usr/local/lib/ -lportaudio 
+LDFLAGS := -L./portaudio -lportaudio 
+#-L/usr/local/lib/ -lportaudio 
 
 .PHONY: all clean
 
@@ -37,7 +39,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR):
-	mkdir -p $@
+	mkdir -p $@ && \
+	git submodule update --init --recursive 
+
 
 clean:
 	rm -r $(BUILD_DIR)/

@@ -9,8 +9,8 @@ Usage:
 $ ./<program name>  [-c <carrier frequency>] [-m <modulator frequency>]
 ```
 
-The builds below expects the portaudio headers be located in "/usr/local/".
-Change the directory to match your configuration*
+The builds below expects the portaudio headers be located in <p>"/usr/local/"</p>
+(Building portaudio from source currently fails on macOS, but works through Homebrew.)
 
 Run:
 ```bash
@@ -24,6 +24,7 @@ demotest showcases some of the sounding objects, such as wavetable FM, envelopes
 ```bash
 $ ./build/demotest
 ```
+
 <!-- ## Vector Oscillator test: -->
 <!-- vectest.cpp runs a demo of a VectorOscillator class, scrolling through all waveform types defined in the -->
 <!-- WaveTable class.  -->

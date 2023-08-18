@@ -1,5 +1,7 @@
 #include "wavetable.hpp"
+#include "dsp.h"
 #include "waveshape.h"
+#include <algorithm>
 
 using namespace dspheaders;
 
@@ -25,7 +27,8 @@ Wavetable::Wavetable(
 
 
 void Wavetable::movepointer(float phase) {
-	float normalizedPhase = (phase + 1) * 0.5;
+  // Make sure phase of the input signal is contained between 0 and 1.f
+	float normalizedPhase = clamp((phase+1) * 0.5, 0.f, 1.f);
   wrapf(&(position += tablelength / (samplerate / (frequency * normalizedPhase))), tablelength);
 }
 

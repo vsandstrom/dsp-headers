@@ -1,5 +1,5 @@
 #include "dsp/interpolation.hpp"
-#include "portaudio/include/portaudio.h"
+#include <portaudio.h>
 #include <cstdio>
 #include <iostream>
 #include "dsp/wavetable.hpp"
@@ -106,15 +106,14 @@ static int paCallback(  const void* inputBuffer,				// input
 }
 
 int main(int argc, char** argv) {
-  printf("before after init of globals");
+
+  // Initialize a waveform
   float camp[] = {1, 0, 0.6, 0.2, 0.4, 0.1, 0.25};
   float cphs[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
   float* ctable = new float[513];
   complex_sine(ctable, 512, camp, 7, cphs);
   carrier = new Wavetable(ctable, 512, SAMPLE_RATE, interpolation::cubic);
   carrier -> frequency = FREQ;
-  // carrier.frequency = FREQ;
-
 
   // float mamp[] = {1, 0.4, 0.2, 0.8, 0.2, 0.1, 0.025};
   // float mphs[] = {0, 0, 0, 0.45, 0.7, 0.3, 0};

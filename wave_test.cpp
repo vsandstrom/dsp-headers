@@ -1,4 +1,4 @@
-#include "waveshape.h"
+#include "dsp/waveshape.h"
 #include <cstdio>
 #include <cstring>
 

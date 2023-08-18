@@ -1,6 +1,6 @@
 
 #include "dsp/interpolation.hpp"
-#include "portaudio/include/portaudio.h"
+#include <portaudio.h>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>

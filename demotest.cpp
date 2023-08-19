@@ -1,7 +1,5 @@
-#include "dsp/interpolation.hpp"
 #include <portaudio.h>
-#include <cstdio>
-#include <iostream>
+#include "dsp/interpolation.hpp"
 #include "dsp/wavetable.hpp"
 #include "dsp/envelope.hpp"
 #include "dsp/verb.hpp"
@@ -50,8 +48,12 @@ unsigned scoreptr = 0;
 
 
 using namespace dspheaders;
-Envelope envelope = Envelope(breakpoints, 5, breaktimes, 4, SAMPLE_RATE, interpolation::linear);
-Wavetable* carrier;
+float camp[] = {1, 0, 0.6, 0.2, 0.4, 0.1, 0.25};
+float cphs[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
+float ctable[513] = {0.0f};
+Wavetable carrier = Wavetable( complex_sine(ctable, 512, camp, cphs, 7) , 512, SAMPLE_RATE, interpolation::cubic);
+
+Envelope envelope = Envelope(breakpoints, 4, breaktimes, 3, SAMPLE_RATE, interpolation::linear);
 // Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 // Wavetable* modulator 
 Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
@@ -82,7 +84,7 @@ static int paCallback(  const void* inputBuffer,				// input
 
     if ( timeline == (int)(SAMPLE_RATE * dur[scoreptr % 18])) {
       env = envelope.play(GATE::on);
-      carrier -> frequency = score[scoreptr % 11];
+      carrier.frequency = score[scoreptr % 11];
       // modulator -> frequency = score[scoreptr % 7] * 7/2; 
       // carrier.frequency = score[scoreptr % 11];
       modulator.frequency = score[scoreptr % 7] * 7/2; 
@@ -90,7 +92,7 @@ static int paCallback(  const void* inputBuffer,				// input
     } else {
       env = envelope.play(GATE::off);
     }
-    float car = carrier -> play(modulator.play()+(vib.play() * 0.01));
+    float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env;
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
@@ -108,12 +110,7 @@ static int paCallback(  const void* inputBuffer,				// input
 int main(int argc, char** argv) {
 
   // Initialize a waveform
-  float camp[] = {1, 0, 0.6, 0.2, 0.4, 0.1, 0.25};
-  float cphs[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
-  float* ctable = new float[513];
-  complex_sine(ctable, 512, camp, 7, cphs);
-  carrier = new Wavetable(ctable, 512, SAMPLE_RATE, interpolation::cubic);
-  carrier -> frequency = FREQ;
+  carrier.frequency = FREQ;
 
   // float mamp[] = {1, 0.4, 0.2, 0.8, 0.2, 0.1, 0.025};
   // float mphs[] = {0, 0, 0, 0.45, 0.7, 0.3, 0};
@@ -133,7 +130,7 @@ int main(int argc, char** argv) {
             case 'c': {
               argc--;
               argv++;
-              carrier -> frequency = std::stof(*argv);
+              carrier.frequency = std::stof(*argv);
               // carrier.frequency = std::stof(*argv);
               break;
             }

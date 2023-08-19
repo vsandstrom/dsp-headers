@@ -101,12 +101,25 @@ namespace dspheaders {
     }
     range(buffer, length, min, max, outmin, outmax);
   }   
+
   
-  inline float sum(float* buffer, unsigned size) {
+  inline float sum(float* buffer, unsigned length) {
     float sum = 0.f;
-    for (unsigned i = 0; i < size; i++) {
-      sum += ceil(buffer[i]);
+    for (unsigned i = 0; i < length; i++) {
+      sum += buffer[i];
     }
     return sum;
+  }
+  
+
+  // Softmax function, useful when creating a wavetable, where total amplitude
+  // should not excede -1 - 1
+  inline float* normalize(float* buffer, unsigned length) {
+    float factor = 1 / sum(buffer, length);
+    int i;
+    for (i=0; i<length; i++){
+      buffer[i] *= factor;
+    }
+    return buffer;
   }
 } /* namespace dspheaders */

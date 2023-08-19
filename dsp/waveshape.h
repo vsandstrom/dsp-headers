@@ -53,26 +53,29 @@ inline void triangle(float* table, unsigned tablelength) {
 }
 
 // TODO: Can use phase
-// Create a Wavetable of a bunch of partials of sines, based on their amplitudes and phases
-//
+// Create a Wavetable of a bunch of partials of sines, based on their amplitudes and phases.
+// Amplitude and phase value-arrays must be same length
 inline float* complex_sine(
     float* table,
     unsigned tablelength, 
     float* amplitudes,
-    unsigned amplength,
-    float* phases
+    float* phases,
+    unsigned paramslength
     ) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
 
   // Make sure amplitudes are within 0 & 1
-  scale(amplitudes, amplength, 0.f, 1.f);
+  // scale(amplitudes, paramslength, 0.f, 1.f);
+  normalize(amplitudes, paramslength);
 
-  // where n = 1
+  // ------------ FORMULA --------------------
+  // where n = 1 -> paramslength
   // inc = pi * 2.f * n / numsamples;
   // positionphase = inc + (numsamples * inc); 
   // value = positionphase * amplitude
+  // -----------------------------------------
   
-  for (int n=1; n < amplength; n++) {
+  for (int n=1; n < paramslength; n++) {
     inc = pi * 2.f * n / numsamples;
     angle = inc * numsamples * phases[n-1];
 
@@ -85,5 +88,6 @@ inline float* complex_sine(
 
   // more shenanigans 
   scale(table, tablelength+1, -1.f, 1.f);
+  // return for simplicity, the function mutates array in place through pointer.
   return table;
 }

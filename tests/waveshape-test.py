@@ -29,6 +29,13 @@ def scale(table: list[float]):
         table[i] = (1.0 - 0.0) * (table[i]- min) / (max - min) + 1
     return table
 
+def normalize(table: list[float]):
+    factor = 1 / sum(table)
+
+    for i in range(len(table)):
+        table[i] = table[i] * factor
+    return table
+
 ####
 def sine(table: list[float], length: int) -> list[float]:
     angle = 0.0
@@ -72,7 +79,7 @@ def hanning(table: list[float], length: int) -> list[float]:
     angle = 0.0
     inc = math.pi / length
     for _ in range(length):
-        table.append(-1.0 - pow(math.cos(angle), 2))
+        table.append(1.0 - pow(math.cos(angle), 2))
         angle = angle + inc
     return table
 
@@ -83,6 +90,7 @@ def noise(table: list[float], length: int) -> list[float]:
 
 def complex(table: list[float], length: int, ampl: list[float], phase: list[float], paramlength:
             int):
+    ampl = normalize(ampl)
     for n in range(1, paramlength+1):
         inc = (math.pi * 2 * n) / float(length)
         angle = inc * float(length) * phase[n-1]
@@ -93,7 +101,7 @@ def complex(table: list[float], length: int, ampl: list[float], phase: list[floa
                 table[i] = table[i] + (math.sin(angle)*ampl[n-1])
             angle = inc + angle
 
-    return scale(table)
+    return table
 
 length = 512
 if len(sys.argv) > 2:

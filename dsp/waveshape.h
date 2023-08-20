@@ -21,7 +21,26 @@ inline void saw(float* table, unsigned tablelength) {
   }
 }
 
+inline void revsaw(float* table, unsigned tablelength) {
+  float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
+  inc = 2.0 / (numsamples-1);
+  for (unsigned i = 0; i < tablelength; i++) {
+    table[i] = angle + 1.f;
+    angle -= inc;
+  }
+}
+
 inline void square(float* table, unsigned tablelength) {
+  float val = -1.f;
+  for (unsigned i = 0; i < tablelength; i++) {
+    table[i] = val;
+    if (i == tablelength/2 - 1) {
+      val = 1.f;
+    }
+  }
+}
+
+inline void revsquare(float* table, unsigned tablelength) {
   float val = 1.f;
   for (unsigned i = 0; i < tablelength; i++) {
     table[i] = val;
@@ -52,9 +71,11 @@ inline void triangle(float* table, unsigned tablelength) {
   }
 }
 
-// TODO: Can use phase
-// Create a Wavetable of a bunch of partials of sines, based on their amplitudes and phases.
-// Amplitude and phase value-arrays must be same length
+///
+/// Creates a additive waveshape based on partials of sines with
+/// different amplitudes and phases
+///
+
 inline float* complex_sine(
     float* table,
     unsigned tablelength, 

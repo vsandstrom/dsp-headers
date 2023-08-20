@@ -54,8 +54,10 @@ void Wavetable::populatetable(WAVESHAPE waveshape) {
   switch (waveshape) {
     case (SINE): { sine(table, tablelength); break; }
     case (SAW): { saw(table, tablelength); break; }
+    case (REVSAW): { revsaw(table, tablelength); break; }
     case (TRIANGLE): { triangle(table, tablelength); break; }
     case (SQUARE): { square(table, tablelength); break; }
+    case (REVSQUARE): { revsquare(table, tablelength); break; }
     case (HANNING): { hanning(table, tablelength); break; }
     case (ENV): { hanning(table, tablelength); break; }
   }

@@ -10,7 +10,9 @@ namespace dspheaders {
     SINE,
     TRIANGLE,
     SAW,
+    REVSAW,
     SQUARE,
+    REVSQUARE,
     HANNING,
     ENV
   };

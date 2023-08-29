@@ -63,6 +63,11 @@ namespace dspheaders {
     return *x;
   }
 
+  inline unsigned wrap_dangerous(int* x, unsigned int length) {
+    int y = *x & (length -1);
+    return y;
+  }
+
   // Makes sure that x is within range of 0.0 - n
   //
   // x is a kept as float for interpolation purposes.

@@ -9,7 +9,7 @@ Buffer::Buffer(
   float seconds,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(seconds*samplerate), interpolate(interpolate) {
+: bufferlength(findpow2(seconds*samplerate)), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 
@@ -26,7 +26,7 @@ Buffer::Buffer(
   unsigned size,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(size), interpolate(interpolate) {
+: bufferlength(findpow2(size)), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 
@@ -43,8 +43,8 @@ float Buffer::readsample(float readptr) {
   return interpolate(wrapf(&readptr, bufferlength), buffer, bufferlength);
 };
 
-float Buffer::readsample(int readptr) {
-  return interpolate(wrap(&readptr, bufferlength), buffer, bufferlength);
+float Buffer::readsample(unsigned readptr) {
+  return interpolate(wrap_dangerously(&readptr, bufferlength), buffer, bufferlength);
 
 }
 

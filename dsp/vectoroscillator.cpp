@@ -1,4 +1,5 @@
 #include "vectoroscillator.hpp"
+#include "dsp.h"
 #include <cstdio>
 #include <vector>
 using namespace dspheaders;
@@ -13,8 +14,8 @@ VectorOscillator::VectorOscillator(
 }
 
 float VectorOscillator::play(float transfer) {
-  float weight = transfer * (float)tablelength -1;
-  for (int i = 0; i < tablelength; ++i) {
+  float weight = transfer * ((float)tablelength -1);
+  for (int i = 0; i < tablelength; i++) {
     tables[i].frequency = frequency;
     crossection[i] = tables[i].play();
   }
@@ -23,7 +24,7 @@ float VectorOscillator::play(float transfer) {
 }
 
 float VectorOscillator::play(float transfer, float phase) {
-  float weight = transfer * (float)tablelength -1;
+  float weight = transfer * ((float)tablelength -1);
 
   for (int i = 0; i < tablelength; ++i) {
     tables[i].frequency = frequency;

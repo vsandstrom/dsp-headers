@@ -16,6 +16,7 @@ namespace dspheaders {
   enum GATE {
     on = 1, 
     off = 0,
+    cycle = 2,
   };
 
 

@@ -21,7 +21,7 @@ namespace dspheaders {
       // Read a interpolated float based on position  
       float readsample(float readptr);
       // Read a sample of a floored position value
-      float readsample(int readptr);
+      float readsample(unsigned readptr);
       // write a sample to a position in the buffer
       void writesample(float sample, int writeptr);
 

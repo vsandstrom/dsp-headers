@@ -96,7 +96,7 @@ inline float* complex_sine(
   // value = positionphase * amplitude
   // -----------------------------------------
   
-  for (int n=1; n < paramslength; n++) {
+  for (int n=1; n <= paramslength; n++) {
     inc = pi * 2.f * n / numsamples;
     angle = inc * numsamples * phases[n-1];
 

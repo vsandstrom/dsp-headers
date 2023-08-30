@@ -1,6 +1,7 @@
 #include "envelope.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
+#include "wavetable.hpp"
 #include <algorithm>
 #include <cstdio>
 
@@ -65,7 +66,7 @@ float Envelope::play(GATE trigger) {
       readptr += 1.f;
     } 
     return out;
-  }
+  } 
   readptr = 0.f;
   out = buffer.readsample(wrapf(&readptr, buffer.bufferlength));
   readptr += 1.f;

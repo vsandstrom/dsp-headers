@@ -63,9 +63,11 @@ namespace dspheaders {
     return *x;
   }
 
-  inline unsigned wrap_dangerous(int* x, unsigned int length) {
-    int y = *x & (length -1);
-    return y;
+  inline unsigned wrap_dangerously(unsigned int* x, unsigned int length) {
+    // Should work for both positive and negative overflow of unsigned int
+    // Since index should always be <= 0 this should work.
+    *x &= (length -1);
+    return *x;
   }
 
   // Makes sure that x is within range of 0.0 - n

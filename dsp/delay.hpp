@@ -9,7 +9,7 @@ namespace dspheaders {
       unsigned samplerate;
       unsigned delay_taps = 1;
       float time;
-      int writeptr = 0;
+      unsigned writeptr = 0;
 
       // Read sample from delay buffer with 
       // delaytime * samplerate number of samples offset

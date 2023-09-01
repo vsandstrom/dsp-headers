@@ -76,13 +76,30 @@ float Envelope::play(GATE trigger) {
   if (trigger == GATE::off) {
     if (readptr < buffer.bufferlength) {
       out = buffer.readsample(readptr);
-      readptr += 1.f;
-    } 
-    return out;
-  } 
-  readptr = 0.f;
-  out = buffer.readsample(readptr);
+      prev = out;
+    }
+  } else if (trigger == GATE::on) {
+    readptr = 0.f;
+    // Small smoothing step 
+    out = (buffer.readsample(readptr) + prev) / 2;
+  }
   readptr += 1.f;
+  return out;
+};
+
+float Envelope::play(GATE trigger, float speed) {
+  float out = 0.f;
+  if (trigger == GATE::off) {
+    if (readptr < buffer.bufferlength) {
+      out = buffer.readsample(readptr);
+      prev = out;
+    }
+  } else if (trigger == GATE::on) {
+    readptr = 0.f;
+    // Small smoothing step 
+    out = (buffer.readsample(readptr) + prev) / 2;
+  }
+  readptr += speed;
   return out;
 };
       

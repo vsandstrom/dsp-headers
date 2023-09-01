@@ -75,7 +75,7 @@ VectorOscillator *vec;
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
 float at[] = {0.01f, 0.1f, 0.4};
-Envelope ampenv = Envelope(ap, 4, at, 3, SAMPLE_RATE, interpolation::linear);
+Envelope ampenv = Envelope(ap, 4, at, 3, SAMPLE_RATE, interpolation::cubic);
 
 // Vector Movement Envelope
 float vp[] = {0.f, 0.8f, 0.3f, 0.f};
@@ -85,7 +85,7 @@ Envelope vecenv = Envelope(vp, 4, vt, 3, SAMPLE_RATE, interpolation::linear);
 // Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 // Wavetable* modulator 
 Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
+Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
 // Verb verb = Verb(SAMPLE_RATE, 0.4f, interpolation::linear);
 
@@ -119,8 +119,8 @@ static int paCallback(  const void* inputBuffer,				// input
       vec -> frequency = score[scoreptr % 11];
       modulator.frequency = score[scoreptr % 7] * 7/2; 
     } else {
-      env = ampenv.play(GATE::off);
-      venv = vecenv.play(GATE::off);
+      env = ampenv.play(GATE::off, 2.f);
+      venv = vecenv.play(GATE::off, 3.f);
     }
     float car = vec -> play(venv, map(modulator.play()+(vib.play() * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));

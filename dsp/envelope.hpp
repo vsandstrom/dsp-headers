@@ -28,6 +28,7 @@ namespace dspheaders {
       unsigned pointlength;
       unsigned timeslength;
       float samplerate;
+      float prev;
       float readptr;
       void generate();
     public: 
@@ -45,6 +46,7 @@ namespace dspheaders {
 
       // Resets envelope to start and returns the first value from table
       float play(GATE trigger);
+      float play(GATE trigger, float speed);
 
       void repr();
   };

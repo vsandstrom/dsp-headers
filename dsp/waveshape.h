@@ -44,10 +44,10 @@ inline void revsquare(float* table, unsigned tablelength) {
   float val = 1.f;
   for (unsigned i = 0; i < tablelength; i++) {
     table[i] = val;
-    if (i == tablelength/2 - 1) {
-      val = -1.f;
+    if (i == (tablelength / 2)-1) {
+      val=-1.f;
     }
-  }
+  } 
 }
 
 inline void hanning(float* table, unsigned tablelength) {

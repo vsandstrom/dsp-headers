@@ -5,6 +5,8 @@
 
 using namespace dspheaders;
 
+
+
 Wavetable::Wavetable(
   WAVESHAPE waveshape,
   unsigned tablelength,
@@ -12,8 +14,10 @@ Wavetable::Wavetable(
   float (*interpolate)(float pos, float* table, unsigned length)
 ): tablelength(tablelength), samplerate((float)samplerate), interpolate(interpolate) {
   table = new float[tablelength+1];
+  initbuffer(table, tablelength+1);
+
   populatetable(waveshape);
-  position = 0.f;
+  readptr = 0.f;
 };
 
 Wavetable::Wavetable(
@@ -22,32 +26,28 @@ Wavetable::Wavetable(
   unsigned samplerate,
   float (*interpolate)(float pos, float* table, unsigned length)
 ): table(table), tablelength(tablelength), samplerate((float)samplerate), interpolate(interpolate) {
-  position = 0.f;
+  readptr = 0.f;
 };
 
-
-void Wavetable::movepointer(float phase) {
-  // Make sure phase of the input signal is contained between 0 and 1.f
-	float normalizedPhase = clamp((phase+1) * 0.5, 0.f, 1.f);
-  wrapf(&(position += tablelength / (samplerate / (frequency * normalizedPhase))), tablelength);
+float Wavetable::read() {
+  wrapf(&(readptr += tablelength / (samplerate / frequency)), tablelength);
+  return interpolate(readptr, table, tablelength);
 }
 
-void Wavetable::movepointer() {
-  wrapf(&(position += tablelength / (samplerate / frequency)), tablelength);
+float Wavetable::read(float phase) {
+  // Make sure phase of the input signal is contained between 0 and 1.f
+	float normalizedPhase = clamp((phase+1) * 0.5, 0.f, 1.f);
+  wrapf(&(readptr += tablelength / (samplerate / (frequency * normalizedPhase))), tablelength);
+  return interpolate(readptr, table, tablelength);
 }
 
 float Wavetable::play(){
-  float out = interpolate(position, table, tablelength);
-  movepointer();
-  return out;
+  return read();
 }
 
 float Wavetable::play(float phase){
-  float out = interpolate(position, table, tablelength);
-  movepointer(phase);
-  return out;
+  return read(phase);
 }
-
 
 void Wavetable::populatetable(WAVESHAPE waveshape) {
   float inc = 0.f, angle = 0.f, numSamples = (float) tablelength;

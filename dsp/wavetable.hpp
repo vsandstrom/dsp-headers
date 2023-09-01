@@ -17,23 +17,41 @@ namespace dspheaders {
 
   class Wavetable {
     private:
-    float position;
+    float readptr;
     float samplerate;
     float* table;
     unsigned tablelength;
 
     float (*interpolate)(float, float*, unsigned) = nullptr;
 
-    void movepointer();
-    void movepointer(float phase);
-
+    // generates the next sample
+    float read();
+    // generates the next sample with phase offset
+    float read(float phase);
     void populatetable(WAVESHAPE waveshape);
 
     public:
     float frequency;
 
+    // Generate the next sample from the wavetable oscillator
     float play();
+    // Generate the next sample from the wavetable oscillator.
+    //
+    // Enables phase modulation.
     float play(float phase);
+
+
+    // WAVESHAPE waveshape - Takes an enum choosing among simple waveforms as first argument.
+    //
+    // unsigned int tablelength - length in number of samples in table
+    //
+    // unsigned int samplerate - audio engine setting of samples per seconds, usually 44100 or
+    // 48000
+    //
+    // float (*interpolate) - supply a pointer to specified interpolation function
+    //
+    // (interpolation::cubic is not suitable for SQUARE and SAW because smoothing discontinuities
+    // can result in wierd sample spikes.)
     Wavetable(
       WAVESHAPE waveshape,
       unsigned tablelength,
@@ -41,6 +59,17 @@ namespace dspheaders {
       float (*interpolate)(float, float*, unsigned)
     );
 
+    // float* table - an pregenerated table.
+    //
+    // unsigned int tablelength - length in number of samples in table
+    //
+    // unsigned int samplerate - audio engine setting of samples per seconds, usually 44100 or
+    // 48000
+    //
+    // float (*interpolate) - supply a pointer to specified interpolation function
+    //
+    // (interpolation::cubic is not suitable for SQUARE and SAW because smoothing discontinuities
+    // can result in wierd sample spikes.)
     Wavetable(
       float* table,
       unsigned tablelength,

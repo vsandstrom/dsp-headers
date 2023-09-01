@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <cstdio>
 
+
+// TODO: Perhaps save segments in separate buffers, making it easier to set duration of attack,
+// decay etc.
+
 using namespace dspheaders;
 // float [breakpoints], unsigned pointlength, float [breaktimes], unsigned timeslength, unsigned
 // samplerate, interpolation-callback
@@ -13,7 +17,16 @@ Envelope::Envelope(
     float* breaktimes, unsigned timeslength,
     float samplerate,
     float (*interpolate)(float, float*, unsigned)) 
-  : breakpoints(breakpoints), breaktimes(breaktimes), pointlength(pointlength), timeslength(timeslength), buffer(Buffer(sum(breaktimes, timeslength), samplerate, interpolate)), samplerate(samplerate) {
+  : breakpoints(breakpoints), 
+    breaktimes(breaktimes),
+    pointlength(pointlength),
+    timeslength(timeslength),
+    buffer(
+        Buffer(
+          sum(breaktimes, timeslength), samplerate, interpolate
+        )
+      ), 
+    samplerate(samplerate) {
   generate();
 };
 
@@ -62,13 +75,13 @@ float Envelope::play(GATE trigger) {
   float out = 0.f;
   if (trigger == GATE::off) {
     if (readptr < buffer.bufferlength) {
-      out = buffer.readsample(wrapf(&readptr, buffer.bufferlength));
+      out = buffer.readsample(readptr);
       readptr += 1.f;
     } 
     return out;
   } 
   readptr = 0.f;
-  out = buffer.readsample(wrapf(&readptr, buffer.bufferlength));
+  out = buffer.readsample(readptr);
   readptr += 1.f;
   return out;
 };

@@ -12,5 +12,6 @@ dmakefile
 tests/*
 !tests/interpolation-test.py
 !tests/waveshape-test.py
+.todo
 
 

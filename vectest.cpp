@@ -39,8 +39,8 @@ using namespace dspheaders;
 // SETUP:
 Wavetable sine = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable triangle = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable square = Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable saw = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable square = Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::none);
+Wavetable saw = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
 Wavetable transfer = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 std::vector<Wavetable> vecTables = {sine, triangle, square, saw};

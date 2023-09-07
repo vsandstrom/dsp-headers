@@ -16,6 +16,7 @@ namespace dspheaders {
       float read(float delaytime);
       // Write sample to delay buffer
       void write(float sample);
+      
 
     public:
       // Set the number of taps in the delay.
@@ -23,6 +24,8 @@ namespace dspheaders {
 
       // Set the duration between delay taps
       void delaytime(float delaytime);
+      void write(float sample, int offset);
+      float read(int offset);
 
       float play(float input, float delaytime, float wet, float feedback);
 

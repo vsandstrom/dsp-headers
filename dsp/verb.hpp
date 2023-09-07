@@ -3,25 +3,25 @@
 #include "dsp.h"
 #include "buffer.hpp"
 #include "delay.hpp"
-#include <x86intrin.h>
 
 namespace dspheaders{
-  // class Verb : public Delay{
-  //   private:
-  //     unsigned samplerate;
-  //     float fb;
-  //     // __m128 fb;
-  //     int writeptr = 0;
-  //     float v[4]   { 0,    0,     0,    0     };
-  //     float k[4]   { 0.8f, 0.35f, 0.5f, 0.12f };
-  //     float   i[4] { 17.f, 19.f,  29.f, 47.f  };
-  //
-  //     // void write();
-  //     // float read(int pos);
-  //
-  //   public:
-  //     Verb(unsigned samplerate, float feedback, float (*interpolate)(float, float*, unsigned));
-  //     void feedback(double feedback);
-  //     float play(float sample);
-  // };
+  class Verb {
+    private:
+      float samplerate;
+      Delay* delaylines;
+      float fb;
+      int readptr = 0;
+      float prev[2] = {0.f, 0.f};
+      float k[4]   { 0.8f, 0.2f, 0.34f, 0.12f };
+      int i[4]   { 17, 19,  29, 47  };
+
+      void write(float sample);
+      float read();
+
+    public:
+      Verb(unsigned samplerate, float feedback, float (*interpolate)(float, float*, unsigned));
+      void feedback(float feedback);
+
+      float play(float sample);
+  };
 }

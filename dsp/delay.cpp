@@ -32,11 +32,31 @@ float Delay::read(float delaytime) {
   return output;
 }
 
+
 void Delay::write(float sample) {
   // Within bounds-checking is handled in the Buffer object
   buffer.writesample(sample, writeptr++);
   // wrap_dangerously(&writeptr, buffer.bufferlength);
 }
+
+//////////////////////////////////////////////////////////
+////////////////// Read for REVERB: //////////////////////
+//////////////////////////////////////////////////////////
+float Delay::read(int offset) {
+  float tap = (float)writeptr + offset;
+  return buffer.readsample(tap);
+}
+
+void Delay::write(float sample, int offset) {
+  // Within bounds-checking is handled in the Buffer object
+  buffer.writesample(sample, writeptr + offset);
+
+  // wrap_dangerously(&writeptr, buffer.bufferlength);
+}
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+
 void Delay::taps(unsigned taps) {
   delay_taps = taps;
 }

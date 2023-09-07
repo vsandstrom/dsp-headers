@@ -10,7 +10,7 @@ Verb::Verb (
     float feedback,
     float (*interpolate)(float, float*, unsigned)
   ): 
-  fb(feedback), 
+  feedback(feedback),
   samplerate(samplerate)
 {
   Delay lines[4] = {
@@ -47,5 +47,4 @@ float Verb::play(float sample) {
   return read();
 }
       
-void Verb::feedback(float _fb) { fb = _fb; }
 

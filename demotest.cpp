@@ -24,23 +24,31 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 // Fundamental pitch
-float fund = 200.f;
+float fund = 80.f;
 // Pitch score
-float score[11] = {
-  fund * 0.8f, 
-  fund, 176.f * 2.0f, 
-  fund/3.f, 
-  fund*4.f/1.5f, 
-  fund/3.f, 
-  176.f/3.f, 
-  fund*9/4, 
-  fund*9/5.f,
-  fund*4/3.f,
-  176.f/3.f, 
+float score[] = {
+  fund,
+  fund * 6/5*2,
+  fund * 3/2,
+  fund * 9/8*2,
+  fund * 3,
 };
+
+float amps[] = {
+  0.8,
+  0.45,
+  0.3,
+  0.5,
+  0.75,
+  0.5,
+  0.65,
+  0.3,
+  0.4
+};
+
 // Duration before retriggering the envelope, in seconds from start
 // float dur[21] = {1.2, 1.4, 2.0, 2.2, 2.6, 3.8, 4.0, 4.1, 4.2, 4.3, 4.7, 5.1, 5.3, 5.6, 5.7, 6.2, 6.4, 7.2, 7.6, 8.0, 8.6};
-float dur[21] = {1.2, 0.2, 0.6, 0.2, 0.4, 1.2, 0.2, 0.1, 0.1, 0.1, 0.4, 0.4, 0.2, 0.3, 0.1, 0.5, 0.2, 0.8, 0.4, 0.4, 0.6 };
+float dur[21] = {0.4, 0.4, 0.6, 0.2, 0.8, 0.2, 0.4, 0.4, 0.2, 0.2, 0.4, 0.4, 0.2, 0.3, 0.1, 0.5, 0.2, 0.8, 0.4, 0.4, 0.6 };
 
 // keeps track of the number of the current sample
 unsigned timeline = 0;
@@ -116,15 +124,15 @@ static int paCallback(  const void* inputBuffer,				// input
       seq += (unsigned)(SAMPLE_RATE * dur[scoreptr % 18]);
       env = ampenv.play(GATE::on);
       venv = vecenv.play(GATE::on);
-      vec -> frequency = score[scoreptr % 11];
-      modulator.frequency = score[scoreptr % 7] * 7/2; 
+      vec -> frequency = score[scoreptr % 5];
+      modulator.frequency = score[scoreptr % 3] * 7/2; 
     } else {
       env = ampenv.play(GATE::off, 2.f);
       venv = vecenv.play(GATE::off, 3.f);
     }
     float car = vec -> play(venv, map(modulator.play()+(vib.play() * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
-    float sig = car*env;
+    float sig = car*env*amps[scoreptr & 7];
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
     // sig += verb.play(sig) * 0.5;
 

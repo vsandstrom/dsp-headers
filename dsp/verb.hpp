@@ -9,7 +9,6 @@ namespace dspheaders{
     private:
       float samplerate;
       Delay* delaylines;
-      float fb;
       int readptr = 0;
       float prev[2] = {0.f, 0.f};
       float k[4]   { 0.8f, 0.2f, 0.34f, 0.12f };
@@ -20,7 +19,7 @@ namespace dspheaders{
 
     public:
       Verb(unsigned samplerate, float feedback, float (*interpolate)(float, float*, unsigned));
-      void feedback(float feedback);
+      float feedback;
 
       float play(float sample);
   };

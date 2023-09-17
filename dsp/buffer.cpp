@@ -40,18 +40,21 @@ Buffer::Buffer(
 
 
 float Buffer::readsample(float readptr) {
-  return interpolate(wrapf(&readptr, bufferlength), buffer, bufferlength);
+  return interpolate(wrapf(&readptr, bufferlength), buffer, bufferlength); 
 };
 
 float Buffer::readsample(unsigned readptr) {
   return interpolate(wrap_dangerously(&readptr, bufferlength), buffer, bufferlength);
-
 }
-
 
 void Buffer::writesample(float sample, int writeptr) {
   buffer[wrap(&writeptr, bufferlength)] = sample;
 };
+
+// Experimental interpolated write
+void Buffer::writesample(float sample, float writeptr) {
+  writeinterpolation::linear(sample, wrapf(&writeptr, bufferlength), buffer, bufferlength);
+}
 
 // important for smaller systems that do not clear old memory
 void Buffer::initbuffer() {

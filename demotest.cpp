@@ -6,6 +6,7 @@
 #include "dsp/envelope.hpp"
 #include "dsp/verb.hpp"
 #include "dsp/delay.hpp"
+#include "dsp/filter.hpp"
 #include "dsp/waveshape.h"
 #include "dsp/vectoroscillator.hpp"
 
@@ -79,7 +80,6 @@ float table3[513] = {0.0f};
 
 VectorOscillator *vec;
 
-
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
 float at[] = {0.01f, 0.1f, 0.4};
@@ -95,6 +95,8 @@ Envelope vecenv = Envelope(vp, 4, vt, 3, SAMPLE_RATE, interpolation::linear);
 Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
+
+Comb comb = Comb(213.f, SAMPLE_RATE, interpolation::linear);
 // Verb verb = Verb(SAMPLE_RATE, 0.4f, interpolation::linear);
 
 static frame data;
@@ -130,10 +132,15 @@ static int paCallback(  const void* inputBuffer,				// input
       env = ampenv.play(GATE::off, 2.f);
       venv = vecenv.play(GATE::off, 3.f);
     }
-    float car = vec -> play(venv, map(modulator.play()+(vib.play() * 0.01), -1.f, 1.f, 0.f, 1.f));
+
+    float vibrato = vib.play();
+
+    float car = vec -> play(venv, map(modulator.play()+(vibrato * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
+    sig += comb.play(sig, vibrato * 30);
+
     // sig += verb.play(sig) * 0.5;
 
     // Stereo frame: two increments of out buffer

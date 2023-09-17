@@ -35,7 +35,7 @@ float Delay::read(float delaytime) {
 
 void Delay::write(float sample) {
   // Within bounds-checking is handled in the Buffer object
-  buffer.writesample(sample, writeptr++);
+  buffer.writesample(sample, (int)writeptr++);
   // wrap_dangerously(&writeptr, buffer.bufferlength);
 }
 
@@ -49,7 +49,7 @@ float Delay::read(int offset) {
 
 void Delay::write(float sample, int offset) {
   // Within bounds-checking is handled in the Buffer object
-  buffer.writesample(sample, writeptr + offset);
+  buffer.writesample(sample, (int)writeptr + offset);
 
   // wrap_dangerously(&writeptr, buffer.bufferlength);
 }

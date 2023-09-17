@@ -11,8 +11,8 @@ namespace dspheaders {
       unsigned readptr = 0.f;
 
     public: 
-      float play(float sample);
-      float play(float sample, float mod);
+      float play(float sample, float feedback);
+      float play(float sample, float feedback, float mod);
       Comb(
           unsigned offset,
           unsigned samplerate,

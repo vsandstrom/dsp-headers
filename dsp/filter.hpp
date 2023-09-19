@@ -4,6 +4,8 @@ namespace dspheaders {
   class Comb {
     private:
       Buffer buffer;
+      float previn = 0.001f;
+      float prevout = 0.001f;
       float read(unsigned readptr);
       void write(float sample);
       void write(float sample, float mod);

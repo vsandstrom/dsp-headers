@@ -79,9 +79,11 @@ float phs3[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
 float table3[513] = {0.0f};
 
 VectorOscillator *vec;
-Comb comb17 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
+// Comb comb17 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb comb23 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
-// Comb comb117 = Comb(117, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb comb27 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb comb41 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb comb117 = Comb(117, (unsigned)SAMPLE_RATE, interpolation::linear);
 
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
@@ -138,14 +140,23 @@ static int paCallback(  const void* inputBuffer,				// input
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
-    sig = comb17.play(sig, 0.95);
-    sig = comb23.play(sig, 0.9);
-    // sig = comb117.play(sig, 0.7);
+    // sig = comb17.play(sig, .9f);
+  
+    float c0 = comb23.play(sig, .95f, vibr * 0.01);
+    float c1 = comb27.play(sig, .8f, vibr*0.021);
+    float c2 = comb41.play(sig, .75f, vibr * 0.032);
+    float c3 = comb117.play(sig, 0.7, vibr * 0.041);
     // sig += verb.play(sig) * 0.5;
+    //
+    sig = (c0 + c1 + c2 + c3)/4.f;
 
     // Stereo frame: two increments of out buffer
-    *out++ = sig; 
-    *out++ = sig;
+    *out++ = sig*0.1; 
+    *out++ = sig*0.1;
+    
+// #ifdef DEBUG
+    printf("output: %f\n", sig);
+// #endif
 
     timeline++;
 	}

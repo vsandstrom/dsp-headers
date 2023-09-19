@@ -52,9 +52,9 @@ void Buffer::writesample(float sample, int writeptr) {
 };
 
 // Experimental interpolated write
-void Buffer::writesample(float sample, float writeptr) {
-  writeinterpolation::linear(sample, wrapf(&writeptr, bufferlength), buffer, bufferlength);
-}
+// void Buffer::writesample(float sample, float writeptr) {
+//   writeinterpolation::linear(sample, wrapf(&writeptr, bufferlength), buffer, bufferlength);
+// }
 
 // important for smaller systems that do not clear old memory
 void Buffer::initbuffer() {

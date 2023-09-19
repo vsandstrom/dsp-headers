@@ -1,6 +1,7 @@
 #include "filter.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
+#include "interpolation.hpp"
 #include <cstdio>
 
 using namespace dspheaders;
@@ -15,31 +16,38 @@ void Comb::write(float sample) {
   buffer.writesample(sample, writeptr);
 }
 
-void Comb::write(float sample, float mod) {
-  buffer.writesample(sample, writeptr + mod);
-}
-
 float Comb::play(float sample, float feedback) {
+  float output = 0.f;
   float dly = read(readptr);
-  readptr++; 
+  readptr+=1.f; 
   float out = sample + (dly * feedback);
-  float output = dcblock(out, previn, prevout);
+  output = interpolation::slope(prevout, out);
+  output = dcblock(output, previn, prevout);
   previn = sample;
   prevout = out;
   write(out);
-  writeptr+=1.f;
+  writeptr++;
   return output;
 }
 
 float Comb::play(float sample, float feedback, float mod) {
+  float output = 0.f;
   float dly = read(readptr);
-  readptr++; 
+  // readptr reads dragging behind writeptr
+
   float out = sample + (dly * feedback);
-  float output = dcblock(out, previn, prevout);
+
+  output = interpolation::slope(prevout, out);
+  // dcblock
+  output = dcblock(output, previn, prevout);
+
+  // store previous in and out
   previn = sample;
   prevout = out;
-  write(out, mod);
-  writeptr+=1.f;
+
+  write(out);
+  readptr += 1.f + mod; 
+  writeptr++;
   return output;
 }
 
@@ -47,7 +55,7 @@ Comb::Comb(
     unsigned offset,
     unsigned samplerate,
     float (*interpolate)(float, float*, unsigned))
-  : writeptr(offset), 
+  : readptr((4*samplerate) - offset), 
     buffer(Buffer(4*samplerate, samplerate, interpolate)) {
 }
 

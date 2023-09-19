@@ -25,7 +25,7 @@ namespace dspheaders {
       // write a sample to a position in the buffer
       void writesample(float sample, int writeptr);
       
-      void writesample(float sample, float writeptr);
+      // void writesample(float sample, float writeptr);
 
       // Zero out the assigned buffer array
       //

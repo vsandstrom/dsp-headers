@@ -142,21 +142,21 @@ static int paCallback(  const void* inputBuffer,				// input
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
     // sig = comb17.play(sig, .9f);
   
-    float c0 = comb23.play(sig, .95f, vibr * 0.01);
-    float c1 = comb27.play(sig, .8f, vibr*0.021);
-    float c2 = comb41.play(sig, .75f, vibr * 0.032);
-    float c3 = comb117.play(sig, 0.7, vibr * 0.041);
+    float c0 = comb23.play(sig, .5f, vibr * 0.01);
+    float c1 = comb27.play(sig, .4f, vibr*0.021);
+    float c2 = comb41.play(sig, .38f, vibr * 0.032);
+    // float c3 = comb117.play(sig, 0., vibr * 0.041);
     // sig += verb.play(sig) * 0.5;
     //
-    sig = (c0 + c1 + c2 + c3)/4.f;
+    sig = (c0 + c1 + c2)/3.f;
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.1; 
     *out++ = sig*0.1;
     
-// #ifdef DEBUG
+#ifdef DEBUG
     printf("output: %f\n", sig);
-// #endif
+#endif
 
     timeline++;
 	}

@@ -4,13 +4,12 @@ namespace dspheaders {
   class Comb {
     private:
       Buffer buffer;
-      float previn = 0.001f;
-      float prevout = 0.001f;
+      float previn = 0.00001f;
+      float prevout = 0.00001f;
       float read(unsigned readptr);
       void write(float sample);
-      void write(float sample, float mod);
-      float writeptr = 0;
-      unsigned readptr = 0.f;
+      unsigned writeptr = 0;
+      float readptr = 0.f;
 
     public: 
       float play(float sample, float feedback);

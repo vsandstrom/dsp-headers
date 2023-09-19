@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include "interpolation.hpp"
 #include "./dsp.h"
 
@@ -113,20 +113,11 @@ float interpolation::hermetic(float position, float *table, unsigned tableLength
   return 0.5f * ((c3 * diff + c2) * diff + c1) * diff + table[a2];
 }
 
-void writeinterpolation::linear(float sample, float position, float* table, unsigned tablelength) {
-  int a1, b1 = 0;
-  float aw, bw, diff = 0.f;
 
-  a1 = position; // implicit cast
-  b1 = a1 + 1;
-  diff = position - a1;
-  bw = diff;
-  aw = 1 - diff;
-
-  float bck = sample * aw;
-  float fwd = sample * bw;
-
-  table[a1] = bck;
-  table[b1] = fwd;
+// Simple linear interpolation between two values
+// TODO: Not suitable as callback, shoule move out of namespace
+float interpolation::slope(float a, float b) {
+  return (a + b) / 2;
 }
+
 

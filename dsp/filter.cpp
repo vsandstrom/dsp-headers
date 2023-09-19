@@ -1,6 +1,7 @@
 #include "filter.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
+#include <cstdio>
 
 using namespace dspheaders;
 
@@ -19,19 +20,27 @@ void Comb::write(float sample, float mod) {
 }
 
 float Comb::play(float sample, float feedback) {
-  float fb = read(readptr);
+  float dly = read(readptr);
   readptr++; 
-  write(sample + (fb * feedback));
+  float out = sample + (dly * feedback);
+  float output = dcblock(out, previn, prevout);
+  previn = sample;
+  prevout = out;
+  write(out);
   writeptr+=1.f;
-  return sample + fb;
+  return output;
 }
 
 float Comb::play(float sample, float feedback, float mod) {
-  float fb = read(readptr);
+  float dly = read(readptr);
   readptr++; 
-  write(sample + (fb * feedback), mod);
+  float out = sample + (dly * feedback);
+  float output = dcblock(out, previn, prevout);
+  previn = sample;
+  prevout = out;
+  write(out, mod);
   writeptr+=1.f;
-  return sample + fb;
+  return output;
 }
 
 Comb::Comb(

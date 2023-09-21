@@ -79,7 +79,7 @@ float phs3[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
 float table3[513] = {0.0f};
 
 VectorOscillator *vec;
-// Comb comb17 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb comb17 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb comb23 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb comb27 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb comb41 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
@@ -140,15 +140,15 @@ static int paCallback(  const void* inputBuffer,				// input
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
-    // sig = comb17.play(sig, .9f);
+    float c0 = comb17.play(sig, .2f);
   
-    float c0 = comb23.play(sig, .5f, vibr * 0.01);
-    float c1 = comb27.play(sig, .4f, vibr*0.021);
-    float c2 = comb41.play(sig, .38f, vibr * 0.032);
+    float c3 = comb23.play(sig, .16f, vibr * 0.01);
+    float c1 = comb27.play(sig, .12f, vibr*0.021);
+    float c2 = comb41.play(sig, .1f, vibr * 0.032);
     // float c3 = comb117.play(sig, 0., vibr * 0.041);
     // sig += verb.play(sig) * 0.5;
     //
-    sig = (c0 + c1 + c2)/3.f;
+    sig = sig + (c0 + c1 + c2 + c3)/4.f;
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.1; 

@@ -4,20 +4,20 @@
 #include "interpolation.hpp"
 #include <cstdio>
 
-using namespace dspheaders::filter;
+using namespace dspheaders;
 
-//////////////////////////////////////////////////////////////////////////////
-/// COMB FEEDBACK
-//////////////////////////////////////////////////////////////////////////////
+////////////
+/// COMB ///
+////////////
 
-float Comb::read(unsigned readptr) {
+float Comb::read (unsigned readptr) {
   // in a delay, we read at [0+n] and write at [0.f + n + offset]
-  float readsample = buffer.readsample(readptr);
+  float readsample = buffer -> readsample(readptr);
   return readsample;
 }
 
 void Comb::write(float sample) {
-  buffer.writesample(sample, writeptr);
+  buffer -> writesample(sample, writeptr);
 }
 
 float Comb::play(float sample, float feedback) {
@@ -65,30 +65,25 @@ Comb::Comb(
     unsigned samplerate,
     float (*interpolate)(float, float*, unsigned))
   : readptr((4*samplerate) - offset), 
-    buffer(Buffer(4*samplerate, samplerate, interpolate)) {
+    buffer(new Buffer(4*samplerate, samplerate, interpolate)) {
 }
 
-// Naming wrapper around Comb class, which is as default a IIR Comb filter
-CombIIR::CombIIR(
-  unsigned offset,
-  unsigned samplerate,
-  float (*interpolate)(float, float*, unsigned)) 
-  : Comb(offset, samplerate, interpolate) {
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/// ALLPASS 
-//////////////////////////////////////////////////////////////////////////////
-
-Allpass::Allpass(
+Comb::Comb(
+    Buffer* buffer,
     unsigned offset,
     unsigned samplerate,
     float (*interpolate)(float, float*, unsigned))
-  : 
-    Comb(offset, samplerate, interpolate)
-{}
+  : buffer(buffer),
+  readptr(buffer -> bufferlength - offset) {
+}
 
-float Allpass::play(float sample, float feedback) {
+////////////////
+/// COMB IIR ///
+////////////////
+
+// Naming wrapper around Comb class, which is as default a IIR Comb filter
+
+float CombIIR::play(float sample, float feedback) {
   float output = 0.f;
   float dly = read(readptr);
   // readptr reads dragging behind writeptr
@@ -106,8 +101,7 @@ float Allpass::play(float sample, float feedback) {
   return output;
 }
 
-
-float Allpass::play(float sample, float feedback, float mod) {
+float CombIIR::play(float sample, float feedback, float mod) {
   float output = 0.f;
   float dly = read(readptr);
   // readptr reads dragging behind writeptr
@@ -128,8 +122,36 @@ float Allpass::play(float sample, float feedback, float mod) {
   writeptr++;
   return output;
 }
+
+
+CombIIR::CombIIR(
+  unsigned offset,
+  unsigned samplerate,
+  float (*interpolate)(float, float*, unsigned)) 
+  : Comb(offset, samplerate, interpolate) {
+};
+
+CombIIR::CombIIR(
+  Buffer* buffer,
+  unsigned offset,
+  unsigned samplerate,
+  float (*interpolate)(float, float*, unsigned)) 
+  : Comb(offset, samplerate, interpolate) {
+};
+
+////////////////
+/// COMB FIR ///
+////////////////
       
 CombFIR::CombFIR (
+  unsigned offset,
+  unsigned samplerate,
+  float (*interpolate)(float, float*, unsigned))
+  : Comb(offset, samplerate, interpolate) {
+};
+
+CombFIR::CombFIR (
+  Buffer* buffer,
   unsigned offset,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
@@ -164,7 +186,6 @@ float CombFIR::play (float sample, float wet, float mod) {
   write(sample);
   // read delay
   float dly = read(readptr);
-
   float out = sample + (dly * wet);
 
   // when modulating the readptr, we need to do
@@ -180,4 +201,27 @@ float CombFIR::play (float sample, float wet, float mod) {
   readptr += 1.f + mod; 
   writeptr++;
   return output;
+}
+
+///////////////
+/// ALLPASS ///
+///////////////
+
+Allpass::Allpass(
+    unsigned offset,
+    unsigned samplerate,
+    float (*interpolate)(float pos, float* table, unsigned tablelength))
+  : buffer(Buffer(4*samplerate, samplerate, interpolate)), iir(CombIIR(&buffer, offset, samplerate, interpolate)), fir(CombFIR(&buffer, offset, samplerate, interpolate)) {
+}
+
+float Allpass::play(float sample, float amount) {
+  float fb = iir.play(sample, amount);
+  float ff = fir.play(sample + fb, amount);
+  return ff;
+}
+
+float Allpass::play(float sample, float amount, float mod) {
+  float fb = iir.play(sample, amount, mod);
+  float ff = fir.play(sample + fb, amount, mod);
+  return ff;
 }

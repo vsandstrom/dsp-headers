@@ -1,24 +1,31 @@
 #include "buffer.hpp"
 
 namespace dspheaders {
-  namespace filter {
     class Comb {
       protected:
-        Buffer buffer;
+        Buffer* buffer;
         float previn = 0.00001f;
         float prevout = 0.00001f;
-        float read(unsigned readptr);
-        void write(float sample);
         unsigned writeptr = 0;
         float readptr = 0.f;
 
       public: 
-        virtual float play(float sample, float feedback);
-        virtual float play(float sample, float feedback, float mod);
+        float read(unsigned readptr);
+        void write(float sample);
+        float play(float sample, float feedback);
+        float play(float sample, float feedback, float mod);
         Comb(
-            unsigned offset,
-            unsigned samplerate,
-            float (*interpolate)(float, float*, unsigned)
+          unsigned offset,
+          unsigned samplerate,
+          float (*interpolate)(float, float*, unsigned)
+        );
+
+        // When using both CombIIR and CombFIR with the same buffer
+        Comb(
+          Buffer* buffer,
+          unsigned offset,
+          unsigned samplerate,
+          float (*interpolate)(float, float*, unsigned)
         );
     };
 
@@ -27,11 +34,31 @@ namespace dspheaders {
 ///////////////////////////////////////////////////////////////////////////////
 
     class CombIIR : public Comb {
-      CombIIR (
-        unsigned offset,
-        unsigned samplerate,
-        float (*interpolate)(float, float*, unsigned)
-      );
+      // Based on:
+      // https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html
+      //
+      //              -----------------------> y(n)
+      //             |     ----------         
+      // x(n) ---(+)---> |   z[-M]  | ---
+      //         |       -----------    |
+      //         ---------(- aM)--------
+      //
+      public: 
+        float play(float sample, float feedback);
+        float play(float sample, float feedback, float mod);
+
+        CombIIR (
+          unsigned offset,
+          unsigned samplerate,
+          float (*interpolate)(float, float*, unsigned)
+        );
+
+        CombIIR (
+          Buffer* buffer,
+          unsigned offset,
+          unsigned samplerate,
+          float (*interpolate)(float, float*, unsigned)
+        );
     };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,27 +66,58 @@ namespace dspheaders {
 ///////////////////////////////////////////////////////////////////////////////
 
     class CombFIR : public Comb {
-      float play(float sample, float feedback);
-      float play(float sample, float feedback, float mod);
-
-      CombFIR (
-          unsigned offset,
-          unsigned samplerate,
-          float (*interpolate)(float, float*, unsigned)
-      );
-    };
-
-
-
-    class Allpass : public Comb {
+      // Based on:
+      // https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html
+      //
+      //    -----------( * b0 )---------------
+      //   |         ----------              |
+      // x(n)  --> |   z[-M]  | -( * bM)--> (+) --> y(n)
+      //           -----------
+      //
+      public: 
         float play(float sample, float feedback);
         float play(float sample, float feedback, float mod);
-        Allpass (
+        
+        CombFIR (
             unsigned offset,
             unsigned samplerate,
             float (*interpolate)(float, float*, unsigned)
         );
 
+        CombFIR (
+            Buffer* buffer,
+            unsigned offset,
+            unsigned samplerate,
+            float (*interpolate)(float, float*, unsigned)
+        );
     };
-  }
+
+///////////////
+/// ALLPASS ///
+///////////////
+
+  // Based on:
+  // https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html
+  //
+  //               ----( * b0 )------------
+  //              |   ----------          |
+  // x(n) ---(+)---> |   z[-M]  | -----> (+) --> y(n)
+  //         |       -----------    |
+  //         -------( * -aM )-------
+    class Allpass {
+      private:
+        Buffer buffer;
+        CombIIR iir;
+        CombFIR fir;
+
+      public:
+        float play(float sample, float amount);
+        float play(float sample, float amount, float mod);
+
+        Allpass(
+          unsigned offset, 
+          unsigned samplerate,
+          float (*interpolate)(float, float*, unsigned)
+        );
+    };
 }

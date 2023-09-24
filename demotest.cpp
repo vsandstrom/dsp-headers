@@ -79,13 +79,13 @@ float phs3[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
 float table3[513] = {0.0f};
 
 VectorOscillator *vec;
-CombIIR comb0 = CombIIR(901, (unsigned)SAMPLE_RATE, interpolation::linear);
-CombIIR comb1 = CombIIR(778, (unsigned)SAMPLE_RATE, interpolation::linear);
-CombIIR comb2 = CombIIR(1011, (unsigned)SAMPLE_RATE, interpolation::linear);
-CombIIR comb3 = CombIIR(1123, (unsigned)SAMPLE_RATE, interpolation::linear);
-Allpass all0 = Allpass(125, (unsigned)SAMPLE_RATE, interpolation::linear);
-Allpass all1 = Allpass(42, (unsigned)SAMPLE_RATE, interpolation::linear);
-Allpass all2 = Allpass(12, (unsigned)SAMPLE_RATE, interpolation::linear);
+CombIIR comb0 = CombIIR(17, (unsigned)SAMPLE_RATE, interpolation::linear);
+// CombIIR comb1 = CombIIR(778, (unsigned)SAMPLE_RATE, interpolation::linear);
+// CombIIR comb2 = CombIIR(1011, (unsigned)SAMPLE_RATE, interpolation::linear);
+// CombIIR comb3 = CombIIR(1123, (unsigned)SAMPLE_RATE, interpolation::linear);
+// Allpass all0 = Allpass(125, (unsigned)SAMPLE_RATE, interpolation::linear);
+// Allpass all1 = Allpass(42, (unsigned)SAMPLE_RATE, interpolation::linear);
+// Allpass all2 = Allpass(12, (unsigned)SAMPLE_RATE, interpolation::linear);
 
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
@@ -143,18 +143,19 @@ static int paCallback(  const void* inputBuffer,				// input
     float car = vec -> play(venv, map(modulator.play()+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
-    sig += delay.play(sig, 0.8, 0.2, 0.01f);
+    // sig += delay.play(sig, 0.8, 0.2, 0.01f);
     float c0 = comb0.play(sig, .805f);
-    float c3 = comb1.play(sig, .827f, vibr * 0.01);
-    float c1 = comb2.play(sig, .783f, vibr*0.021);
-    float c2 = comb3.play(sig, .764f, vibr * 0.032);
+    // float c3 = comb1.play(sig, .827f, vibr * 0.01);
+    // float c1 = comb2.play(sig, .783f, vibr*0.021);
+    // float c2 = comb3.play(sig, .764f, vibr * 0.032);
     // float c3 = comb117.play(sig, 0., vibr * 0.041);
     // sig += verb.play(sig) * 0.5;
     
-    verb = all0.play(c0 + c1 + c2 + c3, 0.7);
-    verb = all1.play(verb, 0.7);
-    verb = all2.play(verb, 0.7);
-    sig = (verb * 0.2);
+    // verb = all0.play(c0 + c1 + c2 + c3, 0.7);
+    // verb = all1.play(verb, 0.7);
+    // verb = all2.play(verb, 0.7);
+    // sig = (verb * 0.2);
+    sig = sig + (c0 * 0.6);
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.3; 

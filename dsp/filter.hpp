@@ -10,10 +10,10 @@ namespace dspheaders {
         float readptr = 0.f;
 
       public: 
-        float read(unsigned readptr);
+        float read(float readptr);
         void write(float sample);
-        float play(float sample, float feedback);
-        float play(float sample, float feedback, float mod);
+        virtual float play(float sample, float feedback);
+        virtual float play(float sample, float feedback, float mod);
         Comb(
           unsigned offset,
           unsigned samplerate,
@@ -43,6 +43,15 @@ namespace dspheaders {
       //         |       -----------    |
       //         ---------(- aM)--------
       //
+      private:
+        float previn = 0.00001f;
+        float prevout = 0.00001f;
+        unsigned writeptr = 0;
+        float readptr = 0.f;
+
+        float read(float readptr);
+        void write(float sample);
+
       public: 
         float play(float sample, float feedback);
         float play(float sample, float feedback, float mod);
@@ -74,6 +83,15 @@ namespace dspheaders {
       // x(n)  --> |   z[-M]  | -( * bM)--> (+) --> y(n)
       //           -----------
       //
+      private:
+        float previn = 0.00001f;
+        float prevout = 0.00001f;
+        unsigned writeptr = 0;
+        float readptr = 0.f;
+
+        float read(float readptr);
+        void write(float sample);
+
       public: 
         float play(float sample, float feedback);
         float play(float sample, float feedback, float mod);

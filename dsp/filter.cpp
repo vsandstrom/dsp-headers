@@ -10,7 +10,7 @@ using namespace dspheaders;
 /// COMB ///
 ////////////
 
-float Comb::read (unsigned readptr) {
+float Comb::read(float readptr) {
   // in a delay, we read at [0+n] and write at [0.f + n + offset]
   float readsample = buffer -> readsample(readptr);
   return readsample;
@@ -42,7 +42,7 @@ float Comb::play(float sample, float feedback, float mod) {
   float output = 0.f;
   float dly = read(readptr);
   // readptr reads dragging behind writeptr
-  float out = sample - (dly * feedback);
+  float out = sample + (dly * feedback);
 
   // when modulating the readptr, we need to do
   // a simple "interpolation", using the mean value
@@ -82,12 +82,21 @@ Comb::Comb(
 ////////////////
 
 // Naming wrapper around Comb class, which is as default a IIR Comb filter
+float CombIIR::read (float readptr) {
+  // in a delay, we read at [0+n] and write at [0.f + n + offset]
+  float readsample = buffer -> readsample(readptr);
+  return readsample;
+}
+
+void CombIIR::write(float sample) {
+  buffer -> writesample(sample, writeptr);
+}
 
 float CombIIR::play(float sample, float feedback) {
   float output = 0.f;
   float dly = read(readptr);
   // readptr reads dragging behind writeptr
-  float out = sample - (dly * feedback);
+  float out = sample + (dly * feedback);
   // output = interpolation::slope(prevout, out);
   //dcblock
   output = dcblock(output, previn, prevout);
@@ -105,7 +114,7 @@ float CombIIR::play(float sample, float feedback, float mod) {
   float output = 0.f;
   float dly = read(readptr);
   // readptr reads dragging behind writeptr
-  float out = sample - (dly * feedback);
+  float out = sample + (dly * feedback);
 
   // when modulating the readptr, we need to do
   // a simple "interpolation", using the mean value
@@ -142,6 +151,16 @@ CombIIR::CombIIR(
 ////////////////
 /// COMB FIR ///
 ////////////////
+
+float CombFIR::read (float readptr) {
+  // in a delay, we read at [0+n] and write at [0.f + n + offset]
+  float readsample = buffer -> readsample(readptr);
+  return readsample;
+}
+
+void CombFIR::write(float sample) {
+  buffer -> writesample(sample, writeptr);
+}
       
 CombFIR::CombFIR (
   unsigned offset,

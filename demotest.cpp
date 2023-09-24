@@ -79,11 +79,13 @@ float phs3[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
 float table3[513] = {0.0f};
 
 VectorOscillator *vec;
-Comb comb17 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb comb23 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb comb27 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb comb41 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb comb117 = Comb(117, (unsigned)SAMPLE_RATE, interpolation::linear);
+CombIIR comb0 = CombIIR(901, (unsigned)SAMPLE_RATE, interpolation::linear);
+CombIIR comb1 = CombIIR(778, (unsigned)SAMPLE_RATE, interpolation::linear);
+CombIIR comb2 = CombIIR(1011, (unsigned)SAMPLE_RATE, interpolation::linear);
+CombIIR comb3 = CombIIR(1123, (unsigned)SAMPLE_RATE, interpolation::linear);
+Allpass all0 = Allpass(125, (unsigned)SAMPLE_RATE, interpolation::linear);
+Allpass all1 = Allpass(42, (unsigned)SAMPLE_RATE, interpolation::linear);
+Allpass all2 = Allpass(12, (unsigned)SAMPLE_RATE, interpolation::linear);
 
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
@@ -120,6 +122,8 @@ static int paCallback(  const void* inputBuffer,				// input
   float env = 0.f;
   float venv = 0.f;
 
+  float verb = 0.f;
+
 	(void) inputBuffer; // prevent unused variable warning
                       //
 
@@ -140,19 +144,21 @@ static int paCallback(  const void* inputBuffer,				// input
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
     sig += delay.play(sig, 0.8, 0.2, 0.01f);
-    float c0 = comb17.play(sig, .2f);
-  
-    float c3 = comb23.play(sig, .16f, vibr * 0.01);
-    float c1 = comb27.play(sig, .12f, vibr*0.021);
-    float c2 = comb41.play(sig, .1f, vibr * 0.032);
+    float c0 = comb0.play(sig, .805f);
+    float c3 = comb1.play(sig, .827f, vibr * 0.01);
+    float c1 = comb2.play(sig, .783f, vibr*0.021);
+    float c2 = comb3.play(sig, .764f, vibr * 0.032);
     // float c3 = comb117.play(sig, 0., vibr * 0.041);
     // sig += verb.play(sig) * 0.5;
-    //
-    sig = sig + (c0 + c1 + c2 + c3)/4.f;
+    
+    verb = all0.play(c0 + c1 + c2 + c3, 0.7);
+    verb = all1.play(verb, 0.7);
+    verb = all2.play(verb, 0.7);
+    sig = (verb * 0.2);
 
     // Stereo frame: two increments of out buffer
-    *out++ = sig*0.1; 
-    *out++ = sig*0.1;
+    *out++ = sig*0.3; 
+    *out++ = sig*0.3;
     
 #ifdef DEBUG
     printf("output: %f\n", sig);

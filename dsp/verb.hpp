@@ -1,26 +1,35 @@
-
 #pragma once
 #include "dsp.h"
-#include "buffer.hpp"
-#include "delay.hpp"
+#include "filter.hpp"
 
 namespace dspheaders{
-  class Verb {
+  class ChownVerb {
     private:
-      float samplerate;
-      Delay* delaylines;
-      int readptr = 0;
-      float prev[2] = {0.f, 0.f};
-      float k[4]   { 0.8f, 0.2f, 0.34f, 0.12f };
-      int i[4]   { 17, 19,  29, 47  };
+      unsigned rotate = 0;
+      unsigned samplerate;
 
-      void write(float sample);
-      float read();
+      Comb cvec[4] = {
+        Comb(901, samplerate, interpolation::linear),
+        Comb(778, samplerate, interpolation::linear),
+        Comb(1011, samplerate, interpolation::linear),
+        Comb(1123, samplerate, interpolation::linear),
+      };
+
+      float ccoeff[4] = {
+        .805f, 
+        .827f, 
+        .783f, 
+        .764f, 
+      };
+
+      Allpass avec[3] = {
+        Allpass(125, samplerate, interpolation::linear),
+        Allpass(42, samplerate, interpolation::linear),
+        Allpass(12, samplerate, interpolation::linear),
+      };
 
     public:
-      Verb(unsigned samplerate, float feedback, float (*interpolate)(float, float*, unsigned));
-      float feedback;
-
-      float play(float sample);
+      float play(float sample, float amount);
+      ChownVerb(unsigned samplerate);
   };
 }

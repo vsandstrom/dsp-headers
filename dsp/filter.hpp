@@ -1,3 +1,4 @@
+#pragma once
 #include "buffer.hpp"
 
 namespace dspheaders {
@@ -15,15 +16,15 @@ namespace dspheaders {
       void write(float sample);
       unsigned writeptr = 0;
       float readptr = 0.f;
-
-    public: 
-      // Feedback
       float iir(float sample, float feedback);
       float iir(float sample, float feedback, float mod);
       // Feedforward
       float fir(float sample, float amp);
       float fir(float sample, float amp, float mod);
 
+
+    public: 
+      // Feedback
       float play(float sample, float feedback, COMBTYPE type);
       float play(float sample, float feedback, float mod, COMBTYPE type);
       Comb(

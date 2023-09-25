@@ -1,16 +1,11 @@
 #include "dsp/dsp.h"
 #include <portaudio.h>
-// #include <chrono>
 #include <cstdio>
-// #include <cstdlib>
-// #include <cstring>
 #include <iostream>
-// #include <cmath>
-// #include <string>
 #include "dsp/wavetable.hpp"
-// #include "dsp/vectoroscillator.hpp"
 #include "dsp/buffer.hpp"
 #include "dsp/delay.hpp"
+#include "dsp/filter.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -43,7 +38,7 @@ static int paCallback(
 	float* out = (float*)outputBuffer;
 	unsigned int i;
 
-	float* in = (float*)inputBuffer; // prevent unused variable warning
+	float* in = (float*)inputBuffer;
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer

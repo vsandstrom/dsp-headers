@@ -79,13 +79,7 @@ float phs3[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
 float table3[513] = {0.0f};
 
 VectorOscillator *vec;
-CombIIR comb0 = CombIIR(17, (unsigned)SAMPLE_RATE, interpolation::linear);
-// CombIIR comb1 = CombIIR(778, (unsigned)SAMPLE_RATE, interpolation::linear);
-// CombIIR comb2 = CombIIR(1011, (unsigned)SAMPLE_RATE, interpolation::linear);
-// CombIIR comb3 = CombIIR(1123, (unsigned)SAMPLE_RATE, interpolation::linear);
-// Allpass all0 = Allpass(125, (unsigned)SAMPLE_RATE, interpolation::linear);
-// Allpass all1 = Allpass(42, (unsigned)SAMPLE_RATE, interpolation::linear);
-// Allpass all2 = Allpass(12, (unsigned)SAMPLE_RATE, interpolation::linear);
+
 
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
@@ -102,7 +96,15 @@ Envelope vecenv = Envelope(vp, 4, vt, 3, SAMPLE_RATE, interpolation::linear);
 Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
-// Verb verb = Verb(SAMPLE_RATE, 0.4f, interpolation::linear);
+
+// Filters
+Comb comb0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb comb1 = Comb(778, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb comb2 = Comb(1011, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb comb3 = Comb(1123, (unsigned)SAMPLE_RATE, interpolation::linear);
+Allpass all0 = Allpass(125, (unsigned)SAMPLE_RATE, interpolation::linear);
+Allpass all1 = Allpass(42, (unsigned)SAMPLE_RATE, interpolation::linear);
+Allpass all2 = Allpass(12, (unsigned)SAMPLE_RATE, interpolation::linear);
 
 static frame data;
 
@@ -143,19 +145,24 @@ static int paCallback(  const void* inputBuffer,				// input
     float car = vec -> play(venv, map(modulator.play()+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
-    float c0 = comb17.play(sig, .96f, COMBTYPE::IIR);
-    float c1 = comb27.play(sig, .9712f, COMBTYPE::IIR);
-    float c2 = comb41.play(sig, .971f, COMBTYPE::IIR);
-    float c3 = comb23.play(sig, .9816f, COMBTYPE::IIR);
-    // float c3 = comb117.play(sig, 0., vibr * 0.041);
+    float c0 = comb0.play(sig, .96f, COMBTYPE::IIR);
+    float c1 = comb1.play(sig, .9712f, COMBTYPE::IIR);
+    float c2 = comb2.play(sig, .971f, COMBTYPE::IIR);
+    float c3 = comb3.play(sig, .9816f, COMBTYPE::IIR);
     // sig += verb.play(sig) * 0.5;
     //
-    sig += (c0 + c1 + c2 + c3)/4.f;
-    // sig += delay.play(sig, 0.8, 0.2, 0.01f);
+    verb = (c0 + c1 + c2 + c3)/4.f;
+    verb += all0.play(verb, 0.98);
+    verb += all1.play(verb, 0.89);
+    verb += all2.play(verb, 0.85);
+
+    sig += verb * 0.01;
+
+    sig += delay.play(sig, 0.4f, 0.8f, 0.1f);
 
     // Stereo frame: two increments of out buffer
-    *out++ = sig*0.3; 
-    *out++ = sig*0.3;
+    *out++ = sig*0.2; 
+    *out++ = sig*0.2;
     
 #ifdef DEBUG
     printf("output: %f\n", sig);

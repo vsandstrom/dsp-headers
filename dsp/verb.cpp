@@ -5,46 +5,17 @@
 
 using namespace dspheaders;
 
-Verb::Verb (
-    unsigned samplerate,
-    float feedback,
-    float (*interpolate)(float, float*, unsigned)
-  ): 
-  feedback(feedback),
-  samplerate(samplerate)
-{
-  Delay lines[4] = {
-    Delay(samplerate, 8.f, interpolate),
-    Delay(samplerate, 8.f, interpolate),
-    Delay(samplerate, 8.f, interpolate),
-    Delay(samplerate, 8.f, interpolate),
-  };
-  delaylines = lines;
-};
-
-void Verb::write(float sample) {
-  int n, m;
-  for (n = 0; n < 4; n++){
-    delaylines[n].write(sample, readptr + i[n]);
+float ChownVerb::play(float sample, float amount) {
+  float sig = 0.f;
+  for (int i = 0; i < 4; i++) {
+    sig += cvec[i].play(sample, ccoeff[(i+rotate)%4], COMBTYPE::IIR);
   }
-}
-
-float Verb::read() {
-  float out = 0.0f;
-  int n, m;
-
-  for (n = 0; n < 4; n++) {
-    for (m = 0; m < 4; m++) {
-      out += k[m] * delaylines[m].read((int)(readptr + (float)i[n]));
-    }
+  rotate++;
+  sig/=4;
+  for (int j = 0; j < 3; j++) {
+    sig += avec[j].play(sig, 0.7);
   }
-  readptr++;
-  return out;
+  return sig * amount;
 }
 
-float Verb::play(float sample) {
-  write(sample);
-  return read();
-}
-      
-
+ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {}

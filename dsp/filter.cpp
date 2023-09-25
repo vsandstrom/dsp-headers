@@ -6,11 +6,6 @@
 
 using namespace dspheaders;
 
-
-////////////
-/// COMB ///
-////////////
-
 float Comb::read(float readptr) {
   // in a delay, we read at [0+n] and write at [0.f + n + offset]
   float readsample = buffer.readsample(readptr);
@@ -109,15 +104,19 @@ Allpass::Allpass(
 float Allpass::play(float sample, float feedback) {
   float bck = iir(sample, -feedback);
   float fwd = fir(sample + bck, feedback);
+  float out = interpolation::slope(fwd, prevout);
+  prevout = out;
   readptr+=1.f; 
   writeptr++;
-  return fwd;
+  return out;
 }
 
 float Allpass::play(float sample, float feedback, float mod) {
   float bck = iir(sample, -feedback, mod);
   float fwd = fir(sample + bck, feedback, mod);
+  float out = interpolation::slope(fwd, prevout);
+  prevout = out;
   readptr+=1.f + mod; 
   writeptr++;
-  return fwd;
+  return out;
 }

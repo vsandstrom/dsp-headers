@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <portaudio.h>
 #include <vector>
+#include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
 #include "dsp/wavetable.hpp"
 #include "dsp/envelope.hpp"
@@ -97,16 +98,16 @@ Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation:
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
 
-// Filters
-Comb comb0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb comb1 = Comb(778, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb comb2 = Comb(1011, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb comb3 = Comb(1123, (unsigned)SAMPLE_RATE, interpolation::linear);
-Allpass all0 = Allpass(125, (unsigned)SAMPLE_RATE, interpolation::linear);
-Allpass all1 = Allpass(42, (unsigned)SAMPLE_RATE, interpolation::linear);
-Allpass all2 = Allpass(12, (unsigned)SAMPLE_RATE, interpolation::linear);
+ChownVerb verb = ChownVerb(SAMPLE_RATE);
 
 static frame data;
+
+float a[16] = {
+   1,  1,  1,  1,
+  -1, -1, -1, -1,
+  -1,  1, -1,  1,
+   1, -1,  1, -1
+};
 
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,				// input
@@ -123,13 +124,16 @@ static int paCallback(  const void* inputBuffer,				// input
 
   float env = 0.f;
   float venv = 0.f;
+  float rev = 0.f;
 
-  float verb = 0.f;
+  unsigned x = 0;
 
 	(void) inputBuffer; // prevent unused variable warning
                       //
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
+                                          //
+    // Modultion and sequencer section
     if ( timeline == seq ) {
       scoreptr++;
       seq += (unsigned)(SAMPLE_RATE * dur[scoreptr % 18]);
@@ -142,27 +146,20 @@ static int paCallback(  const void* inputBuffer,				// input
       venv = vecenv.play(GATE::off, 3.f);
     }
     float vibr = vib.play();
+
+    // Sound generation section
     float car = vec -> play(venv, map(modulator.play()+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
-    float c0 = comb0.play(sig, .96f, COMBTYPE::IIR);
-    float c1 = comb1.play(sig, .9712f, COMBTYPE::IIR);
-    float c2 = comb2.play(sig, .971f, COMBTYPE::IIR);
-    float c3 = comb3.play(sig, .9816f, COMBTYPE::IIR);
-    // sig += verb.play(sig) * 0.5;
-    //
-    verb = (c0 + c1 + c2 + c3)/4.f;
-    verb += all0.play(verb, 0.98);
-    verb += all1.play(verb, 0.89);
-    verb += all2.play(verb, 0.85);
 
-    sig += verb * 0.01;
+    rev = verb.play(sig, 0.6);
 
-    sig += delay.play(sig, 0.4f, 0.8f, 0.1f);
+    float left =  (rev * 0.02);
+    float right = (rev * 0.02);
 
     // Stereo frame: two increments of out buffer
-    *out++ = sig*0.2; 
-    *out++ = sig*0.2;
+    *out++ = left; 
+    *out++ = right;
     
 #ifdef DEBUG
     printf("output: %f\n", sig);

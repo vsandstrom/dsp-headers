@@ -36,8 +36,6 @@ $(BUILD_DIR)/osctest: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) osctest.cpp -o $@
 $(BUILD_DIR)/combtest: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) combtest.cpp -o $@
-$(BUILD_DIR)/verbtest: $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) verbtest.cpp -o $@
 
 # Compiling dependencies
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)

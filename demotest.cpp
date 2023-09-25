@@ -143,19 +143,15 @@ static int paCallback(  const void* inputBuffer,				// input
     float car = vec -> play(venv, map(modulator.play()+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
-    // sig += delay.play(sig, 0.8, 0.2, 0.01f);
-    float c0 = comb0.play(sig, .805f);
-    // float c3 = comb1.play(sig, .827f, vibr * 0.01);
-    // float c1 = comb2.play(sig, .783f, vibr*0.021);
-    // float c2 = comb3.play(sig, .764f, vibr * 0.032);
+    float c0 = comb17.play(sig, .96f, COMBTYPE::IIR);
+    float c1 = comb27.play(sig, .9712f, COMBTYPE::IIR);
+    float c2 = comb41.play(sig, .971f, COMBTYPE::IIR);
+    float c3 = comb23.play(sig, .9816f, COMBTYPE::IIR);
     // float c3 = comb117.play(sig, 0., vibr * 0.041);
     // sig += verb.play(sig) * 0.5;
-    
-    // verb = all0.play(c0 + c1 + c2 + c3, 0.7);
-    // verb = all1.play(verb, 0.7);
-    // verb = all2.play(verb, 0.7);
-    // sig = (verb * 0.2);
-    sig = sig + (c0 * 0.6);
+    //
+    sig += (c0 + c1 + c2 + c3)/4.f;
+    // sig += delay.play(sig, 0.8, 0.2, 0.01f);
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.3; 

@@ -33,8 +33,13 @@ using namespace dspheaders;
 
 Wavetable *carrier = nullptr;
 
-Comb comb = Comb(17, SAMPLE_RATE, interpolation::linear);
-Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
+bool impulse = true;
+
+Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
+// Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
 
 
 
@@ -52,74 +57,31 @@ static int paCallback(  const void* inputBuffer,				// input
 	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
+  float o0 = 0.f;
+  float o1 = 0.f;
+  float o2 = 0.f;
+  float o3 = 0.f;
 
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier->play();
-    car += comb.play(car, 0.9, lfo.play());
+    float sig = (impulse == true) ? 1.f : 0.f;
+    o0 = c0.play(sig, 0.9, COMBTYPE::IIR);
+    o1 = c1.play(sig, .931f, COMBTYPE::IIR);
+    o2 = c2.play(sig, 0.97, COMBTYPE::IIR);
+    o3 = c3.play(sig, 0.98, COMBTYPE::IIR);
+
+    sig += (o0 + o1 + o2 + o3) * 0.2;
 
     // Stereo frame: two increments of out buffer
-    *out++ = car; 
-    *out++ = car;
+    *out++ = sig; 
+    *out++ = sig;
+    impulse = false;
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
-    if ( argc > 2 && argc < 8 ) {
-      argc--;
-      argv++;
-      while (argc > 0){
-        printf("%s", *argv);
-        if ((*argv)[0] == '-') {
-          printf("%c\n", (*argv)[1]);
-          switch ((*argv)[1]){
-            case 'w': {
-              argc--;
-              argv++;
-              printf("%s", *argv);
-              // carrier.frequency = std::stof(*argv);
-              if (!strcmp(*argv, "square")){
-                carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
-                carrier->frequency = FREQ;
-              } 
-              else if (!strcmp(*argv, "sine")){
-                carrier = new Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-                carrier->frequency = FREQ;
-              } 
-              else if (!strcmp(*argv, "saw")){
-                carrier = new Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
-                carrier->frequency = FREQ;
-              } 
-              else if (!strcmp(*argv, "triangle")){
-                carrier = new Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-                carrier->frequency = FREQ;
-              } else {
-                carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
-                carrier->frequency = FREQ;
-              }
-              break;
-            }
-            default:{
-              argc--;
-              argv++;
-              carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-              break;
-
-            }
-          }
-        }
-        argc--;
-        argv++;
-      }
-      printf("running user input frequencies\n");
-    } else {
-      printf("running on default frequencies\n");
-      carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-      carrier->frequency = FREQ;
-    }
-
 	PaStream* stream;
 	PaError err;
 

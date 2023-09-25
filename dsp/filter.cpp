@@ -6,6 +6,7 @@
 
 using namespace dspheaders;
 
+
 //////////////////////////////////////////////////////////////////////////////
 /// COMB FEEDBACK
 //////////////////////////////////////////////////////////////////////////////
@@ -33,8 +34,6 @@ float Comb::playIIR(float sample, float feedback) {
   // prevout = out;
 
   write(out);
-  readptr+=1.f; 
-  writeptr++;
   return out;
 }
 
@@ -54,8 +53,6 @@ float Comb::playIIR(float sample, float feedback, float mod) {
   prevout = out;
 
   write(out);
-  readptr += 1.f + mod; 
-  writeptr++;
   return output;
 }
 
@@ -73,8 +70,6 @@ float Comb::playFIR(float sample, float amp) {
   // previn = sample;
   // prevout = out;
 
-  readptr+=1.f; 
-  writeptr++;
   return out;
 }
 
@@ -95,11 +90,31 @@ float Comb::playFIR(float sample, float amp, float mod) {
   // previn = sample;
   // prevout = out;
 
+  return out;
+}
+
+float Comb::play(float sample, float feedback, COMBTYPE type) {
+  float output = 0.f;
+  switch (type) {
+    case FIR : { output = playFIR(sample, feedback); break; };
+    case IIR : { output = playIIR(sample, feedback); break; };
+    default: { break; };
+  }
+  readptr += 1.f; 
+  writeptr++;
+  return output;
+}
+
+float Comb::play(float sample, float feedback, float mod, COMBTYPE type) {
+  float output = 0.f;
+  switch (type) {
+    case FIR : { output = playFIR(sample, feedback); break; };
+    case IIR : { output = playIIR(sample, feedback); break; };
+    default: { break; };
+  }
   readptr += 1.f + mod; 
   writeptr++;
-  return out;
-  // TODO
-  return 0.f;
+  return output;
 }
 
 Comb::Comb(
@@ -109,3 +124,25 @@ Comb::Comb(
   : buffer(Buffer(4*samplerate, samplerate, interpolate)),
     readptr((float)(buffer.bufferlength - offset)) { }
 
+
+Allpass::Allpass(
+  unsigned offset,
+  unsigned samplerate,
+  float (*interpolate)(float, float*, unsigned))
+  : Comb(offset, samplerate, interpolate) {}
+
+float Allpass::play(float sample, float feedback) {
+  float bck = playIIR(sample, -feedback);
+  float fwd = playFIR(sample + bck, feedback);
+  readptr += 1.f; 
+  writeptr++;
+  return fwd;
+}
+
+float Allpass::play(float sample, float feedback, float mod) {
+  float bck = playIIR(sample, -feedback, mod);
+  float fwd = playFIR(sample + bck, feedback, mod);
+  readptr += 1.f + mod; 
+  writeptr++;
+  return fwd;
+}

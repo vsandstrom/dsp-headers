@@ -139,16 +139,15 @@ static int paCallback(  const void* inputBuffer,				// input
     float car = vec -> play(venv, map(modulator.play()+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
-    sig += delay.play(sig, 0.8, 0.2, 0.01f);
-    float c0 = comb17.play(sig, .2f);
-  
-    float c3 = comb23.play(sig, .16f, vibr * 0.01);
-    float c1 = comb27.play(sig, .12f, vibr*0.021);
-    float c2 = comb41.play(sig, .1f, vibr * 0.032);
+    float c0 = comb17.play(sig, .96f, COMBTYPE::IIR);
+    float c1 = comb27.play(sig, .9712f, COMBTYPE::IIR);
+    float c2 = comb41.play(sig, .971f, COMBTYPE::IIR);
+    float c3 = comb23.play(sig, .9816f, COMBTYPE::IIR);
     // float c3 = comb117.play(sig, 0., vibr * 0.041);
     // sig += verb.play(sig) * 0.5;
     //
-    sig = sig + (c0 + c1 + c2 + c3)/4.f;
+    sig += (c0 + c1 + c2 + c3)/4.f;
+    // sig += delay.play(sig, 0.8, 0.2, 0.01f);
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.1; 

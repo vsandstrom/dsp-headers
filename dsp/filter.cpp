@@ -129,7 +129,8 @@ Allpass::Allpass(
   unsigned offset,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-  : Comb(offset, samplerate, interpolate) {}
+  : Comb(offset, samplerate, interpolate) {
+}
 
 float Allpass::play(float sample, float feedback) {
   float bck = playIIR(sample, -feedback);

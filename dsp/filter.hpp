@@ -18,11 +18,11 @@ namespace dspheaders {
 
     public: 
       // Feedback
-      float playIIR(float sample, float feedback);
-      float playIIR(float sample, float feedback, float mod);
+      float iir(float sample, float feedback);
+      float iir(float sample, float feedback, float mod);
       // Feedforward
-      float playFIR(float sample, float amp);
-      float playFIR(float sample, float amp, float mod);
+      float fir(float sample, float amp);
+      float fir(float sample, float amp, float mod);
 
       float play(float sample, float feedback, COMBTYPE type);
       float play(float sample, float feedback, float mod, COMBTYPE type);

@@ -21,23 +21,15 @@ void Comb::write(float sample) {
   buffer.writesample(sample, writeptr);
 }
 
-float Comb::playIIR(float sample, float feedback) {
+float Comb::iir(float sample, float feedback) {
   float output = 0.f;
-  float dly = read(readptr);
-  // readptr reads dragging behind writeptr
-  float out = sample + (dly * feedback);
-  // output = interpolation::slope(prevout, out);
-  //dcblock
-  // output = dcblock(output, previn, prevout);
-
-  // previn = sample;
-  // prevout = out;
-
+  // read buffer & write buffer with curr sample + dly value, causing feedback
+  float out = sample + (read(readptr) * feedback);
   write(out);
   return out;
 }
 
-float Comb::playIIR(float sample, float feedback, float mod) {
+float Comb::iir(float sample, float feedback, float mod) {
   float output = 0.f;
   float dly = read(readptr);
   // readptr reads dragging behind writeptr
@@ -47,7 +39,6 @@ float Comb::playIIR(float sample, float feedback, float mod) {
   // a simple "interpolation", using the mean value
   output = interpolation::slope(prevout, out);
   output = dcblock(output, previn, prevout);
-
   // store previous in and out
   previn = sample;
   prevout = out;
@@ -57,47 +48,27 @@ float Comb::playIIR(float sample, float feedback, float mod) {
 }
 
 
-float Comb::playFIR(float sample, float amp) {
+float Comb::fir(float sample, float amp) {
   float output = 0.f;
-  float dly = read(readptr);
+  // write only current sample to buffer, not causing feedback
   write(sample);
-  // readptr reads dragging behind writeptr
-  float out = sample + (dly * amp);
-  // output = interpolation::slope(prevout, out);
-  //dcblock
-  // output = dcblock(output, previn, prevout);
-
-  // previn = sample;
-  // prevout = out;
-
-  return out;
+  return sample + (read(readptr) * amp);
 }
 
-float Comb::playFIR(float sample, float amp, float mod) {
+float Comb::fir(float sample, float amp, float mod) {
   float output = 0.f;
   float dly = read(readptr);
   write(sample);
   // readptr reads dragging behind writeptr
   float out = sample + (dly * amp);
-
-  // when modulating the readptr, we need to do
-  // a simple "interpolation", using the mean value
-  // output = interpolation::slope(prevout, out);
-  // dcblock
-  // output = dcblock(output, previn, prevout);
-
-  // store previous in and out
-  // previn = sample;
-  // prevout = out;
-
   return out;
 }
 
 float Comb::play(float sample, float feedback, COMBTYPE type) {
   float output = 0.f;
   switch (type) {
-    case FIR : { output = playFIR(sample, feedback); break; };
-    case IIR : { output = playIIR(sample, feedback); break; };
+    case IIR : { output = iir(sample, feedback); break; };
+    case FIR : { output = fir(sample, feedback); break; };
     default: { break; };
   }
   readptr += 1.f; 
@@ -108,8 +79,11 @@ float Comb::play(float sample, float feedback, COMBTYPE type) {
 float Comb::play(float sample, float feedback, float mod, COMBTYPE type) {
   float output = 0.f;
   switch (type) {
-    case FIR : { output = playFIR(sample, feedback); break; };
-    case IIR : { output = playIIR(sample, feedback); break; };
+    // "mod" arg not used inside function "iir/fir" function any more 
+    // only used to distinguish between nonslope and slope versions
+    // of the "iir"-function
+    case IIR : { output = iir(sample, feedback, mod); break; };
+    case FIR : { output = fir(sample, feedback, mod); break; };
     default: { break; };
   }
   readptr += 1.f + mod; 
@@ -133,17 +107,17 @@ Allpass::Allpass(
 }
 
 float Allpass::play(float sample, float feedback) {
-  float bck = playIIR(sample, -feedback);
-  float fwd = playFIR(sample + bck, feedback);
-  readptr += 1.f; 
+  float bck = iir(sample, -feedback);
+  float fwd = fir(sample + bck, feedback);
+  readptr+=1.f; 
   writeptr++;
   return fwd;
 }
 
 float Allpass::play(float sample, float feedback, float mod) {
-  float bck = playIIR(sample, -feedback, mod);
-  float fwd = playFIR(sample + bck, feedback, mod);
-  readptr += 1.f + mod; 
+  float bck = iir(sample, -feedback, mod);
+  float fwd = fir(sample + bck, feedback, mod);
+  readptr+=1.f + mod; 
   writeptr++;
   return fwd;
 }

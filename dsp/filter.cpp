@@ -4,7 +4,12 @@
 #include "interpolation.hpp"
 #include <cstdio>
 
+/// Diagrams lifted from CCRMAs webpage
+/// https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html
+/// https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html
+/// https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html
 using namespace dspheaders;
+
 
 float Comb::read(float readptr) {
   // in a delay, we read at [0+n] and write at [0.f + n + offset]
@@ -17,6 +22,15 @@ void Comb::write(float sample) {
 }
 
 float Comb::iir(float sample, float feedback) {
+  ///
+  ///                 feedback comb filter
+  ///
+  ///                ╓─────────────────> y(n)
+  ///                ║   ╓─────────╖ 
+  ///  x(n) ─> ( + )─╨─> ║  z(-M)  ║──╖
+  ///            Λ       ╙─────────╜  ║ 
+  ///            ╙────────( * aM ) <──╜
+  ///
   float output = 0.f;
   // read buffer & write buffer with curr sample + dly value, causing feedback
   float out = sample + (read(readptr) * feedback);
@@ -25,6 +39,15 @@ float Comb::iir(float sample, float feedback) {
 }
 
 float Comb::iir(float sample, float feedback, float mod) {
+  ///
+  ///                 feedback comb filter
+  ///
+  ///               ╓─────────────────> y(n)
+  ///               ║   ╓─────────╖ 
+  ///  x(n) ─>( + )─╨─> ║  z(-M)  ║──╖
+  ///           Λ       ╙─────────╜  ║ 
+  ///           ╙────────( * aM ) <──╜
+  ///
   float output = 0.f;
   float dly = read(readptr);
   // readptr reads dragging behind writeptr
@@ -44,6 +67,14 @@ float Comb::iir(float sample, float feedback, float mod) {
 
 
 float Comb::fir(float sample, float amp) {
+  ///
+  ///         feedforward comb filter
+  ///
+  ///        ╓───> ( * b0 )────────╖
+  ///        ║   ╓─────────╖       V
+  ///  x(n) ─╨─> ║  z(-M)  ║───> ( + )──> y(n)
+  ///            ╙─────────╜    
+  ///
   float output = 0.f;
   // write only current sample to buffer, not causing feedback
   write(sample);
@@ -51,6 +82,14 @@ float Comb::fir(float sample, float amp) {
 }
 
 float Comb::fir(float sample, float amp, float mod) {
+  ///
+  ///        feedforward comb filter
+  ///
+  ///        ╓───> ( * b0 )────────╖
+  ///        ║   ╓─────────╖       V
+  ///  x(n) ─╨─> ║  z(-M)  ║ ──> ( + )──> y(n)
+  ///            ╙─────────╜    
+  ///
   float output = 0.f;
   float dly = read(readptr);
   write(sample);
@@ -101,9 +140,23 @@ Allpass::Allpass(
   : Comb(offset, samplerate, interpolate) {
 }
 
-float Allpass::play(float sample, float feedback) {
-  float bck = iir(sample, -feedback);
-  float fwd = fir(sample + bck, feedback);
+// float sample - current input
+//
+// float coeff - the feedback and feedforward of internal comb filters
+float Allpass::play(float sample, float coeff) {
+  ///
+  ///                 allpass filter
+  ///
+  ///                ╓───> ( * b0 )─────────╖
+  ///                ║   ╓─────────╖        V
+  ///  x(n) ─> ( + )─╨─> ║  z(-M)  ║──╥─> ( + )──> y(n)
+  ///            Λ       ╙─────────╜  ║ 
+  ///            ╙────────( * -aM ) <─╜
+  ///
+  ///       where: b0 == aM
+
+  float bck = iir(sample, -coeff);
+  float fwd = fir(sample + bck, coeff);
   float out = interpolation::slope(fwd, prevout);
   prevout = out;
   readptr+=1.f; 
@@ -111,9 +164,14 @@ float Allpass::play(float sample, float feedback) {
   return out;
 }
 
-float Allpass::play(float sample, float feedback, float mod) {
-  float bck = iir(sample, -feedback, mod);
-  float fwd = fir(sample + bck, feedback, mod);
+// float sample - current input
+//
+// float coeff - the feedback and feedforward of internal comb filters
+//
+// float mod - modulates the read head of the buffer
+float Allpass::play(float sample, float coeff, float mod) {
+  float bck = iir(sample, -coeff, mod);
+  float fwd = fir(sample + bck, coeff, mod);
   float out = interpolation::slope(fwd, prevout);
   prevout = out;
   readptr+=1.f + mod; 

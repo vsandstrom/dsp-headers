@@ -16,9 +16,25 @@ namespace dspheaders {
       void write(float sample);
       unsigned writeptr = 0;
       float readptr = 0.f;
+///
+///   feedback comb filter (IIR: infinite impulse response)
+///
+///             ╓───────────────────────────────> out
+///             ║   ╓──────────────────────╖ 
+///  in ─>( + )─╨─> ║  buffer(n - offset)  ║──╖
+///         Λ       ╙──────────────────────╜  ║ 
+///         ╙───────────( * feedback ) <──────╜
+///
       float iir(float sample, float feedback);
       float iir(float sample, float feedback, float mod);
-      // Feedforward
+///
+///   feedforward comb filter (FIR: finite impulse response)
+///
+///        ╓────────> ( * amp )─────────────╖
+///        ║   ╓──────────────────────╖     V
+///  in ───╨─> ║  buffer(n - offset)  ║─> ( + )──> out
+///            ╙──────────────────────╜    
+///
       float fir(float sample, float amp);
       float fir(float sample, float amp, float mod);
 
@@ -35,9 +51,19 @@ namespace dspheaders {
   };
 
   class Allpass : public Comb {
+///
+///                 allpass filter
+///
+///              ╓───> ( * amp )────────────────────╖
+///              ║   ╓──────────────────────╖       V
+///  in ─> ( + )─╨─> ║  buffer(n - offset)  ║─╥─> ( + )──> out
+///          Λ       ╙──────────────────────╜ ║ 
+///          ╙───────( * (-feedback)) <───╜
+///
+///       where: amp == feedback 
     public:
-      float play(float sample, float feedback);
-      float play(float sample, float feedback, float mod);
+      float play(float sample, float coeff);
+      float play(float sample, float coeff, float mod);
       Allpass(
         unsigned offset,
         unsigned samplerate,

@@ -152,7 +152,7 @@ static int paCallback(  const void* inputBuffer,				// input
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
 
-    rev = verb.play(sig, 0.6);
+    rev = verb.play(sig, 0.95);
 
     float left =  (rev * 0.02);
     float right = (rev * 0.02);

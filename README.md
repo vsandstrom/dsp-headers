@@ -4,11 +4,6 @@ A collection of audio DSP header files and examples.
 
 The Portaudio library is required.
 
-Usage:
-```bash
-$ ./<program name>  [-c <carrier frequency>] [-m <modulator frequency>]
-```
-
 The builds below expects the portaudio headers be located in <p>"/usr/local/"</p>
 (Building portaudio from source currently fails on macOS, but works through Homebrew.)
 

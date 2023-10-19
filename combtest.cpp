@@ -39,7 +39,7 @@ Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
-// Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
+Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
 
 
 
@@ -61,11 +61,14 @@ static int paCallback(  const void* inputBuffer,				// input
   float o1 = 0.f;
   float o2 = 0.f;
   float o3 = 0.f;
+  float l  = 0.f;
 
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     float sig = (impulse == true) ? 1.f : 0.f;
+    lfo.frequency = 5.4;
+    l = lfo.play();
     o0 = c0.play(sig, 0.9, COMBTYPE::IIR);
     o1 = c1.play(sig, .931f, COMBTYPE::IIR);
     o2 = c2.play(sig, 0.97, COMBTYPE::IIR);

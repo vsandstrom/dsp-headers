@@ -81,7 +81,6 @@ float table3[513] = {0.0f};
 
 VectorOscillator *vec;
 
-
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
 float at[] = {0.01f, 0.1f, 0.4};
@@ -152,10 +151,11 @@ static int paCallback(  const void* inputBuffer,				// input
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
 
+    // rev = verb.play(sig, 0.95, vibr * 0.2);
     rev = verb.play(sig, 0.95);
 
-    float left =  (rev * 0.02);
-    float right = (rev * 0.02);
+    float left = rev * 0.02;
+    float right = rev * 0.02;
 
     // Stereo frame: two increments of out buffer
     *out++ = left; 

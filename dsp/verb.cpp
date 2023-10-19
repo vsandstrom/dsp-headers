@@ -18,17 +18,4 @@ float ChownVerb::play(float sample, float amount) {
   return sig * amount;
 }
 
-float ChownVerb::play(float sample, float amount, float mod) {
-  float sig = 0.f;
-  for (int i = 0; i < 4; i++) {
-    sig += cvec[i].play(sample, ccoeff[(i+rotate)%4], COMBTYPE::IIR);
-  }
-  rotate++;
-  sig/=4;
-  for (int j = 0; j < 3; j++) {
-    sig = avec[j].play(sig, amount);
-  }
-  return sig * amount;
-}
-
-ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {}
+ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {};

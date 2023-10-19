@@ -1,13 +1,13 @@
 #pragma once
 #include "dsp.h"
 #include "filter.hpp"
+#include "wavetable.hpp"
 
 namespace dspheaders{
   class ChownVerb {
     private:
       unsigned rotate = 0;
       unsigned samplerate;
-
       Comb cvec[4] = {
         Comb(901, samplerate, interpolation::linear),
         Comb(778, samplerate, interpolation::linear),
@@ -30,7 +30,6 @@ namespace dspheaders{
 
     public:
       float play(float sample, float amount);
-      float play(float sample, float amount, float mod);
       ChownVerb(unsigned samplerate);
   };
 }

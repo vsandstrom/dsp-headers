@@ -10,7 +10,6 @@
 /// https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html
 using namespace dspheaders;
 
-
 float Comb::read(float readptr) {
   // in a delay, we read at [0+n] and write at [0.f + n + offset]
   float readsample = buffer.readsample(readptr);
@@ -49,7 +48,7 @@ float Comb::iir(float sample, float feedback, float mod) {
   ///           ╙────────( * aM ) <──╜
   ///
   float output = 0.f;
-  float dly = read(readptr);
+  float dly = read(readptr + mod);
   // readptr reads dragging behind writeptr
   float out = sample + (dly * feedback);
 
@@ -91,7 +90,7 @@ float Comb::fir(float sample, float amp, float mod) {
   ///            ╙─────────╜    
   ///
   float output = 0.f;
-  float dly = read(readptr);
+  float dly = read(readptr + mod);
   write(sample);
   // readptr reads dragging behind writeptr
   float out = sample + (dly * amp);
@@ -116,11 +115,11 @@ float Comb::play(float sample, float feedback, float mod, COMBTYPE type) {
     // "mod" arg not used inside function "iir/fir" function any more 
     // only used to distinguish between nonslope and slope versions
     // of the "iir"-function
-    case IIR : { output = iir(sample, feedback, mod); break; };
-    case FIR : { output = fir(sample, feedback, mod); break; };
+    case IIR : { output = iir(sample, feedback + mod); break; };
+    case FIR : { output = fir(sample, feedback + mod); break; };
     default: { break; };
   }
-  readptr += 1.f + mod; 
+  readptr += 1.f; 
   writeptr++;
   return output;
 }
@@ -174,7 +173,7 @@ float Allpass::play(float sample, float coeff, float mod) {
   float fwd = fir(sample + bck, coeff, mod);
   float out = interpolation::slope(fwd, prevout);
   prevout = out;
-  readptr+=1.f + mod; 
+  readptr+=1.f; 
   writeptr++;
   return out;
 }

@@ -59,6 +59,7 @@ namespace dspheaders{
       };
     public:
       float play(float sample, float amount);
+      float play(float sample, float amount, float mod);
       SchroederVerb(unsigned samplerate);
   };
 }

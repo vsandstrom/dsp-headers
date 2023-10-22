@@ -30,9 +30,22 @@ float SchroederVerb::play(float sample, float amount) {
   }
 
   for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sig, ccoeff[i], COMBTYPE::FIR);
+    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
   }
 
+  return sig/5;
+}
+
+float SchroederVerb::play(float sample, float amount, float mod) {
+  float sig = sample;
+  int i = 0;
+  for (i = 0; i < 3; i++) {
+    sig = avec[i].play(sig, amount);
+  }
+
+  for (i = 0; i < 4; i++) {
+    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
+  }
   return sig/5;
 }
 

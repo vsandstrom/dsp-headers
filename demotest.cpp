@@ -97,7 +97,7 @@ Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation:
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
 
-ChownVerb verb = ChownVerb(SAMPLE_RATE);
+SchroederVerb verb = SchroederVerb(SAMPLE_RATE);
 
 static frame data;
 

@@ -33,15 +33,13 @@ namespace dspheaders {
       Delay(
         unsigned samplerate,
         float time,
-        unsigned delay_taps,
-        float (*interpolate)(float, float*, unsigned)
+        unsigned delay_taps
       );
      
       // Initialize Delay without assigning a number of delay taps
       Delay(
         unsigned samplerate,
-        float time,
-        float (*interpolate)(float, float*, unsigned)
+        float time
       );
 
   };

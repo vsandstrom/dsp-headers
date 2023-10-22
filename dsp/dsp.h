@@ -69,6 +69,10 @@ namespace dspheaders {
     return *x;
   }
 
+  inline int wrap(unsigned x, unsigned int length) {
+      return x % length;
+  }
+
   inline unsigned wrap_dangerously(unsigned int* x, unsigned int length) {
     // Should work for both positive and negative overflow of unsigned int
     // Since index should always be <= 0 this should work.

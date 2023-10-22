@@ -5,11 +5,12 @@
 #include "dsp/interpolation.hpp"
 #include "dsp/wavetable.hpp"
 #include "dsp/envelope.hpp"
-#include "dsp/verb.hpp"
+#include "dsp/verb2.hpp"
 #include "dsp/delay.hpp"
 #include "dsp/filter.hpp"
 #include "dsp/waveshape.h"
 #include "dsp/vectoroscillator.hpp"
+#include <iostream>
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -84,20 +85,20 @@ VectorOscillator *vec;
 //  Volume Envelope
 float ap[] = {0.f, 0.8f, 0.3f, 0.f};
 float at[] = {0.01f, 0.1f, 0.4};
-Envelope ampenv = Envelope(ap, 4, at, 3, SAMPLE_RATE, interpolation::cubic);
+Envelope ampenv = Envelope(ap, 4, at, 3, SAMPLE_RATE);
 
 // Vector Movement Envelope
 float vp[] = {0.f, 0.8f, 0.3f, 0.f};
 float vt[] = {1.1f, 0.8f, 1.4f};
-Envelope vecenv = Envelope(vp, 4, vt, 3, SAMPLE_RATE, interpolation::linear);
+Envelope vecenv = Envelope(vp, 4, vt, 3, SAMPLE_RATE);
 
 // Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 // Wavetable* modulator 
 Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
+Delay delay = Delay(SAMPLE_RATE, 4.f, 4);
 
-ChownVerb verb = ChownVerb(SAMPLE_RATE);
+Verb verb = Verb(SAMPLE_RATE);
 
 static frame data;
 
@@ -152,10 +153,11 @@ static int paCallback(  const void* inputBuffer,				// input
     float sig = car*env*amps[scoreptr & 7];
 
     // rev = verb.play(sig, 0.95, vibr * 0.2);
-    rev = verb.play(sig, 0.95);
+    rev = verb.process(sig);
 
-    float left = rev * 0.02;
-    float right = rev * 0.02;
+
+    float left = rev * 0.2;
+    float right = -rev * 0.2;
 
     // Stereo frame: two increments of out buffer
     *out++ = left; 

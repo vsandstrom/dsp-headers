@@ -10,12 +10,12 @@ namespace dspheaders {
   class Comb {
     protected:
       Buffer buffer;
-      float previn = 0.00001f;
-      float prevout = 0.00001f;
-      float read(float readptr);
+      float previn = 0.f;
+      float prevout = 0.f;
+      float read(unsigned readptr);
       void write(float sample);
       unsigned writeptr = 0;
-      float readptr = 0.f;
+      unsigned readptr = 0;
 ///
 ///   feedback comb filter (IIR: infinite impulse response)
 ///
@@ -43,10 +43,10 @@ namespace dspheaders {
       // Feedback
       float play(float sample, float feedback, COMBTYPE type);
       float play(float sample, float feedback, float mod, COMBTYPE type);
+      float play(float sample, float ff, float fb);
       Comb(
           unsigned offset,
-          unsigned samplerate,
-          float (*interpolate)(float, float*, unsigned)
+          unsigned samplerate
       );
   };
 
@@ -63,11 +63,11 @@ namespace dspheaders {
 ///       where: amp == feedback 
     public:
       float play(float sample, float coeff);
+      float play2(float sample, float coeff);
       float play(float sample, float coeff, float mod);
       Allpass(
         unsigned offset,
-        unsigned samplerate,
-        float (*interpolate)(float, float*, unsigned)
+        unsigned samplerate
       );
   };
 }

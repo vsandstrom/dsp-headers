@@ -29,10 +29,10 @@ unsigned timeline = 0;
 unsigned scoreptr = 0;
 
 using namespace dspheaders;
-Envelope envelope = Envelope(breakpoints, 5, breaktimes, 4, SAMPLE_RATE, interpolation::linear);
+Envelope envelope = Envelope(breakpoints, 5, breaktimes, 4, SAMPLE_RATE);
 Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
+Delay delay = Delay(SAMPLE_RATE, 4.f, 4);
 
 static frame data;
 

@@ -35,10 +35,10 @@ Wavetable *carrier = nullptr;
 
 bool impulse = true;
 
-Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c0 = Comb(17, (unsigned)SAMPLE_RATE);
+Comb c1 = Comb(23, (unsigned)SAMPLE_RATE);
+Comb c2 = Comb(27, (unsigned)SAMPLE_RATE);
+Comb c3 = Comb(41, (unsigned)SAMPLE_RATE);
 Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
 
 

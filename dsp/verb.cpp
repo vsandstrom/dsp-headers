@@ -5,17 +5,15 @@
 
 using namespace dspheaders;
 
-float ChownVerb::play(float sample, float amount) {
+float ChownVerb::process(float sample, float amount) {
   float sig = 0.f;
   for (int i = 0; i < 4; i++) {
-    sig += cvec[i].play(sample, ccoeff[(i+rotate)%4], COMBTYPE::IIR);
+    sig += cvec[i].play(sample, ccoeff[i], -ccoeff[i]);
   }
-  rotate++;
-  sig/=4;
   for (int j = 0; j < 3; j++) {
-    sig = avec[j].play(sig, amount);
+    sig = avec[j].play2(sig, 0.7);
   }
-  return sig * amount;
+  return sig;
 }
 
 ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {};

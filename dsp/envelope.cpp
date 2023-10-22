@@ -15,15 +15,15 @@ using namespace dspheaders;
 Envelope::Envelope(
     float* breakpoints, unsigned pointlength,
     float* breaktimes, unsigned timeslength,
-    float samplerate,
-    float (*interpolate)(float, float*, unsigned)) 
+    float samplerate
+    )
   : breakpoints(breakpoints), 
     breaktimes(breaktimes),
     pointlength(pointlength),
     timeslength(timeslength),
     buffer(
         Buffer(
-          sum(breaktimes, timeslength), samplerate, interpolate
+          sum(breaktimes, timeslength)*samplerate, samplerate
         )
       ), 
     samplerate(samplerate) {
@@ -104,8 +104,9 @@ float Envelope::play(GATE trigger, float speed) {
 };
       
 
-PercEnv::PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned))
-  : attack(attack), decay(decay), samplerate(samplerate), buffer(Buffer(attack+decay, samplerate, interpolate)) {
+PercEnv::PercEnv(float attack, float decay, float samplerate 
+        )
+  : attack(attack), decay(decay), samplerate(samplerate), buffer(Buffer((attack+decay)*samplerate, samplerate)) {
   generate();
 }
 

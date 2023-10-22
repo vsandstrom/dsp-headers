@@ -5,6 +5,7 @@
 #include "dsp/filter.hpp"
 #include "dsp/verb.hpp"
 #include "dsp/wavetable.hpp"
+#include <iostream>
 
 // DURATION OF THE GENERATED TONE
 const int DURATION =           4000; // milliseconds
@@ -40,7 +41,7 @@ static int paCallback(  const void* inputBuffer,				// input
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     float sig = (impulse == true) ? 1.f : 0.f;
-    sig = verb.play(sig, 0.95);
+    sig = verb.process(sig, 0.97);
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.3; 

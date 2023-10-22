@@ -37,8 +37,7 @@ namespace dspheaders {
         unsigned pointlength,
         float* breaktimes,
         unsigned timeslength,
-        float samplerate,
-        float (*interpolate)(float, float*, unsigned)
+        float samplerate
       );
 
       // Returns current value from table
@@ -62,7 +61,7 @@ namespace dspheaders {
     public: 
       float play();
       float play(GATE trigger);
-      PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned));
+      PercEnv(float attack, float decay, float samplerate);
   };
 } // namespace dspheaders
   //

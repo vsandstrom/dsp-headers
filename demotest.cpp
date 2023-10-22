@@ -29,11 +29,24 @@ float ENV_FREQ =              4.0f;
 float fund = 80.f;
 // Pitch score
 float score[] = {
+  // fund,
+  // fund * 6/5*2,
+  // fund * 3/2,
+  // fund * 9/8*2,
+  // fund * 3,
   fund,
-  fund * 6/5*2,
-  fund * 3/2,
-  fund * 9/8*2,
+  fund * 4/3,
+  fund * 3/2*3,
+  fund * 12/7*2,
+  fund * 9/8,
   fund * 3,
+  fund * 4/3,
+  fund * 12/7*2,
+  fund * 9/8,
+  fund * 3,
+  fund * 6/5*4,
+  fund * 11/10*3,
+  fund * 8/3*3,
 };
 
 float amps[] = {
@@ -82,8 +95,8 @@ float table3[513] = {0.0f};
 VectorOscillator *vec;
 
 //  Volume Envelope
-float ap[] = {0.f, 0.8f, 0.3f, 0.f};
-float at[] = {0.01f, 0.1f, 0.4};
+float ap[] = {0.f, 0.5f, 0.3f, 0.f};
+float at[] = {0.6f, 1.2f, 0.4};
 Envelope ampenv = Envelope(ap, 4, at, 3, SAMPLE_RATE, interpolation::cubic);
 
 // Vector Movement Envelope
@@ -124,6 +137,7 @@ static int paCallback(  const void* inputBuffer,				// input
   float env = 0.f;
   float venv = 0.f;
   float rev = 0.f;
+  float del = 0.f;
 
   unsigned x = 0;
 
@@ -138,7 +152,7 @@ static int paCallback(  const void* inputBuffer,				// input
       seq += (unsigned)(SAMPLE_RATE * dur[scoreptr % 18]);
       env = ampenv.play(GATE::on);
       venv = vecenv.play(GATE::on);
-      vec -> frequency = score[scoreptr % 5];
+      vec -> frequency = score[scoreptr % 16];
       modulator.frequency = score[scoreptr % 3] * 7/2; 
     } else {
       env = ampenv.play(GATE::off, 2.f);
@@ -152,10 +166,11 @@ static int paCallback(  const void* inputBuffer,				// input
     float sig = car*env*amps[scoreptr & 7];
 
     // rev = verb.play(sig, 0.95, vibr * 0.2);
-    rev = verb.play(sig, 0.95);
+    del = delay.play(sig, 0.8, 0.1, 0.4);
+    rev = verb.play(sig + del, 0.9995);
 
-    float left = rev * 0.02;
-    float right = rev * 0.02;
+    float left = ((sig * 0.8) + (del * 0.54) + (rev * 0.74)) * 0.5;
+    float right = ((sig * 0.8) + (del * 0.54) + (rev * 0.74)) * 0.5;
 
     // Stereo frame: two increments of out buffer
     *out++ = left; 
@@ -177,6 +192,10 @@ int main(int argc, char** argv) {
   w1 = new Wavetable(complex_sine(table1, 512, amp1, phs1, 3) , 512, SAMPLE_RATE, interpolation::cubic);
   w2 = new Wavetable(complex_sine(table2, 512, amp2, phs2, 5) , 512, SAMPLE_RATE, interpolation::cubic);
   w3 = new Wavetable(complex_sine(table3, 512, amp3, phs3, 7) , 512, SAMPLE_RATE, interpolation::cubic);
+
+  range(amps, 9, 0, 0.8, 0, 0.2);
+  range(dur, 21, 0, 0.8, 0, 2.2);
+
 
   std::vector<Wavetable> t = {*w0, *w1, *w2, *w3};
   vec = new VectorOscillator(t, interpolation::cubic);

@@ -32,7 +32,6 @@ float Delay::read(float delaytime) {
   return output;
 }
 
-
 void Delay::write(float sample) {
   // Within bounds-checking is handled in the Buffer object
   buffer.writesample(sample, (int)writeptr++);
@@ -42,6 +41,7 @@ void Delay::write(float sample) {
 //////////////////////////////////////////////////////////
 ////////////////// Read for REVERB: //////////////////////
 //////////////////////////////////////////////////////////
+
 float Delay::read(int offset) {
   float tap = (float)writeptr + offset;
   return buffer.readsample(tap);
@@ -49,10 +49,12 @@ float Delay::read(int offset) {
 
 void Delay::write(float sample, int offset) {
   // Within bounds-checking is handled in the Buffer object
-  buffer.writesample(sample, (int)writeptr + offset);
-
+  int write = writeptr + offset;
+  buffer.writesample(sample, write);
+  writeptr++;
   // wrap_dangerously(&writeptr, buffer.bufferlength);
 }
+
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -68,7 +70,8 @@ void Delay::delaytime(float delaytime) {
 float Delay::play(float input, float delaytime, float wet, float feedback) {
   float output = read(delaytime);
   // write the time back to write head with feedback
-  write(input + ( output * feedback ));
+  // MAGIC NUMBER for scaling the feedback of the delay to something managable
+  write(((input +  output) / 2) * feedback);
   // wet controls dry/wet balance of time
   return output * wet;
 }

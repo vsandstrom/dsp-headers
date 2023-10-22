@@ -5,6 +5,8 @@
 namespace dspheaders {
   class Delay {
     protected:
+      // magic number... feedback goes too hard
+      float fb_scale_coeff = 0.5;
       Buffer buffer;
       unsigned samplerate;
       unsigned delay_taps = 1;

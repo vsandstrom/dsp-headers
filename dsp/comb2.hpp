@@ -33,15 +33,32 @@ namespace dspheaders {
 
     inline float Comb2::process(float in) {
 
+  ///
+  ///                 allpass filter
+  ///
+  ///                ╓───> ( * _feedforward )─────────╖
+  ///                ║   ╓─────────╖        V
+  ///  x(n) ─> ( + )─╨─> ║  z(-M)  ║──╥─> ( + )──> y(n)
+  ///            Λ  v(n) ╙─────────╜  ║ 
+  ///            ╙────────( * -_feedback ) <─╜
+  ///
+  ///       where: _feedback == _feedforward
+
+
         float v_delayed = _buf[_readptr];
         undenormalise(v_delayed);
         // Simple lowpass filter
         _prev = v_delayed*(1.f-_damp) + _prev*_damp;
         undenormalise(_prev);
+
+        // Feedback part
         float y = in - _feedback*_prev;
 
+        // Feed back feedback part into buffer
         _buf[_readptr] = y;
-        float out = y + _feedforward*v_delayed; 
+
+        // Add feedforward part to output
+        float out = _feedforward*y + v_delayed; 
 
         _readptr = (_readptr + 1) % _maxsize;
         return out;

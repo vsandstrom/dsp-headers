@@ -1,3 +1,10 @@
+#ifndef _denormals_
+#define _denormals_
+
+#define undenormalise(sample) if(((*(unsigned int*)&sample)&0x7f800000)==0) sample=0.0f
+
+#endif
+
 #ifndef _comb2_
 #define _comb2_
 
@@ -25,15 +32,18 @@ namespace dspheaders {
     };
 
     inline float Comb2::process(float in) {
-        float y = _buf[_readptr];
-        float yy = -_fb*y + in;
-        _prev = yy*(1.f-_damp) + _prev*_damp;
 
-        _buf[_readptr] = y + _ff*_prev;
-        //float out = y + _ff*_prev;
+        float y = _buf[_readptr];
+        undenormalise(y);
+        _prev = y*(1.f-_damp) + _prev*_damp;
+        undenormalise(_prev);
+        float yy = in - _fb*_prev;
+
+        _buf[_readptr] = yy;
+        float out = yy + _ff*y; 
 
         _readptr = (_readptr + 1) % _maxsize;
-        return y;
+        return out;
     }
 }
 

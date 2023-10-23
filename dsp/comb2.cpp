@@ -2,14 +2,14 @@
 
 namespace dspheaders {
 
-    Comb2::Comb2(float *buffer, int samplerate, int maxsize, float ff, float fb) {
+    Comb2::Comb2(float *buffer, int samplerate, int maxsize, float fb, float ff) {
         _maxsize = maxsize;
         _samplerate = samplerate;
         _ff = ff;
         _fb = fb;
-        _readptr = 0;
+        _readptr = 0.;
         _buf = buffer;
-        _prev = 0;
+        _prev = 0.;
         _damp = 0.;
     }
 

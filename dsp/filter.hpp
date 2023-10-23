@@ -10,8 +10,8 @@ namespace dspheaders {
   class Comb {
     protected:
       Buffer buffer;
-      float previn = 0.00001f;
-      float prevout = 0.00001f;
+      float previn = 0.f;
+      float prevout = 0.f;
       float read(float readptr);
       void write(float sample);
       unsigned writeptr = 0;
@@ -71,5 +71,3 @@ namespace dspheaders {
       );
   };
 }
-
-

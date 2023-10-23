@@ -33,14 +33,15 @@ namespace dspheaders {
 
     inline float Comb2::process(float in) {
 
-        float y = _buf[_readptr];
-        undenormalise(y);
-        _prev = y*(1.f-_damp) + _prev*_damp;
+        float v_delayed = _buf[_readptr];
+        undenormalise(v_delayed);
+        // Simple lowpass filter
+        _prev = v_delayed*(1.f-_damp) + _prev*_damp;
         undenormalise(_prev);
-        float yy = in - _fb*_prev;
+        float y = in - _fb*_prev;
 
-        _buf[_readptr] = yy;
-        float out = yy + _ff*y; 
+        _buf[_readptr] = y;
+        float out = y + _ff*v_delayed; 
 
         _readptr = (_readptr + 1) % _maxsize;
         return out;

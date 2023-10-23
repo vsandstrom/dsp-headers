@@ -1,52 +1,50 @@
 #include "dsp.h"
-#include "filter.hpp"
 #include "interpolation.hpp"
 #include "verb.hpp"
 #include "delay.hpp"
 
 using namespace dspheaders;
 
-float ChownVerb::process(float sample, float amount) {
-  float sig = 0.f;
-  int i = 0;
-  for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sample, ccoeff[i], COMBTYPE::IIR);
+Verb::Verb (
+    unsigned samplerate,
+    float feedback,
+    float (*interpolate)(float, float*, unsigned)
+  ): 
+  feedback(feedback),
+  samplerate(samplerate)
+{
+  Delay lines[4] = {
+    Delay(samplerate, 8.f, interpolate),
+    Delay(samplerate, 8.f, interpolate),
+    Delay(samplerate, 8.f, interpolate),
+    Delay(samplerate, 8.f, interpolate),
+  };
+  delaylines = lines;
+};
+
+void Verb::write(float sample) {
+  int n, m;
+  for (n = 0; n < 4; n++){
+    delaylines[n].write(sample, readptr + i[n]);
   }
-  // rotate++;
-  sig/=4;
-  for (i = 0; i < 3; i++) {
-    sig = avec[i].play(sig, amount);
-  }
-  return sig;
 }
 
-ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {};
+float Verb::read() {
+  float out = 0.0f;
+  int n, m;
 
-float SchroederVerb::play(float sample, float amount) {
-  float sig = sample;
-  int i = 0;
-  for (i = 0; i < 3; i++) {
-    sig = avec[i].play(sig, amount);
+  for (n = 0; n < 4; n++) {
+    for (m = 0; m < 4; m++) {
+      out += k[m] * delaylines[m].read((int)(readptr + (float)i[n]));
+    }
   }
-
-  for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
-  }
-
-  return sig/5;
+  readptr++;
+  return out;
 }
 
-float SchroederVerb::play(float sample, float amount, float mod) {
-  float sig = sample;
-  int i = 0;
-  for (i = 0; i < 3; i++) {
-    sig = avec[i].play(sig, amount);
-  }
-
-  for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
-  }
-  return sig/5;
+float Verb::play(float sample) {
+  write(sample);
+  return read();
 }
+      
 
-SchroederVerb::SchroederVerb(unsigned samplerate) : samplerate(samplerate) {};

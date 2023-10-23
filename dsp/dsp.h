@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <cstdlib>
 namespace dspheaders {
   const float pi = 3.14159265358979323846f;
 
@@ -30,11 +29,6 @@ namespace dspheaders {
   // Transform value in range 0.0 - 1.0 to -1.0 - 1.0
   inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
 
-  inline float fold(float x, float max) {
-    if (x > max) return x - (x-max);
-    if (x < -max) return x + (max + x);
-    return x;
-  }
 
   // Highpass filter removing DC-offset
   //
@@ -67,10 +61,6 @@ namespace dspheaders {
     while (*x < 0) *x += length;
     while (*x >= length) *x -= length;
     return *x;
-  }
-
-  inline int wrap(unsigned x, unsigned int length) {
-      return x % length;
   }
 
   inline unsigned wrap_dangerously(unsigned int* x, unsigned int length) {

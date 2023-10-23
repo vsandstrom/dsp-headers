@@ -106,7 +106,7 @@ Wavetable modulator1 = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 
 Delay delay = Delay(SAMPLE_RATE, 4.f, 1, interpolation::linear);
-SchroederVerb verb = SchroederVerb(SAMPLE_RATE);
+Verb verb = Verb(SAMPLE_RATE);
 
 static frame data;
 
@@ -180,7 +180,7 @@ static int paCallback(  const void* inputBuffer,				// input
 
     // rev = verb.play(sig, 0.95, vibr * 0.2);
     del = delay.play(sig + sig1, 0.4 + (vibr * 0.001), 0.4, 0.5);
-    rev = verb.play(sig + sig1 + del, 0.9995);
+    rev = verb.process(sig + sig1 + del) * 0.9;
 
     float left = (((sig + sig1) * 0.8) + (del * 0.54) + (rev * 0.74)) * 0.5;
     float right = (((sig + sig1) * 0.8) + (del * 0.54) + (rev * 0.74)) * 0.5;

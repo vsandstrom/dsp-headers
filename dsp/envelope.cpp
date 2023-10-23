@@ -15,15 +15,15 @@ using namespace dspheaders;
 Envelope::Envelope(
     float* breakpoints, unsigned pointlength,
     float* breaktimes, unsigned timeslength,
-    float samplerate
-    )
+    float samplerate,
+    float (*interpolate)(float, float*, unsigned)) 
   : breakpoints(breakpoints), 
     breaktimes(breaktimes),
     pointlength(pointlength),
     timeslength(timeslength),
     buffer(
         Buffer(
-          sum(breaktimes, timeslength)*samplerate, samplerate
+          sum(breaktimes, timeslength), samplerate, interpolate
         )
       ), 
     samplerate(samplerate) {
@@ -81,7 +81,7 @@ float Envelope::play(GATE trigger) {
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
-    out = buffer.readsample(readptr);
+    out = (buffer.readsample(readptr) + prev) / 2;
   }
   readptr += 1.f;
   return out;
@@ -97,16 +97,15 @@ float Envelope::play(GATE trigger, float speed) {
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
-    out = buffer.readsample(readptr);
+    out = (buffer.readsample(readptr) + prev) / 2;
   }
   readptr += speed;
   return out;
 };
       
 
-PercEnv::PercEnv(float attack, float decay, float samplerate 
-        )
-  : attack(attack), decay(decay), samplerate(samplerate), buffer(Buffer((attack+decay)*samplerate, samplerate)) {
+PercEnv::PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned))
+  : attack(attack), decay(decay), samplerate(samplerate), buffer(Buffer(attack+decay, samplerate, interpolate)) {
   generate();
 }
 

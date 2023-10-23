@@ -9,7 +9,7 @@ Buffer::Buffer(
   float seconds,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(seconds*samplerate), interpolate(interpolate) {
+: bufferlength(findpow2(seconds*samplerate)), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 
@@ -26,37 +26,37 @@ Buffer::Buffer(
   unsigned size,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(size), interpolate(interpolate) {
+: bufferlength(findpow2(size)), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 
     // interpolation
     bufferlength = 4;
   }
-
-  buffer = new float[bufferlength];
-}
-
-Buffer::~Buffer() {
-    delete[] buffer;
+  buffer = new float[bufferlength+1];
+  // important for smaller systems that do not clear old memory
+  initbuffer();
 }
 
 
-const float Buffer::readsample(unsigned readptr) {
-  return buffer[wrap(readptr, bufferlength)]; 
+float Buffer::readsample(float readptr) {
+  return interpolate(wrapf(&readptr, bufferlength), buffer, bufferlength); 
 };
 
-const float * Buffer::getReadPtr(unsigned readptr) {
-    return &buffer[readptr];
+float Buffer::readsample(unsigned readptr) {
+  return interpolate(wrap_dangerously(&readptr, bufferlength), buffer, bufferlength);
 }
 
 void Buffer::writesample(float sample, int writeptr) {
   buffer[wrap(&writeptr, bufferlength)] = sample;
 };
 
+// Experimental interpolated write
+// void Buffer::writesample(float sample, float writeptr) {
+//   writeinterpolation::linear(sample, wrapf(&writeptr, bufferlength), buffer, bufferlength);
+// }
 
-void Buffer::init() {
-    for (int i = 0; i < bufferlength; ++i) {
-        buffer[i] = 0.f;
-    }
+// important for smaller systems that do not clear old memory
+void Buffer::initbuffer() {
+  dspheaders::initbuffer(buffer, bufferlength+1);
 }

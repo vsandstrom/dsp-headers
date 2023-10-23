@@ -7,32 +7,31 @@ using namespace dspheaders;
 
 Delay::Delay(
     unsigned samplerate,
-    float maxdelaytime,
+    float time,
     unsigned taps,
     float (*interpolate)(float, float*, unsigned)
-    ) : buffer(Buffer(maxdelaytime, samplerate, interpolate)),
+    ) : buffer(Buffer(time, samplerate, interpolate)),
         samplerate(samplerate), 
         delay_taps(taps) { }
 
 Delay::Delay(
     unsigned samplerate,
-    float maxdelaytime,
+    float time,
     float (*interpolate)(float, float*, unsigned)
-    ) : buffer(Buffer(maxdelaytime, samplerate, interpolate)), 
+    ) : buffer(Buffer(time, samplerate, interpolate)), 
         samplerate(samplerate), 
         delay_taps(0) { }
 
-float Delay::read(float delaytime, float damp) {
+float Delay::read(float delaytime) {
   float output = 0.f;
   float taptime = (delaytime * samplerate);
   for (unsigned i = 1; i <= delay_taps; i++) {
     float tap = (float)writeptr - (taptime*i);
-    output += buffer.readsample(tap) * damp;
-    // damp*=damp;
-    damp /= 2;
+    output += buffer.readsample(tap);
   }
   return output;
 }
+
 
 void Delay::write(float sample) {
   // Within bounds-checking is handled in the Buffer object
@@ -43,7 +42,6 @@ void Delay::write(float sample) {
 //////////////////////////////////////////////////////////
 ////////////////// Read for REVERB: //////////////////////
 //////////////////////////////////////////////////////////
-
 float Delay::read(int offset) {
   float tap = (float)writeptr + offset;
   return buffer.readsample(tap);
@@ -51,12 +49,10 @@ float Delay::read(int offset) {
 
 void Delay::write(float sample, int offset) {
   // Within bounds-checking is handled in the Buffer object
-  int write = writeptr + offset;
-  buffer.writesample(sample, write);
-  writeptr++;
+  buffer.writesample(sample, (int)writeptr + offset);
+
   // wrap_dangerously(&writeptr, buffer.bufferlength);
 }
-
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -70,12 +66,9 @@ void Delay::delaytime(float delaytime) {
 }
 
 float Delay::play(float input, float delaytime, float wet, float feedback) {
-  float output = read(delaytime, feedback);
+  float output = read(delaytime);
   // write the time back to write head with feedback
-  // MAGIC NUMBER for scaling the feedback of the delay to something managable
-  output = interpolation::slope((input + output),prev);
-  write(output);
-  prev = output;
+  write(input + ( output * feedback ));
   // wet controls dry/wet balance of time
   return output * wet;
 }

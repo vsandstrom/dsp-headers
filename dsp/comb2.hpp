@@ -16,15 +16,15 @@ namespace dspheaders {
             int _maxsize;
             int _samplerate;
             float * _buf;
-            float _ff;
-            float _fb;
+            float _feedforward;
+            float _feedback;
             int _length;
             int _readptr;
             float _prev;
             float _damp;
 
         public:
-            Comb2(float * buffer, int samplerate, int maxsize, float fb = 0., float ff = 0.);
+            Comb2(float * buffer, int samplerate, int maxsize, float feedback = 0., float feedforward = 0.);
             ~Comb2();
             // Set optional LP damping, [0,1], 0 is off
             void setDamp(float d);
@@ -38,10 +38,10 @@ namespace dspheaders {
         // Simple lowpass filter
         _prev = v_delayed*(1.f-_damp) + _prev*_damp;
         undenormalise(_prev);
-        float y = in - _fb*_prev;
+        float y = in - _feedback*_prev;
 
         _buf[_readptr] = y;
-        float out = y + _ff*v_delayed; 
+        float out = y + _feedforward*v_delayed; 
 
         _readptr = (_readptr + 1) % _maxsize;
         return out;

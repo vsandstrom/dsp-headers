@@ -6,10 +6,27 @@
 using namespace dspheaders;
 
 Buffer::Buffer(
+  float seconds,
+  unsigned samplerate,
+  float (*interpolate)(float, float*, unsigned))
+: bufferlength(seconds*samplerate), interpolate(interpolate) {
+
+  if (bufferlength < 4) {
+    // Allow for mini-buffers, but still not in conflict with 
+    // interpolation
+    bufferlength = 4;
+  }
+
+  buffer = new float[bufferlength+1];
+  // important for smaller systems that do not clear old memory
+  initbuffer();
+}
+
+Buffer::Buffer(
   unsigned size,
-  unsigned samplerate
-  )
-: bufferlength(size) {
+  unsigned samplerate,
+  float (*interpolate)(float, float*, unsigned))
+: bufferlength(size), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 

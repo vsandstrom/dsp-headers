@@ -1,4 +1,5 @@
 #include "dsp.h"
+#include "filter.hpp"
 #include "interpolation.hpp"
 #include "verb.hpp"
 #include "delay.hpp"
@@ -7,13 +8,45 @@ using namespace dspheaders;
 
 float ChownVerb::process(float sample, float amount) {
   float sig = 0.f;
-  for (int i = 0; i < 4; i++) {
-    sig += cvec[i].play(sample, ccoeff[i], -ccoeff[i]);
+  int i = 0;
+  for (i = 0; i < 4; i++) {
+    sig += cvec[i].play(sample, ccoeff[i], COMBTYPE::IIR);
   }
-  for (int j = 0; j < 3; j++) {
-    sig = avec[j].play2(sig, 0.7);
+  // rotate++;
+  sig/=4;
+  for (i = 0; i < 3; i++) {
+    sig = avec[i].play(sig, amount);
   }
   return sig;
 }
 
 ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {};
+
+float SchroederVerb::play(float sample, float amount) {
+  float sig = sample;
+  int i = 0;
+  for (i = 0; i < 3; i++) {
+    sig = avec[i].play(sig, amount);
+  }
+
+  for (i = 0; i < 4; i++) {
+    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
+  }
+
+  return sig/5;
+}
+
+float SchroederVerb::play(float sample, float amount, float mod) {
+  float sig = sample;
+  int i = 0;
+  for (i = 0; i < 3; i++) {
+    sig = avec[i].play(sig, amount);
+  }
+
+  for (i = 0; i < 4; i++) {
+    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
+  }
+  return sig/5;
+}
+
+SchroederVerb::SchroederVerb(unsigned samplerate) : samplerate(samplerate) {};

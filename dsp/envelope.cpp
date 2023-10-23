@@ -81,7 +81,7 @@ float Envelope::play(GATE trigger) {
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
-    out = (buffer.readsample(readptr) + prev) / 2;
+    out = buffer.readsample(readptr);
   }
   readptr += 1.f;
   return out;
@@ -97,7 +97,7 @@ float Envelope::play(GATE trigger, float speed) {
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
-    out = (buffer.readsample(readptr) + prev) / 2;
+    out = buffer.readsample(readptr);
   }
   readptr += speed;
   return out;

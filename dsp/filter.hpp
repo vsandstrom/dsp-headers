@@ -12,7 +12,7 @@ namespace dspheaders {
       Buffer buffer;
       float previn = 0.f;
       float prevout = 0.f;
-      float read(unsigned readptr);
+      float read(float readptr);
       void write(float sample);
       unsigned writeptr = 0;
       unsigned readptr = 0;
@@ -71,5 +71,3 @@ namespace dspheaders {
       );
   };
 }
-
-

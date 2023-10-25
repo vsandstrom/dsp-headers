@@ -40,7 +40,6 @@ void Envelope::generate() {
     max = breakpoints[i] >= breakpoints[i+1] ? breakpoints[i] : breakpoints[i+1];
     min = breakpoints[i] >= breakpoints[i+1] ? breakpoints[i+1] : breakpoints[i];
 
-
     float time = breaktimes[i];
     float numsamples = time * samplerate;
     float inc = (max - min) / numsamples;

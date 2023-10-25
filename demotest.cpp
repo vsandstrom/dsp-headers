@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <portaudio.h>
 #include <vector>
 #include "dsp/dsp.h"
@@ -170,9 +169,12 @@ static int paCallback(  const void* inputBuffer,				// input
 
     float vibr = vib.play();
 
+    float mod0 = modulator.play();
+    float mod1 = modulator.play();
+
     // Sound generation section
-    float car = vec -> play(venv, map(modulator.play()+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
-    float car1 = vec1 -> play(venv1, map(modulator1.play()+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
+    float car = vec -> play(venv, map(mod0+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
+    float car1 = vec1 -> play(venv1, map(mod1+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car*env*amps[scoreptr & 7];
     float sig1 = car1 * env1 * amps1[scoreptr1 % 4];

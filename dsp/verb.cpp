@@ -40,11 +40,11 @@ float SchroederVerb::play(float sample, float amount, float mod) {
   float sig = sample;
   int i = 0;
   for (i = 0; i < 3; i++) {
-    sig = avec[i].play(sig, amount);
+    sig = avec[i].play(sig, amount, mod);
   }
 
   for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
+    sig += cvec[i].play(sig, ccoeff[i] * amount, mod, COMBTYPE::FIR);
   }
   return sig/5;
 }

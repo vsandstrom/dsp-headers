@@ -42,10 +42,14 @@ float Wavetable::read(float phase) {
 }
 
 float Wavetable::play(){
+  // avoid aliasing, freq bigger than nyqvist
+  if (frequency > (samplerate / 2)) return 0.f;
   return read();
 }
 
 float Wavetable::play(float phase){
+  // avoid aliasing - when used in FM, aliasing should be handled more 
+  if (frequency > (samplerate / 2)) return 0.f;
   return read(phase);
 }
 

@@ -4,59 +4,106 @@
 #include "wavetable.hpp"
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
 
 
 // TODO: Perhaps save segments in separate buffers, making it easier to set duration of attack,
 // decay etc.
 
 using namespace dspheaders;
-// float [breakpoints], unsigned pointlength, float [breaktimes], unsigned timeslength, unsigned
+// float [points], unsigned pLen, float [times], unsigned tLen, unsigned
 // samplerate, interpolation-callback
 Envelope::Envelope(
-    float* breakpoints, unsigned pointlength,
-    float* breaktimes, unsigned timeslength,
+    float* points, unsigned pLen,
+    float* times, unsigned tLen,
     float samplerate,
     float (*interpolate)(float, float*, unsigned)) 
-  : breakpoints(breakpoints), 
-    breaktimes(breaktimes),
-    pointlength(pointlength),
-    timeslength(timeslength),
+  : points(points), 
+    times(times),
+    pLen(pLen),
+    tLen(tLen),
     buffer(
         Buffer(
-          sum(breaktimes, timeslength), samplerate, interpolate
+          sum(times, tLen), samplerate, interpolate
         )
       ), 
     samplerate(samplerate) {
   generate();
 };
 
+Envelope::Envelope(
+    float* points, unsigned pLen,
+    float* times, unsigned tLen,
+    float* curves, unsigned cLen,
+    float samplerate,
+    float (*interpolate)(float, float*, unsigned)) 
+  : points(points), 
+    times(times),
+    curves(curves),
+    pLen(pLen),
+    tLen(tLen),
+    cLen(cLen),
+    buffer(
+        Buffer(
+          sum(times, tLen), samplerate, interpolate
+        )
+      ), 
+    samplerate(samplerate) {
+  generateCurve();
+};
+
 void Envelope::generate() {
   unsigned pos = 0;
   float min = 0.f, max = 0.f;
 
-  for (unsigned i = 0; i < pointlength-1; i++) {
-    // works because breakpoints need to be only positive. 
+  for (unsigned i = 0; i < pLen-1; i++) {
+    // works because points need to be only positive. 
     // needs testing at construction
-    max = breakpoints[i] >= breakpoints[i+1] ? breakpoints[i] : breakpoints[i+1];
-    min = breakpoints[i] >= breakpoints[i+1] ? breakpoints[i+1] : breakpoints[i];
+    max = points[i] >= points[i+1] ? points[i] : points[i+1];
+    min = points[i] >= points[i+1] ? points[i+1] : points[i];
 
-    float time = breaktimes[i];
+    float time = times[i];
     float numsamples = time * samplerate;
     float inc = (max - min) / numsamples;
     for (unsigned j = 0; j < (int)numsamples; j++) {
       // write function to apply curve on envelope segment here.
       float slope = j * inc;
-      if (breakpoints[i] > breakpoints[i+1]) {
-        buffer.buffer[pos] = breakpoints[i] - slope;
+      if (points[i] > points[i+1]) {
+        buffer.buffer[pos] = points[i] - slope;
         pos++;
-      } else if (breakpoints[i] <= breakpoints[i+1]){
-        buffer.buffer[pos] = breakpoints[i] + slope;
+      } else if (points[i] <= points[i+1]){
+        buffer.buffer[pos] = points[i] + slope;
         pos++;
       }
     }
   }
   readptr = pos;
   
+};
+
+void Envelope::generateCurve() {
+  unsigned pos = 0;
+  float q = 0.f;
+
+  for (unsigned i = 0; i < pLen - 1; i++) {
+    q = fabs(points[i+1] - points[i]);
+    int numsamples = (int)(times[i] * samplerate);
+    float m = 1.f / (numsamples);
+
+    for (unsigned j = 0; j < numsamples; j++) {
+      float slope = q * powf(m * j, curves[i]);
+
+      if (points[i] >= points[i+1]) {
+        buffer.buffer[pos] = points[i] - slope;
+        pos++;
+      } else {
+        buffer.buffer[pos] = points[i] + slope;
+        pos++;
+      }
+    }
+  }
+  readptr = pos+1;
+
 };
 
 // Returns current value from table
@@ -84,6 +131,7 @@ float Envelope::play(GATE trigger) {
   }
   readptr += 1.f;
   return out;
+
 };
 
 float Envelope::play(GATE trigger, float speed) {
@@ -101,6 +149,12 @@ float Envelope::play(GATE trigger, float speed) {
   readptr += speed;
   return out;
 };
+
+void Envelope::repr() {
+  for (int i = 0; i < buffer.bufferlength; i++) {
+    std::cout << buffer.buffer[i] << '\n';
+  }
+}
       
 
 PercEnv::PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned))

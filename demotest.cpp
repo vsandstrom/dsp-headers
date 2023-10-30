@@ -86,16 +86,24 @@ float table3[513] = {0.0f};
 
 VectorOscillator *vec, *vec1;
 //  Volume Envelope
-float ap[] = {0.f, 0.5f, 0.3f, 0.f};
-float at[] = {0.6f, 1.2f, 0.4};
-Envelope ampenv = Envelope(ap, 4, at, 3, SAMPLE_RATE, interpolation::cubic);
-Envelope ampenv1 = Envelope(ap, 4, at, 3, SAMPLE_RATE, interpolation::cubic);
+// float ap[] = {0.f, 0.5f, 0.3f, 0.f};
+// float at[] = {0.6f, 1.2f, 0.4};
+// float ac[] = {2.6f, 1.2f, 3.4};
+float ap[] = {0.f, 0.5f, 0.f};
+float at[] = {2.01f, 2.5f};
+float ac[] = {0.1f, 1.6};
+Envelope ampenv = Envelope(ap, 3, at, 2, ac, 2, SAMPLE_RATE, interpolation::cubic);
+Envelope ampenv1 = Envelope(ap, 3, at, 2, ac, 2, SAMPLE_RATE, interpolation::cubic);
 
 // Vector Movement Envelope
-float vp[] = {0.f, 0.8f, 0.3f, 0.f};
-float vt[] = {1.1f, 0.8f, 1.4f};
-Envelope vecenv = Envelope(vp, 4, vt, 3, SAMPLE_RATE, interpolation::linear);
-Envelope vecenv1 = Envelope(vp, 4, vt, 3, SAMPLE_RATE, interpolation::linear);
+// float vp[] = {.0f, .8f, .3f, .0f};
+// float vt[] = {1.1f, 0.8f, 1.4f};
+// float vc[] = {.6f, .8f, 1.4f};
+float vp[] = {.0f, .8f, .0f};
+float vt[] = {.21f, .6f};
+float vc[] = {1.2f, .4f};
+Envelope vecenv = Envelope(vp, 3, vt, 2, SAMPLE_RATE, interpolation::linear);
+Envelope vecenv1 = Envelope(vp, 3, vt, 2, SAMPLE_RATE, interpolation::linear);
 
 // Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 // Wavetable* modulator 
@@ -174,21 +182,23 @@ static int paCallback(  const void* inputBuffer,				// input
 
     // Sound generation section
     float car = vec -> play(venv, map(mod0+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
-    float car1 = vec1 -> play(venv1, map(mod1+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
+    float car1 = vec1 -> play(venv1 , map(mod1+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
-    float sig = car*env*amps[scoreptr & 7];
+    float sig = car * env * amps[scoreptr & 7];
     float sig1 = car1 * env1 * amps1[scoreptr1 % 4];
 
-    // rev = verb.play(sig, 0.95, vibr * 0.2);
     del = delay.play(sig + sig1, 0.4 + (vibr * 0.001), 0.4, 0.5);
     rev = verb.play(sig + sig1 + del, 0.9995);
-
-    float left = (((sig + sig1) * 0.8) + (del * 0.54) + (rev * 0.74)) * 0.5;
-    float right = (((sig + sig1) * 0.8) + (del * 0.54) + (rev * 0.74)) * 0.5;
+    //
+    float left = ((sig * 0.8) + (del * 0.54) + (rev * 0.74));
+    float right = ((sig1 * 0.8) + (del * 0.54) + (rev * 0.74));
 
     // Stereo frame: two increments of out buffer
     *out++ = left; 
     *out++ = right;
+
+    // *out++ = sig; 
+    // *out++ = sig1;
     
 #ifdef DEBUG
     printf("output: %f\n", sig);

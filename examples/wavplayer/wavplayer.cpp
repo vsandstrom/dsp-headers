@@ -3,8 +3,9 @@
 #include "portaudio.h"
 
 #include <iostream>
+#include <fstream>
+#include <cstdio>
 #include <cmath>
-#include <stdio.h>
 #include <memory>
 #include <stdint.h>
 #include <array>
@@ -15,26 +16,27 @@ struct WavHeader {
     uint32_t ChunkSize;
     uint32_t Format;
     uint32_t Subchunk1D;
-    uint32_t Subchunk1Size;
+    uint32_t SubChunk1Size;
     uint16_t AudioFormat;
     uint16_t NumChannels;
     uint32_t SampleRate;
     uint32_t ByteRate;
     uint16_t BlockAlign;
     uint16_t BitsPerSample;
-    uint32_t Subchunk2D;
+    uint32_t SubChunk2D;
     uint32_t SubChunk2Size;
 };
 
 const int NUM_SECONDS = 5;
 const int FRAMES_PER_BUFFER =128;
-const int SAMPLE_RATE = 44100;
+const int SAMPLE_RATE = 48000;
 
-constexpr int32_t bufferSize = SAMPLE_RATE * 4;
+constexpr uint32_t bufferSize = SAMPLE_RATE * 10;
 
 struct paTestData {
-    int16_t buffer[bufferSize];
+    float buffer[bufferSize];
     uint32_t n = 0;
+    uint32_t length = bufferSize;
 };
 
 #if 0
@@ -57,9 +59,12 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
     
     for(i=0; i<framesPerBuffer;i++ )
     {
-        *out++ = float(data->buffer[data->n])/32768.f; 
-        *out++ = float(data->buffer[data->n])/32768.f; 
-        data->n = (data->n + 1) % bufferSize;
+        //*out++ = float(data->buffer[data->n])/32768.f; 
+        //*out++ = float(data->buffer[data->n])/32768.f; 
+        *out++ = data->buffer[data->n]; 
+        data->n = (data->n + 1) % data->length;
+        *out++ = data->buffer[data->n];
+        data->n = (data->n + 1) % data->length;
     }
     return paContinue;
 }
@@ -77,7 +82,9 @@ int main() {
     paTestData data; 
     WavHeader wf;
 
-    auto e = fopen("fb2.wav", "r"); 
+
+
+    auto e = fopen("sines2.wav", "r"); 
    if (!e) {
         printf("Error!\n"); 
     }
@@ -90,17 +97,26 @@ int main() {
         if (feof(e))
             printf("EOF.\n");
         else if (ferror(e))
-            printf("Error reading %s", "fb2.wav");
+            printf("Error reading %s", "sines2.wav");
     }
 
     printf("Wave info\n");
-    printf("NumCannels: %hd\n", wf.NumChannels);
+
+    printf("NumChannels: %d\n", wf.NumChannels);
     printf("SampleRate: %d\n", wf.SampleRate);
     printf("BitDepth: %d\n", wf.BitsPerSample);
+    printf("ChunkSize %d\n", wf.ChunkSize);
+    printf("Subchunk1Size %d\n", wf.SubChunk1Size);
     printf("Subchunk2Size %d\n", wf.SubChunk2Size);
- 
-    ret = fread(&data.buffer[0], sizeof(int16_t), bufferSize, e);
-    
+    fseek(e, 0, SEEK_END);
+    auto size = ftell(e);
+    rewind(e);
+    fseek(e,44, SEEK_SET);
+
+    printf("Length: %f\n seconds", static_cast<float>(size)/wf.BitsPerSample/wf.SampleRate/wf.NumChannels*8);
+
+    ret = fread(&data.buffer[0], sizeof(float), wf.ChunkSize, e);
+    data.length = size;
     fclose(e);
 
     err = Pa_Initialize();

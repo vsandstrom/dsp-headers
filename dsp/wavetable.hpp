@@ -39,7 +39,7 @@ namespace dspheaders {
     float play();
     // Generate the next sample from the wavetable oscillator.
     //
-    // Enables phase modulation.
+    // Allows for phase modulation (FM).
     float play(float phase);
 
 

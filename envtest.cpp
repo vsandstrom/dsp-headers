@@ -20,8 +20,9 @@ float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
-float breakpoints[] = {0.f, 0.8f, 0.3f, 0.f};
-float breaktimes[] = {0.01f, 0.1f, 0.4};
+float breakpoints[] = {0.f, 0.2f, 0.8f, 0.f};
+float breaktimes[] = {0.1f, 1.5f, 1.5f};
+float breakcurves[] = {1.5f, 0.2,  0.2};
 
 // keeps track of the number of the current sample
 unsigned timeline = 0;
@@ -29,7 +30,7 @@ unsigned timeline = 0;
 unsigned scoreptr = 0;
 
 using namespace dspheaders;
-Envelope envelope = Envelope(breakpoints, 5, breaktimes, 4, SAMPLE_RATE, interpolation::linear);
+Envelope envelope = Envelope(breakpoints, 4, breaktimes, 3, breakcurves, 3, SAMPLE_RATE, interpolation::linear);
 Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);

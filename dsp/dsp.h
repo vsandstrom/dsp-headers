@@ -69,6 +69,11 @@ namespace dspheaders {
     return *x;
   }
 
+  inline unsigned wrap(unsigned* x, unsigned int length) {
+    while (*x >= length) *x -= length;
+    return *x;
+  }
+
   inline unsigned wrap_dangerously(unsigned int* x, unsigned int length) {
     // Should work for both positive and negative overflow of unsigned int
     // Since index should always be <= 0 this should work.
@@ -124,6 +129,13 @@ namespace dspheaders {
     return sum;
   }
   
+  inline unsigned sum(unsigned* buffer, unsigned length) {
+    float sum = 0.f;
+    for (unsigned i = 0; i < length; i++) {
+      sum += buffer[i];
+    }
+    return sum;
+  }
 
   // Softmax function, useful when creating a wavetable, where total amplitude
   // should not excede -1 - 1

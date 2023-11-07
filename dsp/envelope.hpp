@@ -5,7 +5,7 @@
 /*  
  *  TODO:
  *  [ ] - apply curve on each envelope segment
- *  [ ] - write test to make sure each value in breakpoints list is >= 0
+ *  [ ] - write test to make sure each value in points list is >= 0
  *  [ ] - dsp.h function that finds closest pow2
  *
  * BaseEnvelope could probably be a descendent of Buffer, or Buffer could 
@@ -23,31 +23,43 @@ namespace dspheaders {
   class Envelope {
     protected:
       Buffer buffer;
-      float* breakpoints;
-      float* breaktimes;
-      unsigned pointlength;
-      unsigned timeslength;
+      float* points;
+      float* times;
+      float* curves;
+      unsigned pLen;
+      unsigned tLen;
+      unsigned cLen;
       float samplerate;
       float prev;
       float readptr;
       void generate();
+      void generateCurve();
     public: 
       Envelope(
-        float* breakpoints,
-        unsigned pointlength,
-        float* breaktimes,
-        unsigned timeslength,
+        float* points,
+        unsigned pLen,
+        float* times,
+        unsigned tLen,
         float samplerate,
         float (*interpolate)(float, float*, unsigned)
       );
 
+      Envelope(
+        float* points,
+        unsigned pLen,
+        float* times,
+        unsigned tLen,
+        float* curves,
+        unsigned cLen,
+        float samplerate,
+        float (*interpolate)(float, float*, unsigned)
+      );
       // Returns current value from table
       // float play();
 
       // Resets envelope to start and returns the first value from table
       float play(GATE trigger);
       float play(GATE trigger, float speed);
-
       void repr();
   };
 

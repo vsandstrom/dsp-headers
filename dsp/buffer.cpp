@@ -1,3 +1,6 @@
+
+/* ˙ˆ˙ */
+
 #include "buffer.hpp"
 #include "dsp.h"
 #include "dsp_math.h"
@@ -44,7 +47,7 @@ float Buffer::readsample(float readptr) {
 };
 
 float Buffer::readsample(unsigned readptr) {
-  return interpolate(wrap_dangerously(&readptr, bufferlength), buffer, bufferlength);
+  return interpolate(wrap(&readptr, bufferlength), buffer, bufferlength);
 }
 
 void Buffer::writesample(float sample, int writeptr) {

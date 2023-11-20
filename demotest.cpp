@@ -10,8 +10,6 @@
 #include "dsp/waveshape.h"
 #include "dsp/vectoroscillator.hpp"
 
-// MASTER VOLUME OF THE GENERATED TONE
-const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
 const int DURATION =           120000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE

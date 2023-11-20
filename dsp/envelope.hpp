@@ -1,24 +1,9 @@
+#pragma once
+
 #include "dsp.h"
 #include "buffer.hpp"
-#include <cmath>
-
-/*  
- *  TODO:
- *  [ ] - apply curve on each envelope segment
- *  [ ] - write test to make sure each value in points list is >= 0
- *  [ ] - dsp.h function that finds closest pow2
- *
- * BaseEnvelope could probably be a descendent of Buffer, or Buffer could 
- * perhaps have a bunch of extra functions to give it this functionality.
- * */
 
 namespace dspheaders {
-  enum GATE {
-    on = 1, 
-    off = 0,
-    cycle = 2,
-  };
-
 
   class Envelope {
     protected:

@@ -1,9 +1,6 @@
 #include "envelope.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
-#include "wavetable.hpp"
-#include <algorithm>
-#include <cstdio>
 #include <iostream>
 
 
@@ -51,6 +48,19 @@ Envelope::Envelope(
     samplerate(samplerate) {
   generateCurve();
 };
+
+// Convert a
+Envelope::Envelope(
+    float* table,
+    unsigned tablesize,
+    float samplerate,
+    float (*interpolate)(float, float*, unsigned))
+    : buffer(tablesize, samplerate, interpolate){
+      for (int i = 0; i < tablesize; i++) {
+        buffer.buffer[i] = table[i];
+      }
+    }
+
 
 void Envelope::generate() {
   unsigned pos = 0;

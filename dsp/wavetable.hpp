@@ -1,9 +1,5 @@
 #pragma once
 
-#include "dsp.h"
-#include "interpolation.hpp"
-
-
 namespace dspheaders {
 
   enum WAVESHAPE {
@@ -29,7 +25,10 @@ namespace dspheaders {
     // generates the next sample
     float read();
     // generates the next sample with phase offset
+    //
+    // phase input is clamped to be within 0.f and 1.f
     float read(float phase);
+    // Generates a wavetable according to the waveshape enum argument 
     void populatetable(WAVESHAPE waveshape);
 
     public:
@@ -41,6 +40,9 @@ namespace dspheaders {
     //
     // Allows for phase modulation (FM).
     float play(float phase);
+
+    // Returns number of samples in table
+    unsigned getTablelength();
 
 
     // WAVESHAPE waveshape - Takes an enum choosing among simple waveforms as first argument.

@@ -1,50 +1,47 @@
-#include "dsp.h"
 #include "filter.hpp"
-#include "interpolation.hpp"
 #include "verb.hpp"
-#include "delay.hpp"
 
 using namespace dspheaders;
 
-float ChownVerb::play(float sample, float amount) {
+float ChownVerb::process(float sample, float amount) {
   float sig = 0.f;
   int i = 0;
   for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sample, ccoeff[i], COMBTYPE::IIR);
+    sig += cvec[i].process(sample, ccoeff[i], COMBTYPE::IIR);
   }
   // rotate++;
   sig/=4;
   for (i = 0; i < 3; i++) {
-    sig = avec[i].play(sig, amount);
+    sig = avec[i].process(sig, amount);
   }
   return sig * amount;
 }
 
 ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {};
 
-float SchroederVerb::play(float sample, float amount) {
+float SchroederVerb::process(float sample, float amount) {
   float sig = sample;
   int i = 0;
   for (i = 0; i < 3; i++) {
-    sig = avec[i].play(sig, amount);
+    sig = avec[i].process(sig, amount);
   }
 
   for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sig, ccoeff[i] * amount, COMBTYPE::FIR);
+    sig += cvec[i].process(sig, ccoeff[i] * amount, COMBTYPE::FIR);
   }
 
   return sig/5;
 }
 
-float SchroederVerb::play(float sample, float amount, float mod) {
+float SchroederVerb::process(float sample, float amount, float mod) {
   float sig = sample;
   int i = 0;
   for (i = 0; i < 3; i++) {
-    sig = avec[i].play(sig, amount, mod);
+    sig = avec[i].process(sig, amount, mod);
   }
 
   for (i = 0; i < 4; i++) {
-    sig += cvec[i].play(sig, ccoeff[i] * amount, mod, COMBTYPE::FIR);
+    sig += cvec[i].process(sig, ccoeff[i] * amount, mod, COMBTYPE::FIR);
   }
   return sig/5;
 }

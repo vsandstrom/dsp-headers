@@ -1,9 +1,7 @@
 #pragma once
 
-#include "interpolation.hpp"
 #include "wavetable.hpp"
 #include <vector>
-#include "dsp.h"
 
 namespace dspheaders {
 

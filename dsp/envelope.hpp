@@ -8,6 +8,7 @@ namespace dspheaders {
   class Envelope {
     protected:
       Buffer buffer;
+      unsigned bufferlength = 0;
       float* points;
       float* times;
       float* curves;
@@ -20,6 +21,9 @@ namespace dspheaders {
       void generate();
       void generateCurve();
     public: 
+      Envelope();
+
+
       Envelope(
         float* points,
         unsigned pLen,
@@ -39,12 +43,26 @@ namespace dspheaders {
         float samplerate,
         float (*interpolate)(float, float*, unsigned)
       );
+
+      Envelope(
+          float* table,
+          unsigned tablelength,
+          float samplerate,
+          float (*interpolate)(float, float*, unsigned)
+      );
+
       // Returns current value from table
       // float play();
 
       // Resets envelope to start and returns the first value from table
+      float play();
+      float play(float speed);
       float play(GATE trigger);
       float play(GATE trigger, float speed);
+
+      unsigned getBufferlength();
+      char running();
+      char finished();
       void repr();
   };
 

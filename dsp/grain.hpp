@@ -18,7 +18,7 @@ namespace dspheaders {
     // Set on spawn
       float readptr;
       float envptr;
-      // Increment speed
+      float playbackspeed = 1.f;
       float graindur = 0.2;
       unsigned envlength;
       float samplerate;
@@ -26,9 +26,11 @@ namespace dspheaders {
     public:
       char active = 1;
 
-      float play(float offset);
+      float play(float readposition);
+      float play(float readposition, float speed);
       void setDur(float dur);
       float getoffset(float noise);
+      void setSpeed(float speed);
 
     Grain(
       float readptr,
@@ -52,13 +54,14 @@ namespace dspheaders {
     public:
     // Live variables
       unsigned numgrains = 8;
-      float jitter = 0.0f;
       float grainsize = 0.2f;
+      float jitter = 0.f;
 
     // Setters
 
       inline void setNumGranulators(int num)    { numgrains = num;  };
-      inline void setJitter (float amount) { jitter = amount;  };
+      inline void setJitter (float amount) { 
+      };
       inline void setGrainSize(float dur) { grainsize = dur; };
 
     // Process / Play

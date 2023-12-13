@@ -11,7 +11,14 @@ using namespace dspheaders;
  * by bitencoding a 32bit number, capping number of grains
  * to 32 - would require finessing
  *
+ * There should be both time and space jitter.
+ * One for providing aditional offset
+ * One for providing a delay spread of the grains
+ *
  * */
+    
+// 
+// float jit = (jitter * static_cast<float>(rand()) / RAND_MAX) * samplerate;
 
 float Granulator::process(float offset) {
   int i = 0;
@@ -31,25 +38,25 @@ Granulator::Granulator(
   unsigned maxgrains,
   float (*interpolate)(float, float*, unsigned))
   : samplerate(samplerate),
-  // Default grain envelope
     buffer(samplerate * 4, samplerate, interpolate) {
 
-  // allocate memory for all grains
+  // create grains
   grains = (Grain *)malloc(sizeof(Grain)*maxgrains);
-  // if out of memory, return
   if (grains == nullptr) { return;} 
   for (int i = 0; i < maxgrains; i++) {
-    // pass audio buffer and grain envelope by reference,
     grains[i] = Grain(0, 0.2, samplerate, &buffer, &grainenv);
   }
-  // Create default envelope ( Hanning )
+
+  // create default grain envelope
   float* env = new float[512];
   hanning(env, 512);
   grainenv = Envelope(env, 512, samplerate, interpolate);
 };
-   
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
     
-// Envelope constructed from float array
+// Envelope from float array
 Granulator::Granulator(
   float samplerate, 
   float* table, 
@@ -57,14 +64,13 @@ Granulator::Granulator(
   unsigned maxgrains,
   float (interpolate)(float, float*, unsigned))
   : samplerate(samplerate),
-  // Construct envelope from given float array.
     grainenv(table, tablelength, samplerate, interpolate),
     buffer(samplerate * 4, samplerate, interpolate) { 
-    // allocate memory for all grains
+
+  // create grains
   grains = (Grain *)malloc(sizeof(Grain)*maxgrains);
   if (grains == nullptr) { return;} 
   for (int i = 0; i < maxgrains; i++) {
-    // pass audio buffer and grain envelope by reference,
     grains[i] = Grain(0, 0.2, samplerate, &buffer, &grainenv);
   }
 };
@@ -73,8 +79,7 @@ Granulator::~Granulator(){
   free(grains);
 }
     
-    
-// Predefined envelope
+// Envelope from envelope object
 Granulator::Granulator(float samplerate, Envelope grainEnvelope)
   : samplerate(samplerate),
     grainenv(grainEnvelope),

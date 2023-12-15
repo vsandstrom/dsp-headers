@@ -8,7 +8,7 @@ BUILD_DIR := build
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
-TARGETS = $(BUILD_DIR)/vectest $(BUILD_DIR)/combtest $(BUILD_DIR)/fmtest $(BUILD_DIR)/delaytest $(BUILD_DIR)/envtest $(BUILD_DIR)/demotest $(BUILD_DIR)/complextest $(BUILD_DIR)/osctest $(BUILD_DIR)/verbtest $(BUILD_DIR)/verbtest2
+TARGETS = $(BUILD_DIR)/vectest $(BUILD_DIR)/combtest $(BUILD_DIR)/fmtest $(BUILD_DIR)/delaytest $(BUILD_DIR)/envtest $(BUILD_DIR)/demotest $(BUILD_DIR)/complextest $(BUILD_DIR)/osctest $(BUILD_DIR)/verbtest $(BUILD_DIR)/verbtest2 $(BUILD_DIR)/graintest
 
 CFLAGS := -std=c++14 -O0 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES)
 #-march=native -msse -msse2 -mssse3 -msse4.1 -msse4.2 -mavx512vl -I./$(SRC_DIR) $(INCLUDES)
@@ -40,6 +40,8 @@ $(BUILD_DIR)/verbtest: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) verbtest.cpp -o $@
 $(BUILD_DIR)/verbtest2: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) verbtest2.cpp -o $@
+$(BUILD_DIR)/graintest: $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) graintest.cpp -o $@
 
 # Compiling dependencies
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)

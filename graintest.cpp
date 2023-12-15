@@ -1,52 +1,36 @@
+#include <portaudio.h>
+#include <iostream>
 #include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
-#include <portaudio.h>
-#include <chrono>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <cmath>
-#include <string>
-#include "dsp/filter.hpp"
 #include "dsp/wavetable.hpp"
-// #include "dsp/wave.hpp"
-// #include "dsp/vectoroscillator.hpp"
-#include <vector>
+#include "dsp/envelope.hpp"
+#include "dsp/grain.hpp"
+#include "dsp/delay.hpp"
 
-
+#include <iostream>
+#include "dsp/interpolation.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
-const int DURATION =           10000; // milliseconds
+const int DURATION =           30000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-const int TABLE_LEN =      512;
+constexpr int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
-// CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-float FREQ =                300.0f;
-float FM_FREQ =             180.0f;
-float ENV_FREQ =              4.0f;
+static float delaytime = 0.0f;
+static float fb = 0.0f;
 
 using namespace dspheaders;
 
-Wavetable *carrier = nullptr;
-
-bool impulse = true;
-
-Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
-Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
-
-
+Granulator gr = Granulator(SAMPLE_RATE, 8, interpolation::linear);
 
 static frame data;
+
 // callback function must contain these inputs as PortAudio expects it.
-static int paCallback(  const void* inputBuffer,				// input
+static int paCallback(
+            const void* inputBuffer,             				// input
 						void* outputBuffer,								          // output
 						unsigned long framesPerBuffer,					    // length of buffer in frames
 						const PaStreamCallbackTimeInfo* timeinfo,		//
@@ -55,32 +39,19 @@ static int paCallback(  const void* inputBuffer,				// input
 {
 
 	// cast data passing through stream
-	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
-  float o0 = 0.f;
-  float o1 = 0.f;
-  float o2 = 0.f;
-  float o3 = 0.f;
-  float l  = 0.f;
 
-	(void) inputBuffer; // prevent unused variable warning
+	float* in = (float*)inputBuffer;
 
+  // gr.setJitter(0.1);
+
+    
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float sig = (impulse == true) ? 1.f : 0.f;
-    lfo.frequency = 5.4;
-    l = lfo.play();
-    o0 = c0.process(sig, 0.9, COMBTYPE::IIR);
-    o1 = c1.process(sig, .931f, COMBTYPE::IIR);
-    o2 = c2.process(sig, 0.97, COMBTYPE::IIR);
-    o3 = c3.process(sig, 0.98, COMBTYPE::IIR);
-
-    sig += (o0 + o1 + o2 + o3) * 0.2;
-
-    // Stereo frame: two increments of out buffer
-    *out++ = sig; 
-    *out++ = sig;
-    impulse = false;
+    // write and increment output and input buffer simultaneously. 
+    // hardcoded for a stereo i/o setup
+    *out++ = gr.process(*in++, 0.1, 1.f); 
+    *out++ = gr.process(*in++, 0.1, 1.f); 
 	}
 	return 0;
 }
@@ -89,6 +60,9 @@ int main(int argc, char** argv) {
 	PaStream* stream;
 	PaError err;
 
+  // initialize first value, no wierd garbage value
+  // if they are initialized here, make sure to give the variables the correct values
+  // before using it, otherwise there will be an unwanted '0'-sample at the first block
 	data.left = data.right = 0.0f;
 
 	err = Pa_Initialize();
@@ -96,7 +70,7 @@ int main(int argc, char** argv) {
 
 	// open an audio I/O stream:
 	err = Pa_OpenDefaultStream( &stream,  // < --- Callback is in err
-								0, 
+								2, 
 								2,
 								paFloat32,
 								(int)SAMPLE_RATE,

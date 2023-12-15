@@ -1,41 +1,41 @@
 #pragma once
-
 #include "buffer.hpp"
-#include "dsp.h"
 #include "envelope.hpp"
-#include "interpolation.hpp"
-#include "wavetable.hpp"
 #include "buffer.hpp"
+#include "grain.hpp"
 
 namespace dspheaders {
 
   class Grain {
     private: 
     // Shared across whole swarm
-      Buffer* buffer;
-      Envelope* envelope;
+      Buffer* g_buffer;
+      float* g_samplerate;
+      
+      Envelope* g_envelope;
+      
+      float m_readptr;
+      float m_envptr;
+      unsigned m_envlength;
 
-    // Set on spawn
-      float readptr;
-      float envptr;
-      float playbackspeed = 1.f;
-      float graindur = 0.2;
-      unsigned envlength;
-      float samplerate;
+      float m_playbackrate = 1.f;
+      float m_dur = 0.2;
 
     public:
-      char active = 1;
+      char m_active = 1;
 
-      float play(float readposition);
-      float play(float readposition, float speed);
+      float play(float delay);
+      float play(float delay, float rate);
+
+      // Setter & Getter
       void setDur(float dur);
       float getoffset(float noise);
-      void setSpeed(float speed);
+      void setRate(float rate);
 
     Grain(
       float readptr,
       float graindur,
-      float samplerate,
+      float* samplerate,
       Buffer* buffer,
       Envelope* envelope
     );
@@ -43,33 +43,37 @@ namespace dspheaders {
 
   class Granulator {
     private: 
-    // Static variables
-      float samplerate;
-      Envelope grainenv;
-      unsigned maxgrains;
-      Buffer buffer;
-      unsigned writeptr;
-      Grain* grains;
+    // Shared variables between Granulator and Grain-swarm
+      float g_samplerate;
+      Buffer g_buffer;
+
+      Grain* g_grains;
+      Envelope* g_envelope;
+
+      unsigned m_maxgrains;
+      unsigned m_writeptr;
+      float m_playbackrate;
+
+      void write(float sample);
 
     public:
     // Live variables
-      unsigned numgrains = 8;
-      float grainsize = 0.2f;
-      float jitter = 0.f;
+      unsigned m_numgrains = 8;
+      float m_grainsize = 0.2f;
+      float m_jitter = 0.f;
 
     // Setters
 
-      inline void setNumGranulators(int num)    { numgrains = num;  };
+      inline void setNumGranulators(int num)    { m_numgrains = num;  };
       inline void setJitter (float amount) { 
       };
-      inline void setGrainSize(float dur) { grainsize = dur; };
+      inline void setGrainSize(float dur) { m_grainsize = dur; };
+      inline void setRate(float rate) { m_playbackrate = rate; };
 
     // Process / Play
 
-      float process(float offset);
-      float process(float offset, GATE trigger);
-      float process(float offset, GATE trigger, float jitter);
-      float process(float offset, GATE trigger, float jitter, float grainsize);
+      float process(float input, float offset);
+      float process(float input, float offset, float rate);
 
     // Construct / Destroy
 
@@ -83,7 +87,7 @@ namespace dspheaders {
       // Predefined grain envelope in float array
       Granulator(
         float samplerate, 
-        float* table, 
+        float* envtable, 
         unsigned tablelength,
         unsigned maxgrains,
         float (interpolate)(float, float*, unsigned)
@@ -92,7 +96,7 @@ namespace dspheaders {
       // Predefined grain envelope in Wavetable
       Granulator(
         float samplerate,
-        Envelope grainEnvelope
+        Envelope* grainEnvelope
       );
 
       ~Granulator();

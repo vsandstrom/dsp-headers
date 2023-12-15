@@ -1,19 +1,11 @@
 
 #include "dsp/interpolation.hpp"
 #include <portaudio.h>
-#include <chrono>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <cmath>
 #include <string>
-// #include "sound.hpp"
 #include "dsp/wavetable.hpp"
 #include "dsp/waveshape.h"
-// #include "dsp/wave.hpp"
-// #include "dsp/vectoroscillator.hpp"
-#include <vector>
 
 
 

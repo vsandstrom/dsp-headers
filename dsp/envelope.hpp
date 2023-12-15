@@ -21,7 +21,6 @@ namespace dspheaders {
       void generate();
       void generateCurve();
     public: 
-      Envelope();
 
 
       Envelope(

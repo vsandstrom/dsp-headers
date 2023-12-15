@@ -1,12 +1,13 @@
 #include <portaudio.h>
 #include <vector>
+#include <string>
+#include <iostream>
 #include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
 #include "dsp/wavetable.hpp"
 #include "dsp/envelope.hpp"
 #include "dsp/verb.hpp"
 #include "dsp/delay.hpp"
-#include "dsp/filter.hpp"
 #include "dsp/waveshape.h"
 #include "dsp/vectoroscillator.hpp"
 
@@ -185,8 +186,8 @@ static int paCallback(  const void* inputBuffer,				// input
     float sig = car * env * amps[scoreptr & 7];
     float sig1 = car1 * env1 * amps1[scoreptr1 % 4];
 
-    del = delay.play(sig + sig1, 0.4 + (vibr * 0.001), 0.4, 0.5);
-    rev = verb.play(sig + sig1 + del, 0.9995);
+    del = delay.process(sig + sig1, 0.4 + (vibr * 0.001), 0.4, 0.5);
+    rev = verb.process(sig + sig1 + del, 0.9995);
     //
     float left = ((sig * 0.8) + (del * 0.54) + (rev * 0.74));
     float right = ((sig1 * 0.8) + (del * 0.54) + (rev * 0.74));

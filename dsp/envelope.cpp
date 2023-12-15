@@ -65,7 +65,6 @@ Envelope::Envelope(
       bufferlength = tablesize;
     }
 
-
 void Envelope::generate() {
   unsigned pos = 0;
   float min = 0.f, max = 0.f;

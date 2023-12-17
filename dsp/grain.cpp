@@ -1,6 +1,7 @@
 #include "grain.hpp"
 #include "dsp.h"
 #include <cmath>
+#include <cstdio>
 
 using namespace dspheaders;
 
@@ -10,6 +11,7 @@ using namespace dspheaders;
  * -- 
  * --
  * */
+
 
 // delay travels from 0 -> 1 
 float Grain::play(float delay) {
@@ -27,10 +29,7 @@ float Grain::play(float delay) {
   } else {
     out = g_buffer->readsample(ptr) * g_envelope->play(GATE::on, m_dur);
     m_active = g_envelope->running();
-
   }
-
-
   return out;
 }
 
@@ -40,13 +39,17 @@ float Grain::play(float delay, float rate) {
 
   // set function variable with position in delay g_buffer
   float out = 0.f;
+    
   // If envelope has run its course, 'active' is set to 0 ( falsy )
+  float pos = m_readptr - (delay * g_buffer->bufferlength);
+  float ptr = fmod(pos, g_buffer -> bufferlength);
   if (m_active) { 
-    float pos = m_readptr - (delay * g_buffer->bufferlength);
-    float ptr = fmod(pos, g_buffer -> bufferlength);
     m_readptr+=m_playbackrate;
     // icrement readptr - Should mirror Granulator readptr
     out = g_buffer->readsample(ptr) * g_envelope->play(m_dur);
+    m_active = g_envelope->running();
+  } else {
+    out = g_buffer->readsample(ptr) * g_envelope->play(GATE::on, m_dur);
     m_active = g_envelope->running();
   }
   return out;
@@ -72,4 +75,10 @@ Grain::Grain(
     g_samplerate(samplerate),
     m_envlength(envelope -> getBufferlength()),
     m_readptr(readptr),
-    m_dur(m_envlength / (*g_samplerate * dur)) {}
+    m_dur(m_envlength / (*g_samplerate * dur)) {
+}
+
+
+void Grain::test() {
+  printf("ALLOCATED");
+}

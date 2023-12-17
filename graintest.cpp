@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <portaudio.h>
 #include <iostream>
 #include "dsp/dsp.h"
@@ -44,14 +45,17 @@ static int paCallback(
 
 	float* in = (float*)inputBuffer;
 
-  // gr.setJitter(0.1);
+  gr.setJitter(0.1);
+  gr.setGrainSize(0.4);
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    *out++ = gr.process(*in++, 0.1, 1.f); 
-    *out++ = gr.process(*in++, 0.1, 1.f); 
+    float left = gr.process(*in++, 0.1); 
+    float right = gr.process(*in++, 0.1); 
+    *out++ = left;
+    *out++ = right;
 	}
 	return 0;
 }

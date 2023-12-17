@@ -3,6 +3,7 @@
 #include "interpolation.hpp"
 #include "envelope.hpp"
 #include <cstdio>
+#include <iterator>
 
 using namespace dspheaders;
 
@@ -26,11 +27,11 @@ using namespace dspheaders;
 float Granulator::process(float sample, float delay) {
   write(sample);
 
-  int i = 0;
   float out = 0.f;
-  for (; i < m_maxgrains; i++) {
-    out += g_grains[i].play(delay + m_jitter, m_playbackrate);
-
+  for (int i = 0; i < m_maxgrains; i++) {
+    // float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    // out += g_grains[i].play(delay + (m_jitter * r), m_playbackrate);
+    out += g_grains[i].play(0.1, 1);
   }
   return out;
 }
@@ -43,14 +44,13 @@ float Granulator::process(float sample, float delay, float rate) {
     m_playbackrate = rate;
   }
 
-  int i = 0;
   float out = 0.f;
-  for (; i < m_maxgrains; i++) {
-    float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+  for (int i = 0; i < m_maxgrains; i++) {
+    // float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     // delay ([0 - 1]) + (m_jitter * r) ([0.f - 1.f] * [0.f - 1.f]) * buffer-> bufferlength = delay
-    out += g_grains[i].play(delay + (m_jitter * r), m_playbackrate);
+    // out += g_grains[i].play(delay + (m_jitter * r), m_playbackrate);
+    out += g_grains[i].play(0.1, 1);
   }
-  printf("output from grains: %f\n", out);
   return out;
 }
 
@@ -76,16 +76,16 @@ Granulator::Granulator(
   g_envelope = new Envelope(env, 512, g_samplerate, interpolate);
 
   // create grains
-  g_grains = (Grain *)malloc(sizeof(Grain)*m_maxgrains);
+  // g_grains = (Grain *)malloc(sizeof(Grain)*m_maxgrains);
+  g_grains = (Grain*)malloc(sizeof(Grain) * m_maxgrains);
   if (g_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
     g_grains[i] = Grain(0, 0.2, &g_samplerate, &g_buffer, g_envelope);
-    printf("in grainloop");
   }
 
-  printf("bufferlength: %i\n", g_buffer.bufferlength);
-  printf("max_grains: %i\n", m_maxgrains);
-
+  for (int i = 0; i < m_maxgrains; i++) {
+    g_grains[i].test();
+  }
 };
 
 /////////////////////////////////////////////////////////////

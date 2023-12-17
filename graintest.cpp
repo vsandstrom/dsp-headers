@@ -19,7 +19,7 @@ const float  SAMPLE_RATE =   48000;
 using namespace dspheaders;
 
 Granulator gr = Granulator(SAMPLE_RATE, 8, interpolation::linear);
-Impulse trigger = Impulse(1.4, SAMPLE_RATE);
+Impulse trigger = Impulse(2.f, SAMPLE_RATE);
 
 static frame data;
 
@@ -46,8 +46,8 @@ static int paCallback(
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    float left = gr.process(*in++, 0.1, 1.f, trigger.play()); 
-    float right = gr.process(*in++, 0.1, 1.f, trigger.play()); 
+    float left = gr.process(*in++, 0.4, 1.f, trigger.play()); 
+    float right = gr.process(*in++, 0.45, 1.f, trigger.play()); 
     *out++ = left;
     *out++ = right;
 	}

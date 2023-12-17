@@ -2,6 +2,7 @@
 #include "dsp.h"
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 
 using namespace dspheaders;
 
@@ -12,23 +13,23 @@ using namespace dspheaders;
  * --
  * */
 
+// THE READPOINTER FOR EACH GRAIN IS DETACHED FROM THE GRANULATORS WRITEPOINTER
+// THIS MIGHT BE MESSY
 
 // delay travels from 0 -> 1 
 float Grain::play(float delay) {
-  // set function variable with position in delay g_buffer
   float out = 0.f;
-  // If envelope has run its course, 'active' is set to 0 ( falsy )
-  float pos = m_readptr - (delay * (*g_samplerate));
+  float pos = m_readptr - (delay * (*g_samplerate) + m_random);
   float ptr = wrapf(&pos, g_buffer -> bufferlength);
   if (m_active) { 
-    // set randomness ( jitter ) as value of seconds 
-    // icrement readptr - Should mirror Granulator readptr
     m_readptr+=m_playbackrate;
     out = g_buffer->readsample(ptr) * g_envelope->play(m_dur);
     m_active = g_envelope->running();
   } else {
+    m_random = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * m_jitter;
     out = g_buffer->readsample(ptr) * g_envelope->play(GATE::on, m_dur);
     m_active = g_envelope->running();
+
   }
   return out;
 }
@@ -41,7 +42,7 @@ float Grain::play(float delay, float rate) {
   float out = 0.f;
     
   // If envelope has run its course, 'active' is set to 0 ( falsy )
-  float pos = m_readptr - (delay * g_buffer->bufferlength);
+  float pos = m_readptr - (delay * g_buffer->bufferlength + m_random);
   float ptr = fmod(pos, g_buffer -> bufferlength);
   if (m_active) { 
     m_readptr+=m_playbackrate;
@@ -49,19 +50,11 @@ float Grain::play(float delay, float rate) {
     out = g_buffer->readsample(ptr) * g_envelope->play(m_dur);
     m_active = g_envelope->running();
   } else {
+    m_random = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * m_jitter;
     out = g_buffer->readsample(ptr) * g_envelope->play(GATE::on, m_dur);
     m_active = g_envelope->running();
   }
   return out;
-}
-
-void Grain::setDur(float dur) {
-  // 512 (len) / 48000 (sr) * 0.2 (sec) ≈ 0.05333334 samples/frame
-  m_dur = m_envlength / (*g_samplerate * dur) ;
-}
-
-void Grain::setRate(float rate) {
-  m_playbackrate = rate;
 }
 
 Grain::Grain(

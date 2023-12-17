@@ -26,12 +26,31 @@ using namespace dspheaders;
 
 float Granulator::process(float sample, float delay) {
   write(sample);
-
   float out = 0.f;
   for (int i = 0; i < m_maxgrains; i++) {
-    // float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    // out += g_grains[i].play(delay + (m_jitter * r), m_playbackrate);
-    out += g_grains[i].play(0.1, 1);
+    if (g_grains[i].m_active) {
+      g_grains[i].setJitter(m_jitter);
+      out += g_grains[i].play(delay, m_playbackrate);
+    }
+  }
+  return out;
+}
+
+float Granulator::process(float sample, float delay, int trigger) {
+  write(sample);
+  float out = 0.f;
+  bool found = false;
+  for (int i = 0; i < m_maxgrains; i++) {
+    if (!g_grains[i].m_active && !found && trigger >= 1) {
+      // Find first free grain to activate.
+      g_grains[i].setJitter(m_jitter);
+      out += g_grains[i].play(delay, m_playbackrate);
+      found = !found;
+    } else if (g_grains[i].m_active) {
+      // Get sound from already active grains
+      g_grains[i].setJitter(m_jitter);
+      out += g_grains[i].play(delay, m_playbackrate);
+    }
   }
   return out;
 }
@@ -40,16 +59,41 @@ float Granulator::process(float sample, float delay) {
 // Speed argument propagates to the grains. pitch
 float Granulator::process(float sample, float delay, float rate) {
   write(sample);
+  float out = 0.f;
+
   if (m_playbackrate != rate) {
     m_playbackrate = rate;
   }
 
-  float out = 0.f;
   for (int i = 0; i < m_maxgrains; i++) {
-    // float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     // delay ([0 - 1]) + (m_jitter * r) ([0.f - 1.f] * [0.f - 1.f]) * buffer-> bufferlength = delay
-    // out += g_grains[i].play(delay + (m_jitter * r), m_playbackrate);
-    out += g_grains[i].play(0.1, 1);
+    if (g_grains[i].m_active) {
+      g_grains[i].setJitter(m_jitter);
+      out += g_grains[i].play(delay, m_playbackrate);
+    }
+  }
+  return out;
+}
+
+
+float Granulator::process(float sample, float delay, float rate, int trigger) {
+  write(sample);
+  float out = 0.f;
+  bool found = false;
+  if (m_playbackrate != rate) {
+    m_playbackrate = rate;
+  }
+  for (int i = 0; i < m_maxgrains; i++) {
+    if (!g_grains[i].m_active && !found && trigger >= 1) {
+      // Find first free grain to activate.
+      g_grains[i].setJitter(m_jitter);
+      out += g_grains[i].play(delay, m_playbackrate);
+      found = !found;
+    } else if (g_grains[i].m_active) {
+      // Get sound from already active grains
+      g_grains[i].setJitter(m_jitter);
+      out += g_grains[i].play(delay, m_playbackrate);
+    }
   }
   return out;
 }
@@ -76,7 +120,6 @@ Granulator::Granulator(
   g_envelope = new Envelope(env, 512, g_samplerate, interpolate);
 
   // create grains
-  // g_grains = (Grain *)malloc(sizeof(Grain)*m_maxgrains);
   g_grains = (Grain*)malloc(sizeof(Grain) * m_maxgrains);
   if (g_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {

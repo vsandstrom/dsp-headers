@@ -1,31 +1,25 @@
 #include <cstdio>
+#include <cstdlib>
 #include <portaudio.h>
 #include <iostream>
 #include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
-#include "dsp/wavetable.hpp"
-#include "dsp/envelope.hpp"
 #include "dsp/grain.hpp"
-#include "dsp/delay.hpp"
-
+#include <ctime>
+#include <stdlib.h>
 #include <iostream>
 #include "dsp/interpolation.hpp"
+#include "dsp/trigger.hpp"
 
-// MASTER VOLUME OF THE GENERATED TONE
-const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
 const int DURATION =           30000; // milliseconds
-// DEFAULT LENGHT OF THE WAVETABLE
-constexpr int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
-
-static float delaytime = 0.0f;
-static float fb = 0.0f;
 
 using namespace dspheaders;
 
 Granulator gr = Granulator(SAMPLE_RATE, 8, interpolation::linear);
+Impulse trigger = Impulse(1.4, SAMPLE_RATE);
 
 static frame data;
 
@@ -45,15 +39,15 @@ static int paCallback(
 
 	float* in = (float*)inputBuffer;
 
-  gr.setJitter(0.1);
   gr.setGrainSize(0.4);
+  gr.setJitter(0.4);
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    float left = gr.process(*in++, 0.1); 
-    float right = gr.process(*in++, 0.1); 
+    float left = gr.process(*in++, 0.1, 1.f, trigger.play()); 
+    float right = gr.process(*in++, 0.1, 1.f, trigger.play()); 
     *out++ = left;
     *out++ = right;
 	}
@@ -61,6 +55,8 @@ static int paCallback(
 }
 
 int main(int argc, char** argv) {
+
+  srand(time(NULL));
 	PaStream* stream;
 	PaError err;
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "buffer.hpp"
+#include "dsp.h"
 #include "envelope.hpp"
 #include "buffer.hpp"
 #include "grain.hpp"
@@ -17,6 +18,8 @@ namespace dspheaders {
       float m_readptr;
       float m_envptr;
       unsigned m_envlength;
+      float m_jitter = 0.f;
+      float m_random = 0.f;
 
       float m_playbackrate = 1.f;
       float m_dur = 0.2;
@@ -28,9 +31,13 @@ namespace dspheaders {
       float play(float delay, float rate);
 
       // Setter & Getter
-      void setDur(float dur);
       float getoffset(float noise);
-      void setRate(float rate);
+      inline void setDur(float dur) {
+        // 512 (len) / 48000 (sr) * 0.2 (sec) ≈ 0.05333334 samples/frame
+        m_dur = m_envlength / (*g_samplerate * dur) ; };
+      inline void setRate(float rate) { m_playbackrate = rate; };
+      inline void setJitter(float jitter) {m_jitter = jitter;};
+
       void test();
 
     Grain(
@@ -74,7 +81,10 @@ namespace dspheaders {
     // Process / Play
 
       float process(float input, float offset);
+      float process(float input, float offset, int trigger);
+
       float process(float input, float offset, float rate);
+      float process(float input, float offset, float rate, int trigger);
 
     // Construct / Destroy
 

@@ -41,7 +41,7 @@ float Granulator::process(float sample, float delay, int trigger) {
   float out = 0.f;
   bool found = false;
   for (int i = 0; i < m_maxgrains; i++) {
-    if (!g_grains[i].m_active && !found && trigger >= 1) {
+    if (!g_grains[i].m_active && !found) {
       // Find first free grain to activate.
       g_grains[i].setJitter(m_jitter);
       out += g_grains[i].play(delay, m_playbackrate);
@@ -84,7 +84,7 @@ float Granulator::process(float sample, float delay, float rate, int trigger) {
     m_playbackrate = rate;
   }
   for (int i = 0; i < m_maxgrains; i++) {
-    if (!g_grains[i].m_active && !found && trigger >= 1) {
+    if (!g_grains[i].m_active && !found) {
       // Find first free grain to activate.
       g_grains[i].setJitter(m_jitter);
       out += g_grains[i].play(delay, m_playbackrate);
@@ -124,10 +124,6 @@ Granulator::Granulator(
   if (g_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
     g_grains[i] = Grain(0, 0.2, &g_samplerate, &g_buffer, g_envelope);
-  }
-
-  for (int i = 0; i < m_maxgrains; i++) {
-    g_grains[i].test();
   }
 };
 

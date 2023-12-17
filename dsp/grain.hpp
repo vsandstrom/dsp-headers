@@ -31,6 +31,7 @@ namespace dspheaders {
       void setDur(float dur);
       float getoffset(float noise);
       void setRate(float rate);
+      void test();
 
     Grain(
       float readptr,
@@ -52,7 +53,7 @@ namespace dspheaders {
 
       unsigned m_maxgrains;
       unsigned m_writeptr;
-      float m_playbackrate;
+      float m_playbackrate=1.f;
 
       void write(float sample);
 
@@ -60,7 +61,7 @@ namespace dspheaders {
     // Live variables
       unsigned m_numgrains = 8;
       float m_grainsize = 0.2f;
-      float m_jitter = 0.f;
+      float m_jitter = 1.f;
 
     // Setters
 

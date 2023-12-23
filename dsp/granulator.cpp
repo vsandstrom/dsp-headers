@@ -24,41 +24,40 @@ using namespace dspheaders;
 
 // Accesspoint
 
-float Granulator::process(float sample, float delay) {
-  write(sample);
+float Granulator::process(float sample, float position) {
+  // write(sample);
   float out = 0.f;
   for (int i = 0; i < m_maxgrains; i++) {
     if (g_grains[i].m_active) {
       g_grains[i].setJitter(m_jitter);
-      out += g_grains[i].play(delay, m_playbackrate);
+      out += g_grains[i].play(position, m_playbackrate);
     }
   }
   return out;
 }
 
-float Granulator::process(float sample, float delay, int trigger) {
-  write(sample);
+float Granulator::process(float sample, float position, int trigger) {
+  // write(sample);
   float out = 0.f;
   bool found = false;
   for (int i = 0; i < m_maxgrains; i++) {
     if (!g_grains[i].m_active && !found) {
       // Find first free grain to activate.
       g_grains[i].setJitter(m_jitter);
-      out += g_grains[i].play(delay, m_playbackrate);
+      out += g_grains[i].play(position, m_playbackrate);
       found = !found;
     } else if (g_grains[i].m_active) {
       // Get sound from already active grains
       g_grains[i].setJitter(m_jitter);
-      out += g_grains[i].play(delay, m_playbackrate);
+      out += g_grains[i].play(position, m_playbackrate);
     }
   }
   return out;
 }
 
-
 // Speed argument propagates to the grains. pitch
-float Granulator::process(float sample, float delay, float rate) {
-  write(sample);
+float Granulator::process(float sample, float position, float rate) {
+  // write(sample);
   float out = 0.f;
 
   if (m_playbackrate != rate) {
@@ -69,15 +68,15 @@ float Granulator::process(float sample, float delay, float rate) {
     // delay ([0 - 1]) + (m_jitter * r) ([0.f - 1.f] * [0.f - 1.f]) * buffer-> bufferlength = delay
     if (g_grains[i].m_active) {
       g_grains[i].setJitter(m_jitter);
-      out += g_grains[i].play(delay, m_playbackrate);
+      out += g_grains[i].play(position, m_playbackrate);
     }
   }
   return out;
 }
 
 
-float Granulator::process(float sample, float delay, float rate, int trigger) {
-  write(sample);
+float Granulator::process(float sample, float position, float rate, int trigger) {
+  // write(sample);
   float out = 0.f;
   bool found = false;
   if (m_playbackrate != rate) {
@@ -87,21 +86,21 @@ float Granulator::process(float sample, float delay, float rate, int trigger) {
     if (!g_grains[i].m_active && !found) {
       // Find first free grain to activate.
       g_grains[i].setJitter(m_jitter);
-      out += g_grains[i].play(delay, m_playbackrate);
+      out += g_grains[i].play(position, m_playbackrate);
       found = !found;
     } else if (g_grains[i].m_active) {
       // Get sound from already active grains
       g_grains[i].setJitter(m_jitter);
-      out += g_grains[i].play(delay, m_playbackrate);
+      out += g_grains[i].play(position, m_playbackrate);
     }
   }
   return out;
 }
 
-void Granulator::write(float sample) {
-  g_buffer.writesample(sample, m_writeptr++);
-  m_writeptr %= g_buffer.bufferlength ;
-}
+// void Granulator::write(float sample) {
+//   g_buffer.writesample(sample, m_writeptr++);
+//   m_writeptr %= g_buffer.bufferlength ;
+// }
 
 // Ctor
 
@@ -109,9 +108,10 @@ void Granulator::write(float sample) {
 Granulator::Granulator(
   float samplerate, 
   unsigned maxgrains,
+  Buffer* buffer,
   float (*interpolate)(float, float*, unsigned))
   : g_samplerate(samplerate),
-    g_buffer(4.f, samplerate, interpolate),
+    g_buffer(buffer),
     m_maxgrains(maxgrains) {
 
   // create default grain envelope
@@ -123,7 +123,7 @@ Granulator::Granulator(
   g_grains = (Grain*)malloc(sizeof(Grain) * m_maxgrains);
   if (g_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
-    g_grains[i] = Grain(0, 0.2, &g_samplerate, &g_buffer, g_envelope);
+    g_grains[i] = Grain(0, 0.2, &g_samplerate, g_buffer, g_envelope);
   }
 };
 
@@ -135,34 +135,39 @@ Granulator::Granulator(
   float samplerate, 
   float* table, 
   unsigned tablelength,
+  Buffer* buffer,
   unsigned maxgrains,
   float (interpolate)(float, float*, unsigned))
   : g_samplerate(samplerate),
     g_envelope(new Envelope(table, tablelength, samplerate, interpolate)),
-    g_buffer(4.f, samplerate, interpolate),
+    g_buffer(buffer),
     m_maxgrains(maxgrains) { 
 
   // create grains
   g_grains = (Grain *)malloc(sizeof(Grain)*m_maxgrains);
   if (g_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
-    g_grains[i] = Grain(0, 0.2, &g_samplerate, &g_buffer, g_envelope);
+    g_grains[i] = Grain(0, 0.2, &g_samplerate, g_buffer, g_envelope);
   }
 };
 
     
 // Envelope from envelope object
-Granulator::Granulator(float samplerate, Envelope* grainEnvelope)
+Granulator::Granulator(
+  float samplerate, 
+  Envelope* grainEnvelope, 
+  Buffer* buffer)
   : g_samplerate(samplerate),
     g_envelope(grainEnvelope),
-    g_buffer(samplerate * 4, samplerate, interpolation::linear) { 
+    g_buffer(buffer)
+{ 
 
   // allocate memory for all grains
   g_grains = (Grain *)malloc(sizeof(Grain)*m_maxgrains);
   if (g_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
     // pass audio buffer and grain envelope by reference,
-    g_grains[i] = Grain(0, 0.2, &g_samplerate, &g_buffer, g_envelope);
+    g_grains[i] = Grain(0, 0.2, &g_samplerate, g_buffer, g_envelope);
   }
 };
 

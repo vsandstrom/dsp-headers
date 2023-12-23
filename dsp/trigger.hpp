@@ -6,9 +6,10 @@ namespace dspheaders {
      * Trigger generator with fixed duration
      *
      */
-    float dur;
-    float samplerate;
-    unsigned count = 0;
+    protected:
+      float dur;
+      float samplerate;
+      unsigned count = 0;
 
     public: 
       inline float play() {
@@ -35,7 +36,7 @@ namespace dspheaders {
       : dur(dur), samplerate(samplerate){}
   };
 
-  class Dust {
+  class Dust: public Impulse {
     /*
      *
      * Trigger generator with random duration.
@@ -44,7 +45,29 @@ namespace dspheaders {
      *
      */
 
-    // TODO
+      inline float play() {
+        if (count >= dur * samplerate) {
+          return 1.f;
+          count = 0;
+        }
+        count++;
+        return 0.f;
+      }
 
+      inline float play(float dur) {
+        this -> dur = dur;
+        if (count >= dur * samplerate) {
+          return 1.f;
+          count = 0;
+        }
+        count++;
+        return 0.f;
+
+      }
+
+      // Dust(float relativeDur, float samplerate): Impulse(relativeDur, samplerate) {
+      //   dur = 
+      //
+      // };
   };
 }

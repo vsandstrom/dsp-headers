@@ -31,7 +31,8 @@ namespace dspheaders {
       float play(float delay, float rate);
 
       // Setter & Getter
-      float getoffset(float noise);
+      float getPosition(float noise);
+
       inline void setDur(float dur) {
         // 512 (len) / 48000 (sr) * 0.2 (sec) ≈ 0.05333334 samples/frame
         m_dur = m_envlength / (*g_samplerate * dur) ; };
@@ -53,16 +54,19 @@ namespace dspheaders {
     private: 
     // Shared variables between Granulator and Grain-swarm
       float g_samplerate;
-      Buffer g_buffer;
+      Buffer* g_buffer;
 
       Grain* g_grains;
       Envelope* g_envelope;
 
       unsigned m_maxgrains;
+      // POS
+      float m_position = 0.f;
       unsigned m_writeptr;
+
       float m_playbackrate=1.f;
 
-      void write(float sample);
+      // void write(float sample);
 
     public:
     // Live variables
@@ -80,11 +84,11 @@ namespace dspheaders {
 
     // Process / Play
 
-      float process(float input, float offset);
-      float process(float input, float offset, int trigger);
+      float process(float input, float position);
+      float process(float input, float position, int trigger);
 
-      float process(float input, float offset, float rate);
-      float process(float input, float offset, float rate, int trigger);
+      float process(float input, float position, float rate);
+      float process(float input, float position, float rate, int trigger);
 
     // Construct / Destroy
 
@@ -92,6 +96,7 @@ namespace dspheaders {
       Granulator(
         float samplerate,
         unsigned maxgrains,
+        Buffer* buffer,
         float (*interpolate)(float, float*, unsigned)
       );
      
@@ -100,6 +105,7 @@ namespace dspheaders {
         float samplerate, 
         float* envtable, 
         unsigned tablelength,
+        Buffer* buffer,
         unsigned maxgrains,
         float (interpolate)(float, float*, unsigned)
       );
@@ -107,7 +113,8 @@ namespace dspheaders {
       // Predefined grain envelope in Wavetable
       Granulator(
         float samplerate,
-        Envelope* grainEnvelope
+        Envelope* grainEnvelope,
+        Buffer* buffer
       );
 
       ~Granulator();

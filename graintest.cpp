@@ -18,8 +18,11 @@ const float  SAMPLE_RATE =   48000;
 
 using namespace dspheaders;
 
-Granulator gr = Granulator(SAMPLE_RATE, 8, interpolation::linear);
+Granulator* gr;
+Buffer buf = Buffer(8.f, SAMPLE_RATE, interpolation::linear);
 Impulse trigger = Impulse(2.f, SAMPLE_RATE);
+
+int writeptr = 0;
 
 static frame data;
 
@@ -39,17 +42,17 @@ static int paCallback(
 
 	float* in = (float*)inputBuffer;
 
-  gr.setGrainSize(0.4);
-  gr.setJitter(0.4);
+  gr->setGrainSize(0.4);
+  gr->setJitter(0.4);
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
+    buf.writesample(in[i], writeptr++ % buf.bufferlength);
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    float left = gr.process(*in++, 0.4, 1.f, trigger.play()); 
-    float right = gr.process(*in++, 0.45, 1.f, trigger.play()); 
-    *out++ = left;
-    *out++ = right;
+    float gryn = gr->process(*in++, 0.4, 1.f, trigger.play()); 
+    *out++ = gryn;
+    *out++ = gryn;
 	}
 	return 0;
 }
@@ -57,6 +60,7 @@ static int paCallback(
 int main(int argc, char** argv) {
 
   srand(time(NULL));
+  gr = new Granulator(SAMPLE_RATE, 8, &buf, interpolation::linear);
 	PaStream* stream;
 	PaError err;
 

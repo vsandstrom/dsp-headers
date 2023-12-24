@@ -24,7 +24,7 @@ using namespace dspheaders;
 
 // Accesspoint
 
-float Granulator::process(float sample, float position) {
+float Granulator::process(float position) {
   // write(sample);
   float out = 0.f;
   for (int i = 0; i < m_maxgrains; i++) {
@@ -36,7 +36,7 @@ float Granulator::process(float sample, float position) {
   return out;
 }
 
-float Granulator::process(float sample, float position, int trigger) {
+float Granulator::process(float position, int trigger) {
   // write(sample);
   float out = 0.f;
   bool found = false;
@@ -56,7 +56,7 @@ float Granulator::process(float sample, float position, int trigger) {
 }
 
 // Speed argument propagates to the grains. pitch
-float Granulator::process(float sample, float position, float rate) {
+float Granulator::process(float position, float rate) {
   // write(sample);
   float out = 0.f;
 
@@ -75,7 +75,7 @@ float Granulator::process(float sample, float position, float rate) {
 }
 
 
-float Granulator::process(float sample, float position, float rate, int trigger) {
+float Granulator::process(float position, float rate, int trigger) {
   // write(sample);
   float out = 0.f;
   bool found = false;

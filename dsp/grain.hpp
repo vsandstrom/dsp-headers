@@ -84,11 +84,11 @@ namespace dspheaders {
 
     // Process / Play
 
-      float process(float input, float position);
-      float process(float input, float position, int trigger);
+      float process(float position);
+      float process(float position, int trigger);
 
-      float process(float input, float position, float rate);
-      float process(float input, float position, float rate, int trigger);
+      float process(float position, float rate);
+      float process(float position, float rate, int trigger);
 
     // Construct / Destroy
 

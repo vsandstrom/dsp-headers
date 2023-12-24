@@ -42,15 +42,17 @@ static int paCallback(
 
 	float* in = (float*)inputBuffer;
 
-  gr->setGrainSize(0.4);
-  gr->setJitter(0.4);
+  gr->setGrainSize(1.1f);
+  gr->setJitter(0.f);
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    buf.writesample(in[i], writeptr++ % buf.bufferlength);
+    // monobuffer
+    buf.writesample(*in++, writeptr++ % buf.bufferlength);
+    in++;
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    float gryn = gr->process(*in++, 0.4, 1.f, trigger.play()); 
+    float gryn = gr->process(0.4, 1.f, trigger.play()); 
     *out++ = gryn;
     *out++ = gryn;
 	}

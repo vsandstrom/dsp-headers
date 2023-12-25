@@ -29,45 +29,23 @@ float Granulator::process(float position) {
   float out = 0.f;
   for (int i = 0; i < m_maxgrains; i++) {
     if (g_grains[i].m_active) {
-      g_grains[i].setJitter(m_jitter);
       out += g_grains[i].play(position, m_playbackrate);
     }
   }
   return out;
 }
 
-float Granulator::process(float position, int trigger) {
+float Granulator::process(float position, float trigger) {
   // write(sample);
   float out = 0.f;
   bool found = false;
   for (int i = 0; i < m_maxgrains; i++) {
-    if (!g_grains[i].m_active && !found) {
+    if (!g_grains[i].m_active && !found && trigger > 0.f) {
       // Find first free grain to activate.
-      g_grains[i].setJitter(m_jitter);
       out += g_grains[i].play(position, m_playbackrate);
       found = !found;
     } else if (g_grains[i].m_active) {
       // Get sound from already active grains
-      g_grains[i].setJitter(m_jitter);
-      out += g_grains[i].play(position, m_playbackrate);
-    }
-  }
-  return out;
-}
-
-// Speed argument propagates to the grains. pitch
-float Granulator::process(float position, float rate) {
-  // write(sample);
-  float out = 0.f;
-
-  if (m_playbackrate != rate) {
-    m_playbackrate = rate;
-  }
-
-  for (int i = 0; i < m_maxgrains; i++) {
-    // delay ([0 - 1]) + (m_jitter * r) ([0.f - 1.f] * [0.f - 1.f]) * buffer-> bufferlength = delay
-    if (g_grains[i].m_active) {
-      g_grains[i].setJitter(m_jitter);
       out += g_grains[i].play(position, m_playbackrate);
     }
   }
@@ -75,7 +53,7 @@ float Granulator::process(float position, float rate) {
 }
 
 
-float Granulator::process(float position, float rate, int trigger) {
+float Granulator::process(float position, float rate, float trigger) {
   // write(sample);
   float out = 0.f;
   bool found = false;
@@ -83,24 +61,17 @@ float Granulator::process(float position, float rate, int trigger) {
     m_playbackrate = rate;
   }
   for (int i = 0; i < m_maxgrains; i++) {
-    if (!g_grains[i].m_active && !found) {
+    if (!g_grains[i].m_active && !found && trigger > 0) {
       // Find first free grain to activate.
-      g_grains[i].setJitter(m_jitter);
       out += g_grains[i].play(position, m_playbackrate);
       found = !found;
     } else if (g_grains[i].m_active) {
       // Get sound from already active grains
-      g_grains[i].setJitter(m_jitter);
       out += g_grains[i].play(position, m_playbackrate);
     }
   }
   return out;
 }
-
-// void Granulator::write(float sample) {
-//   g_buffer.writesample(sample, m_writeptr++);
-//   m_writeptr %= g_buffer.bufferlength ;
-// }
 
 // Ctor
 

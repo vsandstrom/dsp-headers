@@ -191,11 +191,11 @@ float Envelope::play(GATE trigger, float speed) {
   return out;
 };
 
-char Envelope::running() {
+bool Envelope::running() {
   return readptr < buffer.bufferlength;
 }
 
-char Envelope::finished() {
+bool Envelope::finished() {
   return readptr >= buffer.bufferlength;
 }
 

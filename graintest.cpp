@@ -4,6 +4,7 @@
 #include <iostream>
 #include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
+#include "dsp/wavetable.hpp"
 #include "dsp/grain.hpp"
 #include <ctime>
 #include <stdlib.h>
@@ -20,8 +21,11 @@ using namespace dspheaders;
 
 Granulator* gr;
 Buffer buf = Buffer(8.f, SAMPLE_RATE, interpolation::linear);
-Impulse trigger = Impulse(2.f, SAMPLE_RATE);
+// Impulse trigger = Impulse(0.15f, SAMPLE_RATE);
+Dust trigger = Dust(0.15f, SAMPLE_RATE);
+Wavetable saw = Wavetable(SAW, 1024, SAMPLE_RATE, interpolation::linear);
 
+int playhead = 0;
 int writeptr = 0;
 
 static frame data;
@@ -38,23 +42,28 @@ static int paCallback(
 
 	// cast data passing through stream
 	float* out = (float*)outputBuffer;
-	unsigned int i;
-
 	float* in = (float*)inputBuffer;
-
-  gr->setGrainSize(1.1f);
-  gr->setJitter(0.f);
+	unsigned int i;
+  saw.frequency = 1.f/24;
 
     
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    // monobuffer
-    buf.writesample(*in++, writeptr++ % buf.bufferlength);
-    in++;
-    // write and increment output and input buffer simultaneously. 
-    // hardcoded for a stereo i/o setup
-    float gryn = gr->process(0.4, 1.f, trigger.play()); 
-    *out++ = gryn;
-    *out++ = gryn;
+    // monobuffer -- write once, then grain
+    if (writeptr < buf.bufferlength) {
+      float input = *in++;
+      buf.writesample(input, writeptr % buf.bufferlength);
+      writeptr++;
+      in++;
+      *out++ = 0.f;
+      *out++ = 0.f;
+    } else {
+        float trigg = trigger.play();
+        float phasor = map(saw.play(), -1.f, 1.f, 0.f, 0.99f);
+        float gryn = gr->process(phasor, 1.f, trigg); 
+        *out++ = gryn;
+        *out++ = gryn;
+    }
+    playhead++;
 	}
 	return 0;
 }
@@ -62,7 +71,10 @@ static int paCallback(
 int main(int argc, char** argv) {
 
   srand(time(NULL));
-  gr = new Granulator(SAMPLE_RATE, 8, &buf, interpolation::linear);
+  gr = new Granulator(SAMPLE_RATE, 16, &buf, interpolation::linear);
+  gr->setGrainSize(0.2f);
+  gr->setJitter(0.05f);
+  
 	PaStream* stream;
 	PaError err;
 

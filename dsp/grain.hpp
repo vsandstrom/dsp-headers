@@ -22,10 +22,10 @@ namespace dspheaders {
       float m_random = 0.f;
 
       float m_playbackrate = 1.f;
-      float m_dur = 0.2;
+      float m_dur = 0.0533333;
 
     public:
-      char m_active = 1;
+      bool m_active = false;
 
       float play(float delay);
       float play(float delay, float rate);
@@ -79,16 +79,21 @@ namespace dspheaders {
       inline void setNumGranulators(int num)    { m_numgrains = num;  };
       inline void setJitter (float amount) { 
       };
-      inline void setGrainSize(float dur) { m_grainsize = dur; };
+      inline void setGrainSize(float dur) {
+        m_grainsize = dur;
+        for (int i = 0; i < m_numgrains; i++) {
+          g_grains->setDur(dur);
+        }
+      };
       inline void setRate(float rate) { m_playbackrate = rate; };
 
     // Process / Play
 
       float process(float position);
-      float process(float position, int trigger);
+      float process(float position, float trigger);
 
-      float process(float position, float rate);
-      float process(float position, float rate, int trigger);
+      // float process(float position, float rate);
+      float process(float position, float rate, float trigger);
 
     // Construct / Destroy
 

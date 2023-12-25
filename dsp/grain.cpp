@@ -6,6 +6,8 @@
 
 using namespace dspheaders;
 
+static int x = 0;
+
 /*
  * ## TODO: 
  * -- Scale duration of envelope from wavetable, duration / tablelength
@@ -20,10 +22,10 @@ using namespace dspheaders;
 float Grain::play(float position) {
   float out = 0.f;
   // float pos = m_readptr - (position * (*g_samplerate) + m_random);
-  m_random = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * m_jitter;
+  m_random = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * m_jitter;
   if (m_active) { 
     out = g_buffer->readsample(m_readptr);
-    out *= g_envelope->play(m_dur);
+    out *= g_envelope->play(GATE::off, m_dur);
     // inc
     m_readptr+=m_playbackrate;
     m_active = g_envelope->running();
@@ -33,7 +35,7 @@ float Grain::play(float position) {
     out = g_buffer->readsample(m_readptr);
     out *= g_envelope->play(GATE::on, m_dur);
     m_readptr+=m_playbackrate;
-    m_active = g_envelope->running();
+    m_active = 1;
   }
   return out;
 }
@@ -42,20 +44,20 @@ float Grain::play(float position) {
 float Grain::play(float position, float rate) {
   setRate(rate);
   float out = 0.f;
-  m_random = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * m_jitter;
+  m_random = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * m_jitter;
   if (m_active) { 
     // icrement readptr - Should mirror Granulator readptr
     out = g_buffer->readsample(m_readptr);
-    out *= g_envelope->play(m_dur);
+    out *= g_envelope->play(GATE::off, m_dur);
     m_readptr+=m_playbackrate;
-    m_active = g_envelope->running();
+    m_active = !g_envelope->finished();
   } else {
     // initializes readpointer to a new start position
     m_readptr = ((position + m_random) * g_buffer -> bufferlength);
     out = g_buffer->readsample(m_readptr);
     out *= g_envelope->play(GATE::on, m_dur);
     m_readptr+=m_playbackrate;
-    m_active = g_envelope->running();
+    m_active = 1;
   }
   return out;
 }

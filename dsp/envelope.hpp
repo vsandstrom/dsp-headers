@@ -4,7 +4,6 @@
 #include "buffer.hpp"
 
 namespace dspheaders {
-
   class Envelope {
     protected:
       Buffer buffer;
@@ -60,8 +59,8 @@ namespace dspheaders {
       float play(GATE trigger, float speed);
 
       unsigned getBufferlength();
-      char running();
-      char finished();
+      bool running();
+      bool finished();
       void repr();
   };
 

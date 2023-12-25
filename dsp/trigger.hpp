@@ -1,4 +1,4 @@
-
+#pragma once
 namespace dspheaders {
   class Impulse {
     /*
@@ -7,33 +7,15 @@ namespace dspheaders {
      *
      */
     protected:
-      float dur;
       float samplerate;
-      unsigned count = 0;
+      float m_dur;
+      int m_count = 0;
 
     public: 
-      inline float play() {
-        if (count >= dur * samplerate) {
-          return 1.f;
-          count = 0;
-        }
-        count++;
-        return 0.f;
-      }
+      float play();
+      float play(float interval);
 
-      inline float play(float dur) {
-        this -> dur = dur;
-        if (count >= dur * samplerate) {
-          return 1.f;
-          count = 0;
-        }
-        count++;
-        return 0.f;
-
-      }
-
-      Impulse(float dur, float samplerate)
-      : dur(dur), samplerate(samplerate){}
+      Impulse(float interval, float samplerate);
   };
 
   class Dust: public Impulse {
@@ -44,30 +26,13 @@ namespace dspheaders {
      * SuperCollider 3
      *
      */
+    private:
+      float relDur;
 
-      inline float play() {
-        if (count >= dur * samplerate) {
-          return 1.f;
-          count = 0;
-        }
-        count++;
-        return 0.f;
-      }
+    public:
+      float play();
+      float play(float interval);
+      Dust(float interval, float samplerate);
 
-      inline float play(float dur) {
-        this -> dur = dur;
-        if (count >= dur * samplerate) {
-          return 1.f;
-          count = 0;
-        }
-        count++;
-        return 0.f;
-
-      }
-
-      // Dust(float relativeDur, float samplerate): Impulse(relativeDur, samplerate) {
-      //   dur = 
-      //
-      // };
   };
 }

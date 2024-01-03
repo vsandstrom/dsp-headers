@@ -1,9 +1,7 @@
 #include "grain.hpp"
 #include "waveshape.h"
-#include "interpolation.hpp"
 #include "envelope.hpp"
 #include <cstdio>
-#include <iterator>
 
 using namespace dspheaders;
 
@@ -25,30 +23,40 @@ using namespace dspheaders;
 // Accesspoint
 
 float Granulator::process(float position) {
-  // write(sample);
   float out = 0.f;
+  // sum all active grains
   for (int i = 0; i < m_maxgrains; i++) {
     if (g_grains[i].m_active) {
-      out += g_grains[i].play(position, m_playbackrate);
+      out += g_grains[i].play(position);
     }
   }
   return out;
 }
 
 float Granulator::process(float position, float trigger) {
-  // write(sample);
   float out = 0.f;
-  bool found = false;
-  for (int i = 0; i < m_maxgrains; i++) {
-    if (!g_grains[i].m_active && !found && trigger > 0.f) {
-      // Find first free grain to activate.
-      out += g_grains[i].play(position, m_playbackrate);
-      found = !found;
-    } else if (g_grains[i].m_active) {
-      // Get sound from already active grains
-      out += g_grains[i].play(position, m_playbackrate);
+  int i = 0;
+  int newTriggered = -1;
+  // find available grain to trigger
+  if (trigger >= 1.f) {
+    while (i < m_maxgrains) {
+      if (g_grains[i].m_active == false) {
+        newTriggered = i;
+        out += g_grains[i].play(position, m_playbackrate); 
+        printf("triggered!!! Grain No_%i\n", i);
+        break;
+
+      }
+      i++;
     }
   }
+
+  // sum other active grains
+  for (int j = 0; j < m_maxgrains; j++) {
+      if (j != newTriggered && g_grains->m_active) {
+        out += g_grains[j].play(position);
+      }
+    }
   return out;
 }
 
@@ -56,20 +64,31 @@ float Granulator::process(float position, float trigger) {
 float Granulator::process(float position, float rate, float trigger) {
   // write(sample);
   float out = 0.f;
-  bool found = false;
   if (m_playbackrate != rate) {
     m_playbackrate = rate;
   }
-  for (int i = 0; i < m_maxgrains; i++) {
-    if (!g_grains[i].m_active && !found && trigger > 0) {
-      // Find first free grain to activate.
-      out += g_grains[i].play(position, m_playbackrate);
-      found = !found;
-    } else if (g_grains[i].m_active) {
-      // Get sound from already active grains
-      out += g_grains[i].play(position, m_playbackrate);
+  
+  int i = 0;
+  int newTriggered = -1;
+
+  if (trigger >= 1.f) {
+    while (i < m_maxgrains) {
+      if (g_grains[i].m_active == false) {
+        newTriggered = i;
+        out += g_grains[i].play(position, m_playbackrate); 
+        printf("triggered!!! Grain No_%i\n", i);
+        break;
+
+      }
+      i++;
     }
   }
+
+  for (int j = 0; j < m_maxgrains; j++) {
+      if (j != newTriggered && g_grains->m_active) {
+        out += g_grains[j].play(position);
+      }
+    }
   return out;
 }
 

@@ -2,6 +2,7 @@
 #include "envelope.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
+#include <cstdio>
 #include <iostream>
 
 
@@ -144,6 +145,13 @@ float Envelope::play() {
   return out;
 };
 
+// read from envelope without internal readpointer
+float Envelope::read(float ptr) {
+  return buffer.readsample(ptr);
+}
+
+
+
 // Resets envelope to start and returns the first value from table
 float Envelope::play(GATE trigger) {
   float out = 0.f;
@@ -160,7 +168,6 @@ float Envelope::play(GATE trigger) {
     readptr += 1.f;
   }
   return out;
-
 };
 
 float Envelope::play(float speed) {
@@ -192,7 +199,11 @@ float Envelope::play(GATE trigger, float speed) {
 };
 
 bool Envelope::running() {
-  return readptr < buffer.bufferlength;
+  bool x = readptr < buffer.bufferlength;
+  if (!x) {
+    printf("not running");
+  }
+  return x;
 }
 
 bool Envelope::finished() {

@@ -5,23 +5,28 @@ using namespace dspheaders;
 
 
 float Impulse::play() {
-
+  float out = 0.f;
   if (m_count >= (m_dur * samplerate)) {
     m_count = 0;
-    return 1.f;
+    printf("impulse %f\n", m_dur);
+    out = 1.f;
+  } else {
+    m_count++;
   }
-  m_count++;
-  return -0.f;
+  return out;
 }
 
 float Impulse::play(float dur) {
   m_dur = dur;
+  float out = 0.f;
   if (m_count >= (m_dur * samplerate)) {
     m_count = 0;
-    return 1.f;
+    printf("impulse %f\n", m_dur);
+    out = 1.f;
+  } else {
+    m_count++;
   }
-  m_count++;
-  return -0.f;
+  return out;
 
 }
 

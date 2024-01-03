@@ -58,6 +58,8 @@ namespace dspheaders {
       float play(GATE trigger);
       float play(GATE trigger, float speed);
 
+      float read(float ptr);
+
       unsigned getBufferlength();
       bool running();
       bool finished();

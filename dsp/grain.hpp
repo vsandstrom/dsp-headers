@@ -1,9 +1,7 @@
 #pragma once
 #include "buffer.hpp"
-#include "dsp.h"
 #include "envelope.hpp"
 #include "buffer.hpp"
-#include "grain.hpp"
 
 namespace dspheaders {
 
@@ -27,8 +25,9 @@ namespace dspheaders {
     public:
       bool m_active = false;
 
-      float play(float delay);
-      float play(float delay, float rate);
+      float play();
+      float play(float position);
+      float play(float position, float rate);
 
       // Setter & Getter
       float getPosition(float noise);

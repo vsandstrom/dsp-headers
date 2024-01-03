@@ -26,7 +26,6 @@ namespace dspheaders {
       bool m_active = false;
 
       float play();
-      float play(float position);
       float play(float position, float rate);
 
       // Setter & Getter
@@ -58,15 +57,9 @@ namespace dspheaders {
       Grain* g_grains;
       Envelope* g_envelope;
 
-      unsigned m_maxgrains;
-      // POS
+      unsigned m_maxgrains = 32;
       float m_position = 0.f;
-      unsigned m_writeptr;
-
       float m_playbackrate=1.f;
-
-      // void write(float sample);
-
     public:
     // Live variables
       unsigned m_numgrains = 8;
@@ -75,7 +68,7 @@ namespace dspheaders {
 
     // Setters
 
-      inline void setNumGranulators(int num)    { m_numgrains = num;  };
+      inline void setNumGrains(int num)    { m_numgrains = num;  };
       inline void setJitter (float amount) { 
       };
       inline void setGrainSize(float dur) {
@@ -88,7 +81,7 @@ namespace dspheaders {
 
     // Process / Play
 
-      float process(float position);
+      float process();
       float process(float position, float trigger);
 
       // float process(float position, float rate);

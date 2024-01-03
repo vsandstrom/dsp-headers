@@ -18,63 +18,35 @@ static int x = 0;
 // THIS MIGHT BE MESSY
 
 // delay travels from 0 -> 1 
-float Grain::play(float position) {
+// Play-method for already triggered grain
+float Grain::play() {
   float out = 0.f;
-  if (m_active) { 
-    out = g_buffer->readsample(m_readptr);
-    out *= g_envelope->read(m_envptr);
+  out = g_buffer->readsample(m_readptr);
+  out *= g_envelope->read(m_envptr);
 
-    m_readptr+=m_playbackrate;
-    m_envptr += m_dur;
+  m_readptr+=m_playbackrate;
+  m_envptr += m_dur;
 
-    if (m_envptr > g_envelope->getBufferlength()) { m_active = false; }
-
-  } else {
-    // initializes readpointer to a new start position
-    printf("spawn grain\n");
-    m_envptr = 0.f;
-    m_random = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * m_jitter;
-    m_readptr = ((position + m_random) * g_buffer -> bufferlength);
-
-    out = g_buffer->readsample(m_readptr);
-    out *= g_envelope->read(m_envptr);
-
-    m_readptr += m_playbackrate;
-    m_envptr += m_dur;
-    m_active = true;
-  }
+  if (m_envptr > g_envelope->getBufferlength()) { m_active = false; }
   return out;
 }
 
-// delay travels from 0 -> 1 
+// Play-method for new grains
 float Grain::play(float position, float rate) {
   float out = 0.f;
-
   m_playbackrate = rate;
-  if (m_active) { 
-    // icrement readptr - Should mirror Granulator readptr
-    out = g_buffer->readsample(m_readptr);
-    out *= g_envelope->read(m_envptr);
+  printf("spawn grain\n");
+  // initializes readpointer to a new start position
+  m_random = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * m_jitter;
+  m_readptr = ((position + m_random) * g_buffer -> bufferlength);
+  m_envptr = 0.f;
 
-    m_readptr+=m_playbackrate;
-    m_envptr+=m_dur;
+  out = g_buffer->readsample(m_readptr);
+  out *= g_envelope->read(m_envptr);
 
-    if (m_envptr > g_envelope->getBufferlength()) { m_active = false; }
-
-  } else {
-    printf("spawn grain\n");
-    // initializes readpointer to a new start position
-    m_random = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * m_jitter;
-    m_readptr = ((position + m_random) * g_buffer -> bufferlength);
-    m_envptr = 0.f;
-
-    out = g_buffer->readsample(m_readptr);
-    out *= g_envelope->read(m_envptr);
-
-    m_readptr+=m_playbackrate;
-    m_envptr+=m_dur;
-    m_active = true;
-  }
+  m_readptr+=m_playbackrate;
+  m_envptr+=m_dur;
+  m_active = true;
   return out;
 }
 

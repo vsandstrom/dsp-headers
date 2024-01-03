@@ -22,41 +22,41 @@ using namespace dspheaders;
 
 // Accesspoint
 
-float Granulator::process(float position) {
+float Granulator::process() {
   float out = 0.f;
   // sum all active grains
-  for (int i = 0; i < m_maxgrains; i++) {
+  for (int i = 0; i < m_numgrains; i++) {
     if (g_grains[i].m_active) {
-      out += g_grains[i].play(position);
+      out += g_grains[i].play();
     }
   }
   return out;
 }
 
 float Granulator::process(float position, float trigger) {
+  // find available grain to trigger
+  if (trigger < 1.f) {
+    return process();
+  } 
+
   float out = 0.f;
   int i = 0;
   int newTriggered = -1;
-  // find available grain to trigger
-  if (trigger >= 1.f) {
-    while (i < m_maxgrains) {
-      if (g_grains[i].m_active == false) {
-        newTriggered = i;
-        out += g_grains[i].play(position, m_playbackrate); 
-        printf("triggered!!! Grain No_%i\n", i);
-        break;
-
-      }
-      i++;
+  while (i < m_numgrains) {
+    if (g_grains[i].m_active == false) {
+      newTriggered = i;
+      out += g_grains[i].play(position, m_playbackrate); 
+      printf("triggered!!! Grain No_%i\n", i);
+      break;
+    }
+    i++;
+  }
+  // sum other active grains
+  for (int j = 0; j < m_numgrains; j++) {
+    if (j != newTriggered && g_grains->m_active) {
+      out += g_grains[j].play();
     }
   }
-
-  // sum other active grains
-  for (int j = 0; j < m_maxgrains; j++) {
-      if (j != newTriggered && g_grains->m_active) {
-        out += g_grains[j].play(position);
-      }
-    }
   return out;
 }
 
@@ -72,7 +72,7 @@ float Granulator::process(float position, float rate, float trigger) {
   int newTriggered = -1;
 
   if (trigger >= 1.f) {
-    while (i < m_maxgrains) {
+    while (i < m_numgrains) {
       if (g_grains[i].m_active == false) {
         newTriggered = i;
         out += g_grains[i].play(position, m_playbackrate); 
@@ -84,9 +84,9 @@ float Granulator::process(float position, float rate, float trigger) {
     }
   }
 
-  for (int j = 0; j < m_maxgrains; j++) {
+  for (int j = 0; j < m_numgrains; j++) {
       if (j != newTriggered && g_grains->m_active) {
-        out += g_grains[j].play(position);
+        out += g_grains[j].play();
       }
     }
   return out;

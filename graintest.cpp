@@ -17,17 +17,29 @@
 #include "dsp/trigger.hpp"
 
 // SETUP
-const int DURATION = 30000; // milliseconds
-const float  SAMPLE_RATE =   48000;
 const int INPUT_CH = 2;
 const int OUTPUT_CH = 2;
+const int MAX_GRAINS = 32;
+const float GRAIN_DUR = 0.8f;
+const float INTERVAL = 0.1f;
+const float RATE = 1.f; // TRY NEGATIVE
+const float JITTER = 0.01f;
+const float PITCH_MOD_AMOUNT = 0.05f;
+const float RECORD_LEN = 12.f; // seconds
+
+const int PROGRAM_DURATION = 60000; // milliseconds
+const float  SAMPLE_RATE =   48000;
+
+
+
+
 using namespace dspheaders;
 
 // GLOBALS
 Granulator* gr;
-Buffer buf = Buffer(8.f, SAMPLE_RATE, interpolation::linear);
-// Impulse trigger = Impulse(0.1f, SAMPLE_RATE);
-Dust trigger = Dust(0.1f, SAMPLE_RATE);
+Buffer buf = Buffer(RECORD_LEN, SAMPLE_RATE, interpolation::linear);
+// Impulse trigger = Impulse(INTERVAL, SAMPLE_RATE);
+Dust trigger = Dust(INTERVAL, SAMPLE_RATE);
 Wavetable saw = Wavetable(SAW, 1024, SAMPLE_RATE, interpolation::linear);
 Wavetable lfo = Wavetable(SINE, 1024, SAMPLE_RATE, interpolation::linear);
 
@@ -70,8 +82,8 @@ static int paCallback(
         float trig = trigger.play();
         float phasor = map(saw.play(),-1.f, 1.f, 0.f, 0.99f);
           gryn = gr->process(
-            phasor, 
-            (lfo.play() * 0.05) - 1.f,
+            phasor, // TRY STATIC VALUE (0.0 <= x < 1.0)
+            RATE + (lfo.play() * PITCH_MOD_AMOUNT),
             trig
           ); 
         *out++ = gryn;
@@ -85,12 +97,28 @@ static int paCallback(
 }
 
 int main(int argc, char** argv) {
-
+  // seed rng for dust  and jitter in graulator object
   srand(time(NULL));
-  gr = new Granulator(0.8f, SAMPLE_RATE, 32, &buf, interpolation::linear);
-  gr->setJitter(0.02f);
-  gr->setNumGrains(32);
-  gr->setRate(0.8);
+
+  printf(
+      "    ╒═════════════════════════════════════════════════════╕\n"
+      "    │ THIS PROGRAM RECORDS THE INPUT OF YOUR AUDIO DEVICE │\n" 
+      "    │ FOR A COUPLE OF SECONDS, THEN PLAYS THE AUDIO BACK  │\n" 
+      "    │ THROUGH A GRANULATED AUDIO EFFECT.                  │\n"
+      "    │                                                     │\n"
+      "    │           ( NOTHING IS SAVED TO MEMORY )            │\n"
+      "    ╘═════════════════════════════════════════════════════╛\n");
+
+  gr = new Granulator(
+      GRAIN_DUR,
+      SAMPLE_RATE,
+      MAX_GRAINS,
+      &buf,
+      interpolation::linear
+    );
+
+  gr->setJitter(JITTER);
+  gr->setNumGrains(MAX_GRAINS);
   
 	PaStream* stream;
 	PaError err;
@@ -118,7 +146,7 @@ int main(int argc, char** argv) {
 	if( err != paNoError ) goto error;
 
 	// sound duration
-	Pa_Sleep(DURATION); // NUM_SECONDS is in milliseconds????
+	Pa_Sleep(PROGRAM_DURATION);
 
 	// stop sound
 	err = Pa_StopStream(stream);

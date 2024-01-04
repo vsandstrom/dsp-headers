@@ -33,7 +33,7 @@ namespace dspheaders {
 
       inline void setDur(float dur) {
         // 512 (len) / 48000 (sr) * 0.2 (sec) ≈ 0.05333334 samples/frame
-        m_dur = m_envlength / (*g_samplerate * dur) ; };
+        m_dur = m_envlength / ((*g_samplerate) * dur); };
       inline void setRate(float rate) { m_playbackrate = rate; };
       inline void setJitter(float jitter) {m_jitter = jitter;};
 
@@ -73,8 +73,8 @@ namespace dspheaders {
       };
       inline void setGrainSize(float dur) {
         m_grainsize = dur;
-        for (int i = 0; i < m_numgrains; i++) {
-          g_grains->setDur(dur);
+        for (int i = 0; i < m_maxgrains; i++) {
+          g_grains[i].setDur(dur);
         }
       };
       inline void setRate(float rate) { m_playbackrate = rate; };
@@ -87,7 +87,7 @@ namespace dspheaders {
       // float process(float position, float rate);
       float process(float position, float rate, float trigger);
 
-    // Construct / Destroy
+    // Construct / Destruct
 
       // Default envelope - works fine to get going
       Granulator(
@@ -102,17 +102,18 @@ namespace dspheaders {
       Granulator(
         float dur,
         float samplerate, 
+        unsigned maxgrains,
         float* envtable, 
         unsigned tablelength,
-        Buffer* buffer,
-        unsigned maxgrains,
-        float (interpolate)(float, float*, unsigned)
+        float (interpolate)(float, float*, unsigned),
+        Buffer* buffer
       );
       
       // Predefined grain envelope in Wavetable
       Granulator(
         float dur,
         float samplerate,
+        unsigned maxgrains,
         Envelope* grainEnvelope,
         Buffer* buffer
       );

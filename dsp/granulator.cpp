@@ -116,11 +116,11 @@ Granulator::Granulator(
 Granulator::Granulator(
   float dur,
   float samplerate, 
+  unsigned maxgrains,
   float* table, 
   unsigned tablelength,
-  Buffer* buffer,
-  unsigned maxgrains,
-  float (interpolate)(float, float*, unsigned))
+  float (interpolate)(float, float*, unsigned),
+  Buffer* buffer)
   : g_samplerate(samplerate),
     g_envelope(new Envelope(table, tablelength, samplerate, interpolate)),
     g_buffer(buffer),
@@ -140,11 +140,13 @@ Granulator::Granulator(
 Granulator::Granulator(
   float dur,
   float samplerate, 
+  unsigned maxgrains,
   Envelope* grainEnvelope, 
   Buffer* buffer)
   : g_samplerate(samplerate),
     g_envelope(grainEnvelope),
-    g_buffer(buffer)
+    g_buffer(buffer),
+    m_maxgrains(maxgrains)
 { 
 
   // allocate memory for all grains

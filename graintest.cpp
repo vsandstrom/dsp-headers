@@ -67,16 +67,17 @@ static int paCallback(
       *out++ = 0.f;
       *out++ = 0.f;
     } else {
-        float trigg = trigger.play();
+        float trig = trigger.play();
         float phasor = map(saw.play(),-1.f, 1.f, 0.f, 0.99f);
           gryn = gr->process(
             phasor, 
-            trigg
+            (lfo.play() * 0.05) - 1.f,
+            trig
           ); 
         *out++ = gryn;
         *out++ = gryn;
 
-        gr->setRate((lfo.play()*0.05) - 1.f);
+        // gr->setRate((lfo.play()*0.05) - 1.f);
     }
     playhead++;
 	}

@@ -91,6 +91,7 @@ namespace dspheaders {
 
       // Default envelope - works fine to get going
       Granulator(
+        float dur,
         float samplerate,
         unsigned maxgrains,
         Buffer* buffer,
@@ -99,6 +100,7 @@ namespace dspheaders {
      
       // Predefined grain envelope in float array
       Granulator(
+        float dur,
         float samplerate, 
         float* envtable, 
         unsigned tablelength,
@@ -109,6 +111,7 @@ namespace dspheaders {
       
       // Predefined grain envelope in Wavetable
       Granulator(
+        float dur,
         float samplerate,
         Envelope* grainEnvelope,
         Buffer* buffer

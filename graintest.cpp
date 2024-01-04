@@ -26,9 +26,11 @@ using namespace dspheaders;
 // GLOBALS
 Granulator* gr;
 Buffer buf = Buffer(8.f, SAMPLE_RATE, interpolation::linear);
-Impulse trigger = Impulse(0.2f, SAMPLE_RATE);
-// Dust trigger = Dust(0.6f, SAMPLE_RATE);
+// Impulse trigger = Impulse(0.1f, SAMPLE_RATE);
+Dust trigger = Dust(0.1f, SAMPLE_RATE);
 Wavetable saw = Wavetable(SAW, 1024, SAMPLE_RATE, interpolation::linear);
+Wavetable lfo = Wavetable(SINE, 1024, SAMPLE_RATE, interpolation::linear);
+
 
 // Duration in samples
 int playhead = 0;
@@ -51,6 +53,7 @@ static int paCallback(
 	float* in = (float*)inputBuffer;
 	unsigned int i;
   saw.frequency = 1.f/24;
+  lfo.frequency = 11.f;
 
   float gryn = 0.f;
 
@@ -66,9 +69,14 @@ static int paCallback(
     } else {
         float trigg = trigger.play();
         float phasor = map(saw.play(),-1.f, 1.f, 0.f, 0.99f);
-        gryn = gr->process(phasor, 1.f, trigg); 
+          gryn = gr->process(
+            phasor, 
+            trigg
+          ); 
         *out++ = gryn;
         *out++ = gryn;
+
+        gr->setRate((lfo.play()*0.05) - 1.f);
     }
     playhead++;
 	}
@@ -78,10 +86,10 @@ static int paCallback(
 int main(int argc, char** argv) {
 
   srand(time(NULL));
-  gr = new Granulator(SAMPLE_RATE, 9, &buf, interpolation::linear);
-  gr->setGrainSize(0.4f);
-  gr->setJitter(0.f);
-  gr->setNumGrains(8);
+  gr = new Granulator(0.8f, SAMPLE_RATE, 32, &buf, interpolation::linear);
+  gr->setJitter(0.02f);
+  gr->setNumGrains(32);
+  gr->setRate(0.8);
   
 	PaStream* stream;
 	PaError err;

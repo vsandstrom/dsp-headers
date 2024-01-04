@@ -35,7 +35,6 @@ float Grain::play() {
 float Grain::play(float position, float rate) {
   float out = 0.f;
   m_playbackrate = rate;
-  printf("spawn grain\n");
   // initializes readpointer to a new start position
   m_random = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * m_jitter;
   m_readptr = ((position + m_random) * g_buffer -> bufferlength);

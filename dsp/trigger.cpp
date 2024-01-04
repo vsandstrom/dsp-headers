@@ -1,5 +1,4 @@
 #include "trigger.hpp"
-#include <cstdio>
 #include <stdlib.h>
 using namespace dspheaders;
 
@@ -8,7 +7,6 @@ float Impulse::play() {
   float out = 0.f;
   if (m_count >= (m_dur * samplerate)) {
     m_count = 0;
-    printf("impulse %f\n", m_dur);
     out = 1.f;
   } else {
     m_count++;
@@ -21,7 +19,6 @@ float Impulse::play(float dur) {
   float out = 0.f;
   if (m_count >= (m_dur * samplerate)) {
     m_count = 0;
-    printf("impulse %f\n", m_dur);
     out = 1.f;
   } else {
     m_count++;
@@ -41,7 +38,6 @@ float Dust::play() {
     float rng = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 2.f;
     m_dur = relDur * rng;
     m_count = 0;
-    printf("impulse %f\n", m_dur);
     return 1.f;
   }
   m_count++;
@@ -54,7 +50,6 @@ float Dust::play(float relativeDur) {
     float rng = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 2.f;
     m_dur = relativeDur * rng;
     m_count = 0;
-    printf("impulse %f\n", m_dur);
     return 1.f;
   }
   m_count++;

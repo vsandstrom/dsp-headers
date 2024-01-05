@@ -1,7 +1,6 @@
 
 /* ˚◊˚ */
 
-#include "dsp.h"
 #include "buffer.hpp"
 #include "delay.hpp"
 #include "interpolation.hpp"
@@ -72,7 +71,7 @@ void Delay::delaytime(float delaytime) {
   time = delaytime;
 }
 
-float Delay::play(float input, float delaytime, float wet, float feedback) {
+float Delay::process(float input, float delaytime, float wet, float feedback) {
   float output = read(delaytime, feedback);
   // write the time back to write head with feedback
   // MAGIC NUMBER for scaling the feedback of the delay to something managable

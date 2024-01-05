@@ -41,8 +41,8 @@ namespace dspheaders {
 
     public: 
       // Feedback
-      float play(float sample, float feedback, COMBTYPE type);
-      float play(float sample, float feedback, float mod, COMBTYPE type);
+      float process(float sample, float feedback, COMBTYPE type);
+      float process(float sample, float feedback, float mod, COMBTYPE type);
       Comb(
           unsigned offset,
           unsigned samplerate,
@@ -62,8 +62,8 @@ namespace dspheaders {
 ///
 ///       where: amp == feedback 
     public:
-      float play(float sample, float coeff);
-      float play(float sample, float coeff, float mod);
+      float process(float sample, float coeff);
+      float process(float sample, float coeff, float mod);
       Allpass(
         unsigned offset,
         unsigned samplerate,

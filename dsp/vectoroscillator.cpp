@@ -1,6 +1,4 @@
 #include "vectoroscillator.hpp"
-#include "dsp.h"
-#include <cstdio>
 #include <vector>
 using namespace dspheaders;
 VectorOscillator::VectorOscillator(){}

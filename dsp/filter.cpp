@@ -2,7 +2,6 @@
 #include "buffer.hpp"
 #include "dsp.h"
 #include "interpolation.hpp"
-#include <cstdio>
 
 /// Diagrams lifted from CCRMAs webpage
 /// https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html
@@ -97,7 +96,7 @@ float Comb::fir(float sample, float amp, float mod) {
   return out;
 }
 
-float Comb::play(float sample, float feedback, COMBTYPE type) {
+float Comb::process(float sample, float feedback, COMBTYPE type) {
   float output = 0.f;
   switch (type) {
     case IIR : { output = iir(sample, feedback); break; };
@@ -109,7 +108,7 @@ float Comb::play(float sample, float feedback, COMBTYPE type) {
   return output;
 }
 
-float Comb::play(float sample, float feedback, float mod, COMBTYPE type) {
+float Comb::process(float sample, float feedback, float mod, COMBTYPE type) {
   float output = 0.f;
   switch (type) {
     // "mod" arg not used inside function "iir/fir" function any more 
@@ -142,7 +141,7 @@ Allpass::Allpass(
 // float sample - current input
 //
 // float coeff - the feedback and feedforward of internal comb filters
-float Allpass::play(float sample, float coeff) {
+float Allpass::process(float sample, float coeff) {
   ///
   ///                 allpass filter
   ///
@@ -168,7 +167,7 @@ float Allpass::play(float sample, float coeff) {
 // float coeff - the feedback and feedforward of internal comb filters
 //
 // float mod - modulates the read head of the buffer
-float Allpass::play(float sample, float coeff, float mod) {
+float Allpass::process(float sample, float coeff, float mod) {
   float bck = iir(sample, -coeff, mod);
   float fwd = fir(sample + bck, coeff, mod);
   float out = interpolation::slope(fwd, prevout);

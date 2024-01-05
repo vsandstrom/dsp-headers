@@ -1,28 +1,13 @@
+#pragma once
+
 #include "dsp.h"
 #include "buffer.hpp"
-#include <cmath>
-
-/*  
- *  TODO:
- *  [ ] - apply curve on each envelope segment
- *  [ ] - write test to make sure each value in points list is >= 0
- *  [ ] - dsp.h function that finds closest pow2
- *
- * BaseEnvelope could probably be a descendent of Buffer, or Buffer could 
- * perhaps have a bunch of extra functions to give it this functionality.
- * */
 
 namespace dspheaders {
-  enum GATE {
-    on = 1, 
-    off = 0,
-    cycle = 2,
-  };
-
-
   class Envelope {
     protected:
       Buffer buffer;
+      unsigned bufferlength = 0;
       float* points;
       float* times;
       float* curves;
@@ -35,6 +20,8 @@ namespace dspheaders {
       void generate();
       void generateCurve();
     public: 
+
+
       Envelope(
         float* points,
         unsigned pLen,
@@ -54,12 +41,28 @@ namespace dspheaders {
         float samplerate,
         float (*interpolate)(float, float*, unsigned)
       );
+
+      Envelope(
+          float* table,
+          unsigned tablelength,
+          float samplerate,
+          float (*interpolate)(float, float*, unsigned)
+      );
+
       // Returns current value from table
       // float play();
 
       // Resets envelope to start and returns the first value from table
+      float play();
+      float play(float speed);
       float play(GATE trigger);
       float play(GATE trigger, float speed);
+
+      float read(float ptr);
+
+      unsigned getBufferlength();
+      bool running();
+      bool finished();
       void repr();
   };
 

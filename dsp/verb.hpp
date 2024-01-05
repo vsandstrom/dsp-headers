@@ -1,7 +1,6 @@
 #pragma once
-#include "dsp.h"
 #include "filter.hpp"
-#include "wavetable.hpp"
+#include "interpolation.hpp"
 
 namespace dspheaders{
   class ChownVerb {
@@ -29,7 +28,7 @@ namespace dspheaders{
       };
 
     public:
-      float play(float sample, float amount);
+      float process(float sample, float amount);
       ChownVerb(unsigned samplerate);
   };
 
@@ -58,8 +57,8 @@ namespace dspheaders{
         Allpass(113, samplerate, interpolation::linear),
       };
     public:
-      float play(float sample, float amount);
-      float play(float sample, float amount, float mod);
+      float process(float sample, float amount);
+      float process(float sample, float amount, float mod);
       SchroederVerb(unsigned samplerate);
   };
 }

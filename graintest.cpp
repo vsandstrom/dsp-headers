@@ -25,11 +25,11 @@ const int MAX_GRAINS = 8;
 const float GRAIN_DUR = 0.01f;
 const float INTERVAL = 0.1f;
 const float RATE = 1.f; // TRY NEGATIVE
-const float JITTER = 0.01f;
-const float PITCH_MOD_AMOUNT = 0.05f;
+const float JITTER = 0.6f;
+const float PITCH_MOD_AMOUNT = 0.004f;
 const float RECORD_LEN = 16.f; // seconds
 
-const int PROGRAM_DURATION = 60000; // milliseconds
+const int PROGRAM_DURATION = 120000; // milliseconds
 const float  SAMPLE_RATE =   48000;
 
 using namespace dspheaders;
@@ -43,14 +43,28 @@ Dust trigger = Dust(INTERVAL, SAMPLE_RATE);
 Wavetable ph_saw = Wavetable(SAW, 1024, SAMPLE_RATE, interpolation::linear);
 Wavetable lfo = Wavetable(SINE, 1024, SAMPLE_RATE, interpolation::linear);
 
+
 float p[4] = { 0.01f, 0.8f, 2.2f, 0.3f };
 float t[3] = { 12.f, 12.f, 18.f };
 float c[3] = { 0.8f, 0.2f, 1.2f };
 
-
 Envelope size = Envelope(p, 4, t, 3, c, 3, SAMPLE_RATE, interpolation::linear);
 
-bool toggle = true;
+float p2[4] = { 1.f, 0.8f, 2.2f, 0.3f };
+float t2[3] = { 6.f, 20.f, 18.f };
+float c2[3] = { 0.8f, 0.2f, 1.2f };
+
+Envelope speed = Envelope(p2, 4, t2, 3, c2, 3, SAMPLE_RATE, interpolation::linear);
+
+float p3[4] = { 0.1f, 0.03f, 2.2f, 0.3f };
+float t3[3] = { 12.f, 8.f, 18.f };
+float c3[3] = { 1.7f, 1.2f, 0.2f };
+
+Envelope imp = Envelope(p3, 4, t3, 3, c3, 3, SAMPLE_RATE, interpolation::linear);
+
+bool toggle_size_env = true;
+bool toggle_rate_env = true;
+bool toggle_impl_env = true;
 
 // Duration in samples
 int playhead = 0;
@@ -77,6 +91,8 @@ static int paCallback(
 
   float gryn = 0.f;
   float s = 0.f;
+  float r = 0.f;
+  float t = 0.f;
 
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
@@ -88,19 +104,34 @@ static int paCallback(
       *out++ = 0.f;
       *out++ = 0.f;
     } else {
-      if (toggle || size.finished()) {
+      if (toggle_size_env || size.finished()) {
         s = size.play(GATE::on);
-        toggle = false;
+        toggle_size_env = false;
       } else {
         s = size.play(GATE::off);
       }
+
+      if (toggle_rate_env || speed.finished()) {
+        r = speed.play(GATE::on);
+        toggle_rate_env = false;
+      } else {
+        r = speed.play(GATE::off);
+      }
       
-        float trig = trigger.play();
+      if (toggle_impl_env || imp.finished()) {
+        t = imp.play(GATE::on);
+        toggle_impl_env = false;
+      } else {
+        t = imp.play(GATE::off);
+      }
+      
+        float trig = trigger.play(t);
         float phasor = map(ph_saw.play(),-1.f, 1.f, 0.f, 0.99f);
         gr->setGrainSize(s);
         gryn = gr->process(
           phasor, // TRY STATIC VALUE (0.0 <= x < 1.0)
-          RATE + (lfo.play() * PITCH_MOD_AMOUNT),
+          // RATE + (lfo.play() * PITCH_MOD_AMOUNT),
+          r + (lfo.play() * PITCH_MOD_AMOUNT),
           trig
         ); 
         *out++ = gryn;

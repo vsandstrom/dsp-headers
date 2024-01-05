@@ -2,10 +2,8 @@
 #include <portaudio.h>
 #include <cstdio>
 #include <iostream>
-#include "dsp/wavetable.hpp"
-#include "dsp/buffer.hpp"
 #include "dsp/delay.hpp"
-#include "dsp/filter.hpp"
+#include "dsp/interpolation.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -44,8 +42,8 @@ static int paCallback(
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    *out++ = delay.play(*in++, delaytime, 0.8f, fb); 
-    *out++ = delay.play(*in++, delaytime, 0.8f, fb); 
+    *out++ = delay.process(*in++, delaytime, 0.8f, fb); 
+    *out++ = delay.process(*in++, delaytime, 0.8f, fb); 
 	}
 	return 0;
 }

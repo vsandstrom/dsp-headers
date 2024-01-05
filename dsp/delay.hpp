@@ -1,5 +1,4 @@
 #pragma once
-#include "dsp.h"
 #include "buffer.hpp"
 
 namespace dspheaders {
@@ -31,7 +30,7 @@ namespace dspheaders {
       void write(float sample, int offset);
       float read(int offset);
 
-      float play(float input, float delaytime, float wet, float feedback);
+      float process(float input, float delaytime, float wet, float feedback);
 
       // Initialize Delay
       // maxdelaytime: the size of the buffer in samples

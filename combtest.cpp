@@ -1,3 +1,4 @@
+#include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
 #include <portaudio.h>
 #include <chrono>
@@ -69,10 +70,10 @@ static int paCallback(  const void* inputBuffer,				// input
     float sig = (impulse == true) ? 1.f : 0.f;
     lfo.frequency = 5.4;
     l = lfo.play();
-    o0 = c0.play(sig, 0.9, COMBTYPE::IIR);
-    o1 = c1.play(sig, .931f, COMBTYPE::IIR);
-    o2 = c2.play(sig, 0.97, COMBTYPE::IIR);
-    o3 = c3.play(sig, 0.98, COMBTYPE::IIR);
+    o0 = c0.process(sig, 0.9, COMBTYPE::IIR);
+    o1 = c1.process(sig, .931f, COMBTYPE::IIR);
+    o2 = c2.process(sig, 0.97, COMBTYPE::IIR);
+    o3 = c3.process(sig, 0.98, COMBTYPE::IIR);
 
     sig += (o0 + o1 + o2 + o3) * 0.2;
 

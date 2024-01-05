@@ -1,8 +1,7 @@
+
 #include "envelope.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
-#include "wavetable.hpp"
-#include <algorithm>
 #include <cstdio>
 #include <iostream>
 
@@ -50,7 +49,23 @@ Envelope::Envelope(
       ), 
     samplerate(samplerate) {
   generateCurve();
+  bufferlength = buffer.bufferlength;
 };
+
+
+
+// Convert a table to envelope
+Envelope::Envelope(
+    float* table,
+    unsigned tablesize,
+    float samplerate,
+    float (*interpolate)(float, float*, unsigned))
+    : buffer(tablesize, samplerate, interpolate){
+      for (int i = 0; i < tablesize; i++) {
+        buffer.buffer[i] = table[i];
+      }
+      bufferlength = tablesize;
+    }
 
 void Envelope::generate() {
   unsigned pos = 0;
@@ -106,6 +121,10 @@ void Envelope::generateCurve() {
 
 };
 
+unsigned Envelope::getBufferlength() {
+  return bufferlength;
+}
+
 // Returns current value from table
 // float Envelope::play() {
 //   float out = 0.f;
@@ -116,6 +135,23 @@ void Envelope::generateCurve() {
 //   return out;
 // }
 
+float Envelope::play() {
+  float out = 0.f;
+  if (readptr < buffer.bufferlength) {
+    out = buffer.readsample(readptr);
+    prev = out;
+    readptr += 1.f;
+  } 
+  return out;
+};
+
+// read from envelope without internal readpointer
+float Envelope::read(float ptr) {
+  return buffer.readsample(ptr);
+}
+
+
+
 // Resets envelope to start and returns the first value from table
 float Envelope::play(GATE trigger) {
   float out = 0.f;
@@ -123,16 +159,27 @@ float Envelope::play(GATE trigger) {
     if (readptr < buffer.bufferlength) {
       out = buffer.readsample(readptr);
       prev = out;
+      readptr += 1.f;
     }
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
     out = buffer.readsample(readptr);
+    readptr += 1.f;
   }
-  readptr += 1.f;
+  return out;
+};
+
+float Envelope::play(float speed) {
+  float out = 0.f;
+  if (readptr < buffer.bufferlength) {
+    out = buffer.readsample(readptr);
+    prev = out;
+    readptr += speed;
+  }
   return out;
 
-};
+}
 
 float Envelope::play(GATE trigger, float speed) {
   float out = 0.f;
@@ -140,15 +187,28 @@ float Envelope::play(GATE trigger, float speed) {
     if (readptr < buffer.bufferlength) {
       out = buffer.readsample(readptr);
       prev = out;
+      readptr += speed;
     }
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
     out = buffer.readsample(readptr);
+    readptr += speed;
   }
-  readptr += speed;
   return out;
 };
+
+bool Envelope::running() {
+  bool x = readptr < buffer.bufferlength;
+  if (!x) {
+    printf("not running");
+  }
+  return x;
+}
+
+bool Envelope::finished() {
+  return readptr >= buffer.bufferlength;
+}
 
 void Envelope::repr() {
   for (int i = 0; i < buffer.bufferlength; i++) {
@@ -200,3 +260,4 @@ float PercEnv::play(GATE trigger) {
   readptr += 1.f;
   return out;
 }
+

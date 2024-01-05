@@ -1,3 +1,8 @@
+#pragma once
+
+#include "dsp.h"
+#include <math.h>
+
 namespace dspheaders{
   inline float fast_tanh(double x) {
     if (x < -1.f) return -1.f;
@@ -28,5 +33,11 @@ namespace dspheaders{
     y = y * (c - (x2 * y * y));
     return y;
   }
+
+  inline float freqToRadians(float freq, float samplerate) {
+    return cos(2*pi*freq / samplerate);
+  }
+
+  // inline float radiansToFreq(float radian, float samplerate) { }
 }
   

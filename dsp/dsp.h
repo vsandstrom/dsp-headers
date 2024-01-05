@@ -10,6 +10,12 @@ namespace dspheaders {
     float right;
   };
 
+  enum GATE {
+    on = 1, 
+    off = 0,
+    cycle = 2,
+  };
+
   ///////////////////////////////
   // Discrete sample manipulation
   ///////////////////////////////

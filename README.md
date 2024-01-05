@@ -1,3 +1,5 @@
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
 ## DSP HEADERS
 
 A collection of audio DSP header files and examples.
@@ -20,7 +22,6 @@ demotest showcases some of the sounding objects, such as wavetable FM, envelopes
 $ ./build/demotest
 ```
 
-Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
 This work is licensed under a
 [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].

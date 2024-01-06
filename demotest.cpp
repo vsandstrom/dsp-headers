@@ -110,7 +110,7 @@ Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation:
 Wavetable modulator1 = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 
-Delay delay = Delay(SAMPLE_RATE, 4.f, 1, interpolation::linear);
+Delay delay = Delay(SAMPLE_RATE, 4.f, 1, interpolation::cubic);
 SchroederVerb verb = SchroederVerb(SAMPLE_RATE);
 
 static frame data;

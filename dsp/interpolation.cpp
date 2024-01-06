@@ -50,7 +50,7 @@ float interpolation::cosine(float position, float *table, unsigned tablelength) 
    * |     4 sample interpolation        |
    * |--[a1]--|--[a2]--|--[b1]--|--[b2]--|
    * |        |        |        |        |
-   * |  n-2   |   n-1  |  n+1   |  n+2   |
+   * |  n-1   |   n    |  n+1   |  n+2   |
    * |        |        |        |        |
    * |        |     [ pos ]     |        |
    * |-----------------------------------|
@@ -62,14 +62,10 @@ float interpolation::cubic(float position, float* table, unsigned tableLength) {
   float c0, c1, c2, diff;
 
   // positions
-  a2 = position;
+  a2 = position; // implicit cast
   b1 = a2+1;
-  a1 = a2-1;
-  b2 = a2-1;
-  // Since table is constructed with an n+1 size, we only need to
-  // make sure samples read 2 steps removed is within bounds.
-  wrap_dangerously(&a1, tableLength);
-  wrap_dangerously(&b2, tableLength);
+  a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wraparound guard
+  b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
 
   diff = position - a2;
 
@@ -99,10 +95,8 @@ float interpolation::hermetic(float position, float *table, unsigned tableLength
   float c1, c2, c3, sub, diff;
   a2 = position;
   b1 = position + 1;
-  a1 = a2-1;
-  b2 = b1+1;
-  wrap_dangerously(&a1, tableLength);
-  wrap_dangerously(&b2, tableLength);
+  a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wraparound guard
+  b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
 
   diff = position - a2;
 

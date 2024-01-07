@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <portaudio.h>
+#include "portaudio/include/portaudio.h"
 #include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
 #include "dsp/wavetable.hpp"

@@ -1,6 +1,5 @@
 CC = clang++
-INCLUDES = 
-# -I/usr/local/include 
+INCLUDES = # -I./portaudio/include
 
 SRC_DIR := dsp
 BUILD_DIR := build
@@ -10,12 +9,14 @@ OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
 TARGETS = $(BUILD_DIR)/vectest $(BUILD_DIR)/combtest $(BUILD_DIR)/fmtest $(BUILD_DIR)/delaytest $(BUILD_DIR)/envtest $(BUILD_DIR)/demotest $(BUILD_DIR)/complextest $(BUILD_DIR)/osctest $(BUILD_DIR)/verbtest $(BUILD_DIR)/verbtest2 $(BUILD_DIR)/graintest
 
-CFLAGS := -std=c++14 -O0 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES)
+CFLAGS := -std=c++14 -O0 -v -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES)
 #-march=native -msse -msse2 -mssse3 -msse4.1 -msse4.2 -mavx512vl -I./$(SRC_DIR) $(INCLUDES)
 #-I./$(SRC_DIR) $(INCLUDES)
-LDFLAGS := -L/usr/local/lib/ -lportaudio 
+LDFLAGS := -L./portaudio/lib/.libs/ -lportaudio
+# -L/Users/viktorsandstrom/Documents/CPP/dsp/portaudio/lib/.libs/ -lportaudio 
 
-.PHONY: all clean
+
+.PHONY: portaudio all clean
 
 all: $(TARGETS)
 
@@ -50,6 +51,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $@
 
-
-clean:
+clean: portaudio
 	rm -r $(BUILD_DIR)/
+
+portaudio:
+	cd portaudio && ./configure && make

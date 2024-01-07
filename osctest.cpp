@@ -1,6 +1,6 @@
 #include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
-#include <portaudio.h>
+#include "portaudio/include/portaudio.h"
 #include <cstdio>
 #include <cstring>
 #include <iostream>

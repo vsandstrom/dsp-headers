@@ -1,20 +1,10 @@
 #include "dsp/dsp.h"
 #include "dsp/interpolation.hpp"
-#include <portaudio.h>
-#include <chrono>
+#include "portaudio/include/portaudio.h"
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <cmath>
 #include <string>
-// #include "sound.hpp"
 #include "dsp/wavetable.hpp"
-// #include "dsp/wave.hpp"
-// #include "dsp/vectoroscillator.hpp"
-#include <vector>
-
-
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;

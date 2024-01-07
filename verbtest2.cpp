@@ -1,6 +1,6 @@
 #include "dsp/dsp.h"
 #include <iostream>
-#include <portaudio.h>
+#include "portaudio/include/portaudio.h"
 #include "dsp/verb.hpp"
 
 // DURATION OF THE GENERATED TONE

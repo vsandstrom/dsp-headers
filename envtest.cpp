@@ -1,5 +1,5 @@
 #include "dsp/interpolation.hpp"
-#include <portaudio.h>
+#include "portaudio/include/portaudio.h"
 #include <cstdio>
 #include <iostream>
 #include "dsp/wavetable.hpp"

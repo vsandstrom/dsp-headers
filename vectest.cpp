@@ -1,5 +1,5 @@
 #include "dsp/dsp.h"
-#include <portaudio.h>
+#include "portaudio/include/portaudio.h"
 #include <cstdio>
 #include <iostream>
 #include <string>

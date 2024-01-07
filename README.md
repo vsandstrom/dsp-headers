@@ -11,7 +11,11 @@ The builds below expects the portaudio headers be located in <p>"/usr/local/"</p
 
 Run:
 ```bash
-# run make to compile dependencies and examples
+# download the portaudio submodule
+$ git submodule update --init --recursive
+# compile the portaudio library
+$ cd portaudio && ./configure && make && cd ..
+# build the synth and audio effects tests
 $ make
 # will compile a demo and other tests in a folder called build/
 

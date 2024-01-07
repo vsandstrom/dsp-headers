@@ -1,4 +1,4 @@
-#include <portaudio.h>
+#include "portaudio/include/portaudio.h"
 #include <iostream>
 #include "dsp/dsp.h"
 #include <cstdio>

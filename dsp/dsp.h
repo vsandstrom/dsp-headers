@@ -68,6 +68,8 @@ namespace dspheaders {
     return 20.f * log10f(volume);
   }
 
+
+  /// INDEX WRAPPING FUNCTIONS - AVOID AND USE 
   // Makes sure that x is within range of 0 - n 
   inline int wrap(int* x, unsigned int length) {
     while (*x < 0) *x += length;

@@ -9,13 +9,13 @@ namespace dspheaders {
 
   class Comb {
     protected:
-      Buffer buffer;
+      Buffer m_buffer;
       float previn = 0.f;
       float prevout = 0.f;
-      float read(float readptr);
-      void write(float sample);
-      unsigned writeptr = 0;
-      float readptr = 0.f;
+      float m_read();
+      void m_write(float sample);
+      unsigned m_writeptr = 0;
+      float m_readptr = 0.f;
 ///
 ///   feedback comb filter (IIR: infinite impulse response)
 ///
@@ -25,8 +25,8 @@ namespace dspheaders {
 ///         Λ       ╙──────────────────────╜  ║ 
 ///         ╙───────────( * feedback ) <──────╜
 ///
-      float iir(float sample, float feedback);
-      float iir(float sample, float feedback, float mod);
+      float m_feedback(float sample, float feedback);
+      // float m_feedback(float sample, float feedback, float mod);
 ///
 ///   feedforward comb filter (FIR: finite impulse response)
 ///
@@ -35,8 +35,8 @@ namespace dspheaders {
 ///  in ───╨─> ║  buffer(n - offset)  ║─> ( + )──> out
 ///            ╙──────────────────────╜    
 ///
-      float fir(float sample, float amp);
-      float fir(float sample, float amp, float mod);
+      float m_feedforward(float sample, float amp);
+      // float m_feedforward(float sample, float amp, float mod);
 
 
     public: 

@@ -17,7 +17,11 @@ float ChownVerb::process(float sample, float amount) {
   return sig * amount;
 }
 
-ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {};
+ChownVerb::ChownVerb(unsigned samplerate) : samplerate(samplerate) {
+  for (int i = 0; i < 4; i++) cvec[i].setDamp(0.3f);
+  for (int i = 0; i < 3; i++) avec[i].setDamp(0.0f);
+};
+
 
 float SchroederVerb::process(float sample, float amount) {
   float sig = sample;
@@ -46,4 +50,7 @@ float SchroederVerb::process(float sample, float amount, float mod) {
   return sig/5;
 }
 
-SchroederVerb::SchroederVerb(unsigned samplerate) : samplerate(samplerate) {};
+SchroederVerb::SchroederVerb(unsigned samplerate) : samplerate(samplerate) {
+  for (int i = 0; i < 4; i++) cvec[i].setDamp(0.3f);
+  for (int i = 0; i < 3; i++) avec[i].setDamp(0.0f);
+};

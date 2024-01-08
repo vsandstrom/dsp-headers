@@ -4,6 +4,8 @@
 #include "interpolation.hpp"
 #include <cstdio>
 
+#define undenormalise(sample) if(((*(unsigned int*)&sample)&0x7f800000)==0) sample=0.0f
+
 /// Diagrams lifted from CCRMAs webpage
 /// https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html
 /// https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html
@@ -33,28 +35,13 @@ void Comb::m_write(float sample) {
 float Comb::m_feedback(float sample, float feedback) {
   float output = 0.f;
   // read buffer & write buffer with curr sample + dly value, causing feedback
-  float out = sample + (m_read() * feedback);
-  m_write(out);
-  return out;
+  output = m_read() * feedback;
+  undenormalise(output);
+  m_prev = output * (1.f - m_damp) + m_prev * m_damp;
+  undenormalise(m_prev);
+  m_write(sample - m_prev);
+  return m_prev;
 }
-
-// float Comb::m_feedback(float sample, float feedback) {
-//   float output = 0.f;
-//   float dly = m_read();
-//   // readptr reads dragging behind writeptr
-//   float out = sample + (dly * feedback);
-//
-//   // when modulating the readptr, we need to do
-//   // a simple "interpolation", using the mean value
-//   output = interpolation::slope(prevout, out);
-//   output = dcblock(output, previn, prevout);
-//   // store previous in and out
-//   previn = sample;
-//   prevout = out;
-//
-//   m_write(out);
-//   return output;
-// }
 
 ///
 ///         feedforward comb filter
@@ -69,19 +56,13 @@ float Comb::m_feedforward(float sample, float amp) {
   float output = 0.f;
   // write only current sample to buffer, not causing feedback
   output = m_read() * amp;
-  m_write(sample);
-  return output;
+  undenormalise(output);
+  m_prev = output * (1.f - m_damp) + m_prev * m_damp;
+  undenormalise(m_prev);
+  m_write(sample - m_prev);
+  return m_prev;
     // sample + (m_read() * amp);
 }
-
-// float Comb::m_feedforward(float sample, float amp) {
-//   float output = 0.f;
-//   float dly = m_read();
-//   m_write(sample);
-//   // readptr reads dragging behind writeptr
-//   float out = sample + (dly * amp);
-//   return out;
-// }
 
 float Comb::process(float sample, float feedback, COMBTYPE type) {
   float output = 0.f;

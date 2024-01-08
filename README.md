@@ -4,11 +4,6 @@
 
 A collection of audio DSP header files and examples.
 
-The Portaudio library is required.
-
-The builds below expects the portaudio headers be located in <p>"/usr/local/"</p>
-(Building portaudio from source currently fails on macOS, but works through Homebrew.)
-
 Run:
 ```bash
 # download the portaudio submodule

@@ -64,7 +64,7 @@ float interpolation::cubic(float position, float* table, unsigned tableLength) {
   // positions
   a2 = position; // implicit cast
   b1 = a2+1;
-  a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wraparound guard
+  a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wrap-around guard
   b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
 
   diff = position - a2;
@@ -95,7 +95,7 @@ float interpolation::hermetic(float position, float *table, unsigned tableLength
   float c1, c2, c3, sub, diff;
   a2 = position;
   b1 = position + 1;
-  a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wraparound guard
+  a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wrap-around guard
   b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
 
   diff = position - a2;

@@ -111,7 +111,10 @@ Wavetable modulator1 = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation
 Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 
 Delay delay = Delay(SAMPLE_RATE, 4.f, 1, interpolation::cubic);
-SchroederVerb verb = SchroederVerb(SAMPLE_RATE);
+// SchroederVerb verbl = SchroederVerb(SAMPLE_RATE);
+// SchroederVerb verbr = SchroederVerb(SAMPLE_RATE);
+SchroederVerb verbl = SchroederVerb(SAMPLE_RATE);
+SchroederVerb verbr = SchroederVerb(SAMPLE_RATE);
 
 static frame data;
 
@@ -139,7 +142,7 @@ static int paCallback(  const void* inputBuffer,				// input
   float venv = 0.f;
   float env1 = 0.f;
   float venv1 = 0.f;
-  float rev = 0.f;
+  float revl=0.f, revr=0.f;
   float del = 0.f;
 
   unsigned x = 0;
@@ -180,17 +183,18 @@ static int paCallback(  const void* inputBuffer,				// input
     float mod1 = modulator.play();
 
     // Sound generation section
-    float car = vec -> play(venv, map(mod0+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
-    float car1 = vec1 -> play(venv1 , map(mod1+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
+    float car = vec -> play(venv , map(mod0+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
+    float car1 = vec1 -> play(venv, map(mod1+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car * env * amps[scoreptr & 7];
     float sig1 = car1 * env1 * amps1[scoreptr1 % 4];
 
     del = delay.process(sig + sig1, 0.4 + (vibr * 0.001), 0.4, 0.5);
-    rev = verb.process(sig + sig1 + del, 0.9995);
+    revl = verbl.process(sig + del, 0.7);
+    revr = verbr.process(sig1 - del, 0.7);
     //
-    float left = ((sig * 0.8) + (del * 0.54) + (rev * 0.74));
-    float right = ((sig1 * 0.8) + (del * 0.54) + (rev * 0.74));
+    float left = ((sig * 0.8) + (del * 0.54) + (revl * 0.74));
+    float right = ((sig1 * 0.8) + (del * 0.54) + (revr * 0.74));
 
     // Stereo frame: two increments of out buffer
     *out++ = left; 
@@ -223,7 +227,6 @@ int main(int argc, char** argv) {
   range(amps1, 4, 0, 0.8, 0, 0.2);
   range(dur, 21, 0, 0.8, 0, 2.2);
   range(dur1, 5, 0, 0.8, 0, 2.2);
-
 
   std::vector<Wavetable> t = {*w0, *w1, *w2, *w3};
   vec = new VectorOscillator(t, interpolation::cubic);

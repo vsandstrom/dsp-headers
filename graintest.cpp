@@ -27,7 +27,7 @@ const float INTERVAL = 0.1f;
 const float RATE = 1.f; // TRY NEGATIVE
 const float JITTER = 0.6f;
 const float PITCH_MOD_AMOUNT = 0.004f;
-const float RECORD_LEN = 16.f; // seconds
+const float RECORD_LEN = 4.f; // seconds
 
 const int PROGRAM_DURATION = 120000; // milliseconds
 const float  SAMPLE_RATE =   48000;
@@ -129,9 +129,13 @@ static int paCallback(
         float phasor = map(ph_saw.play(),-1.f, 1.f, 0.f, 0.99f);
         gr->setGrainSize(s);
         gryn = gr->process(
-          phasor, // TRY STATIC VALUE (0.0 <= x < 1.0)
+
+          0.5,
+          // phasor, // TRY STATIC VALUE (0.0 <= x < 1.0)
           // RATE + (lfo.play() * PITCH_MOD_AMOUNT),
-          r + (lfo.play() * PITCH_MOD_AMOUNT),
+          //
+          RATE,
+          // r + (lfo.play() * PITCH_MOD_AMOUNT),
           trig
         ); 
         *out++ = gryn;

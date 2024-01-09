@@ -53,10 +53,9 @@ namespace dspheaders {
     // Shared variables between Granulator and Grain-swarm
       float g_samplerate;
       Buffer* g_buffer;
-
-      Grain* g_grains;
       Envelope* g_envelope;
 
+      Grain* m_grains;
       unsigned m_maxgrains = 32;
       float m_position = 0.f;
       float m_playbackrate=1.f;
@@ -74,7 +73,7 @@ namespace dspheaders {
       inline void setGrainSize(float dur) {
         m_grainsize = dur;
         for (int i = 0; i < m_maxgrains; i++) {
-          g_grains[i].setDur(dur);
+          m_grains[i].setDur(dur);
         }
       };
       inline void setRate(float rate) { m_playbackrate = rate; };

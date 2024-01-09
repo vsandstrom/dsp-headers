@@ -8,16 +8,12 @@ using namespace dspheaders;
 static int x = 0;
 
 /*
- * ## TODO: 
- * -- Scale duration of envelope from wavetable, duration / tablelength
- * -- 
- * --
- * */
-
-// THE READPOINTER FOR EACH GRAIN IS DETACHED FROM THE GRANULATORS WRITEPOINTER
-// THIS MIGHT BE MESSY
+ * TODO: 
+ * Scale duration of envelope from wavetable, duration / tablelength
+ */
 
 // delay travels from 0 -> 1 
+
 // Play-method for already triggered grain
 float Grain::play() {
   float out = 0.f;

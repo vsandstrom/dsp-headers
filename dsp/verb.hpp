@@ -28,7 +28,7 @@ namespace dspheaders{
       };
 
     public:
-      float process(float sample, float amount);
+      float process(float sample, float len);
       ChownVerb(unsigned samplerate);
   };
 
@@ -67,12 +67,12 @@ namespace dspheaders{
       unsigned samplerate;
       Allpass initial = Allpass(6, samplerate, interpolation::linear);
       Comb cvec[6] = {
-        Comb(50, samplerate, interpolation::linear),
-        Comb(56, samplerate, interpolation::linear),
-        Comb(61, samplerate, interpolation::linear),
-        Comb(68, samplerate, interpolation::linear),
-        Comb(72, samplerate, interpolation::linear),
-        Comb(78, samplerate, interpolation::linear),
+        Comb(2400, samplerate, interpolation::linear),
+        Comb(2688, samplerate, interpolation::linear),
+        Comb(2928, samplerate, interpolation::linear),
+        Comb(3264, samplerate, interpolation::linear),
+        Comb(3455, samplerate, interpolation::linear),
+        Comb(3744, samplerate, interpolation::linear),
       };
       
       float ccoeff[6] = {
@@ -85,8 +85,7 @@ namespace dspheaders{
       };
      
     public:
-      float process(float sample, float amount);
-      float process(float sample, float amount, float mod);
+      float process(float sample, float length);
       MoorerVerb(unsigned samplerate);
   };
 }

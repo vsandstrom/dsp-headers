@@ -47,6 +47,10 @@ namespace dspheaders {
         m_damp = damp;
       }
 
+      inline unsigned getBufferLength() {
+        return m_buffer.bufferlength;
+      }
+
 
       Comb(
           unsigned offset,

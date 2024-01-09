@@ -1,4 +1,5 @@
 #include "filter.hpp"
+#include <cstdlib>
 #include "verb.hpp"
 
 using namespace dspheaders;
@@ -53,4 +54,21 @@ float SchroederVerb::process(float sample, float amount, float mod) {
 SchroederVerb::SchroederVerb(unsigned samplerate) : samplerate(samplerate) {
   for (int i = 0; i < 4; i++) cvec[i].setDamp(0.3f);
   for (int i = 0; i < 3; i++) avec[i].setDamp(0.0f);
+};
+
+float MoorerVerb::process(float sample, float amount) {
+  float sig = sample;
+  int i = 0;
+  sig = initial.process(sig, amount);
+  float out = 0.f;
+
+  for (i = 0; i < 6; i++) {
+    out += cvec[i].process(sig, ccoeff[i] * amount, COMBTYPE::FIR);
+  }
+
+  return sig/5;
+}
+
+MoorerVerb::MoorerVerb(unsigned samplerate) : samplerate(samplerate) {
+  for (int i = 0; i < 6; i++) cvec[i].setDamp(0.33f);
 };

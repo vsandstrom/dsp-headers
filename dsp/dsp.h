@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <cmath>
@@ -41,31 +42,9 @@ namespace dspheaders {
     if (x < -max) return x + (max + x);
     return x;
   }
-
-  // Highpass filter removing DC-offset
-  //
-  // x - current input sample: x[n]
-  //
-  // xm1 - previous input sample - FIR
-  //
-  // ym1 - previous output sample - IIR
+  
   inline float dcblock(float x, float xm1, float ym1) {
       return  x - xm1 + 0.995 * ym1;
-  }
-
-  // Converts midinumber to frequency
-  inline float mtof(int midinum, float base = 440.f) {
-    return base * pow(2,(midinum/12));
-  }
-
-  // Converts from dB to linear volume
-  inline float dBToVolume(float dB) {
-    return powf(10.f, 0.05f * dB);
-  }
-
-  // Converts from linear volume to dB
-  inline float volumeTodB(float volume) {
-    return 20.f * log10f(volume);
   }
 
 

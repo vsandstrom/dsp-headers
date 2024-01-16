@@ -2,22 +2,20 @@
 #include "dsp.h"
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
+
 
 using namespace dspheaders;
 
 static int x = 0;
 
 /*
- * ## TODO: 
- * -- Scale duration of envelope from wavetable, duration / tablelength
- * -- 
- * --
- * */
-
-// THE READPOINTER FOR EACH GRAIN IS DETACHED FROM THE GRANULATORS WRITEPOINTER
-// THIS MIGHT BE MESSY
+ * TODO: 
+ * Scale duration of envelope from wavetable, duration / tablelength
+ */
 
 // delay travels from 0 -> 1 
+
 // Play-method for already triggered grain
 float Grain::play() {
   float out = 0.f;
@@ -53,15 +51,18 @@ Grain::Grain(
   float readptr,
   float dur,
   float* samplerate,
-  Buffer* buffer,
-  Envelope* envelope) 
+  std::shared_ptr<Buffer> buffer,
+  std::shared_ptr<Envelope> envelope) 
+
   : g_buffer(buffer), 
     g_envelope(envelope), 
     g_samplerate(samplerate),
     m_envlength(envelope -> getBufferlength()),
-    m_readptr(readptr),
-    m_dur(m_envlength / (*g_samplerate * dur)) {
+    m_readptr(readptr)
+    { setDur(dur);
 }
+
+Grain::Grain(){}
 
 
 void Grain::test() {

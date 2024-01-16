@@ -28,7 +28,7 @@ namespace dspheaders{
       };
 
     public:
-      float process(float sample, float amount);
+      float process(float sample, float len);
       ChownVerb(unsigned samplerate);
   };
 
@@ -60,5 +60,32 @@ namespace dspheaders{
       float process(float sample, float amount);
       float process(float sample, float amount, float mod);
       SchroederVerb(unsigned samplerate);
+  };
+
+  class MoorerVerb {
+    private:
+      unsigned samplerate;
+      Allpass initial = Allpass(6, samplerate, interpolation::linear);
+      Comb cvec[6] = {
+        Comb(2400, samplerate, interpolation::linear),
+        Comb(2688, samplerate, interpolation::linear),
+        Comb(2928, samplerate, interpolation::linear),
+        Comb(3264, samplerate, interpolation::linear),
+        Comb(3455, samplerate, interpolation::linear),
+        Comb(3744, samplerate, interpolation::linear),
+      };
+      
+      float ccoeff[6] = {
+        .742f, 
+        .733f, 
+        .715f, 
+        .697f, 
+        .683f, 
+        .677f, 
+      };
+     
+    public:
+      float process(float sample, float length);
+      MoorerVerb(unsigned samplerate);
   };
 }

@@ -1,33 +1,19 @@
+
 #include "grain.hpp"
 #include "waveshape.h"
 #include "envelope.hpp"
-#include <cstdio>
+#include <memory>
 
 using namespace dspheaders;
 
-/*
- * TODO:
- * Should we keep track of all active / non-active grains
- * by bitencoding a 32bit number, capping number of grains
- * to 32 - would require finessing
- *
- * There should be both time and space jitter.
- * One for providing aditional delay
- * One for providing a delay spread of the grains
- *
- * */
-    
-// 
-// float jit = (jitter * static_cast<float>(rand()) / RAND_MAX) * samplerate;
-
-// Accesspoint
 
 float Granulator::process() {
   float out = 0.f;
   // sum all active grains
   for (int i = 0; i < m_numgrains; i++) {
-    if (g_grains[i].m_active) {
-      out += g_grains[i].play();
+    if (m_grains[i].m_active) {
+      out += m_grains[i].play();
+
     }
   }
   return out;
@@ -41,17 +27,19 @@ float Granulator::process(float position, float trigger) {
   int i = 0;
   int newTriggered = -1;
   while (i < m_numgrains) {
-    if (g_grains[i].m_active == false) {
+    if (m_grains[i].m_active == false) {
       newTriggered = i;
-      out += g_grains[i].play(position, m_playbackrate); 
+      out += m_grains[i].play(position, m_playbackrate); 
+
       break;
     }
     i++;
   }
   // sum other active grains
   for (int j = 0; j < m_numgrains; j++) {
-    if (j != newTriggered && g_grains->m_active) {
-      out += g_grains[j].play();
+    if (j != newTriggered && m_grains->m_active) {
+      out += m_grains[j].play();
+
     }
   }
   return out;
@@ -66,17 +54,19 @@ float Granulator::process(float position, float rate, float trigger) {
   int i = 0;
   int newTriggered = -1;
   while (i < m_numgrains) {
-    if (g_grains[i].m_active == false) {
+    if (m_grains[i].m_active == false) {
       newTriggered = i;
-      out += g_grains[i].play(position, m_playbackrate); 
+      out += m_grains[i].play(position, m_playbackrate); 
+
       break;
     }
     i++;
   }
 
   for (int j = 0; j < m_numgrains; j++) {
-    if (j != newTriggered && g_grains->m_active) {
-      out += g_grains[j].play();
+    if (j != newTriggered && m_grains->m_active) {
+      out += m_grains[j].play();
+
     }
   }
   return out;
@@ -89,23 +79,25 @@ Granulator::Granulator(
   float dur,
   float samplerate, 
   unsigned maxgrains,
-  Buffer* buffer,
+  std::shared_ptr<Buffer> buffer,
+
   float (*interpolate)(float, float*, unsigned))
   : g_samplerate(samplerate),
     g_buffer(buffer),
     m_maxgrains(maxgrains) {
 
+  unsigned envlen = 512;
   // create default grain envelope
-  float* env = new float[512];
-  hanning(env, 512);
-  g_envelope = new Envelope(env, 512, g_samplerate, interpolate);
-
-  // create grains
-  g_grains = (Grain*)malloc(sizeof(Grain) * m_maxgrains);
-  if (g_grains == nullptr) { return;} 
+  float* env = new float[envlen];
+  hanning(env, envlen);
+  g_envelope = std::shared_ptr<Envelope>(new Envelope(env, envlen, g_samplerate, interpolate));
+  
+  m_grains = new Grain[m_maxgrains];
+  if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
 
-    g_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
+    m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
+
   }
 };
 
@@ -120,18 +112,17 @@ Granulator::Granulator(
   float* table, 
   unsigned tablelength,
   float (interpolate)(float, float*, unsigned),
-  Buffer* buffer)
+  std::shared_ptr<Buffer> buffer)
   : g_samplerate(samplerate),
-    g_envelope(new Envelope(table, tablelength, samplerate, interpolate)),
+    g_envelope(std::shared_ptr<Envelope>(new Envelope(table, tablelength, samplerate, interpolate))),
     g_buffer(buffer),
     m_maxgrains(maxgrains) { 
 
-  // create grains
-  g_grains = (Grain *)malloc(sizeof(Grain) * m_maxgrains);
-  if (g_grains == nullptr) { return;} 
+  m_grains = new Grain[m_maxgrains];
+  if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
+    m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
 
-    g_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
   }
 };
 
@@ -141,25 +132,24 @@ Granulator::Granulator(
   float dur,
   float samplerate, 
   unsigned maxgrains,
-  Envelope* grainEnvelope, 
-  Buffer* buffer)
+  std::shared_ptr<Envelope> grainEnvelope, 
+  std::shared_ptr<Buffer> buffer)
   : g_samplerate(samplerate),
     g_envelope(grainEnvelope),
     g_buffer(buffer),
     m_maxgrains(maxgrains)
 { 
 
-  // allocate memory for all grains
-  g_grains = (Grain *)malloc(sizeof(Grain)*m_maxgrains);
-  if (g_grains == nullptr) { return;} 
+  m_grains = new Grain[m_maxgrains];
+  if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
-    // pass audio buffer and grain envelope by reference,
-    g_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
+    m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
+
   }
 };
 
 // Dtor
 
 Granulator::~Granulator(){
-  free(g_grains);
+  delete m_grains;
 }

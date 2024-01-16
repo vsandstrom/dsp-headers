@@ -1,4 +1,5 @@
 #include "dsp/envelope.hpp"
+#include <memory>
 #ifdef DEBUG
   #define D(x) x
 #else
@@ -16,18 +17,17 @@
 #include "dsp/grain.hpp"
 #include "dsp/interpolation.hpp"
 #include "dsp/trigger.hpp"
-#include "dsp/waveshape.h"
 
 // SETUP
 const int INPUT_CH = 2;
 const int OUTPUT_CH = 2;
-const int MAX_GRAINS = 8;
+const int MAX_GRAINS = 32;
 const float GRAIN_DUR = 0.01f;
 const float INTERVAL = 0.1f;
 const float RATE = 1.f; // TRY NEGATIVE
 const float JITTER = 0.6f;
 const float PITCH_MOD_AMOUNT = 0.004f;
-const float RECORD_LEN = 16.f; // seconds
+const float RECORD_LEN = 4.f; // seconds
 
 const int PROGRAM_DURATION = 120000; // milliseconds
 const float  SAMPLE_RATE =   48000;
@@ -37,9 +37,9 @@ using namespace dspheaders;
 // GLOBALS
 Granulator* gr;
 Envelope* genv;
-Buffer buf = Buffer(RECORD_LEN, SAMPLE_RATE, interpolation::linear);
-// Impulse trigger = Impulse(INTERVAL, SAMPLE_RATE);
-Dust trigger = Dust(INTERVAL, SAMPLE_RATE);
+std::shared_ptr<Buffer> buf(new Buffer(RECORD_LEN, SAMPLE_RATE, interpolation::linear));
+Impulse trigger = Impulse(INTERVAL, SAMPLE_RATE);
+// Dust trigger = Dust(INTERVAL, SAMPLE_RATE);
 Wavetable ph_saw = Wavetable(SAW, 1024, SAMPLE_RATE, interpolation::linear);
 Wavetable lfo = Wavetable(SINE, 1024, SAMPLE_RATE, interpolation::linear);
 
@@ -58,8 +58,7 @@ Envelope speed = Envelope(p2, 4, t2, 3, c2, 3, SAMPLE_RATE, interpolation::linea
 
 float p3[4] = { 0.1f, 0.03f, 2.2f, 0.3f };
 float t3[3] = { 12.f, 8.f, 18.f };
-float c3[3] = { 1.7f, 1.2f, 0.2f };
-
+float c3[3] = { 1.7f, 1.2f, 3.f };
 Envelope imp = Envelope(p3, 4, t3, 3, c3, 3, SAMPLE_RATE, interpolation::linear);
 
 bool toggle_size_env = true;
@@ -96,9 +95,9 @@ static int paCallback(
 
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    if (writeptr < buf.bufferlength) {
+    if (writeptr < buf->bufferlength) {
       float input = *in++;
-      buf.writesample(input, writeptr % buf.bufferlength);
+      buf->writesample(input, writeptr % buf->bufferlength);
       writeptr++;
       in++; // skip one since input buffer is stereo
       *out++ = 0.f;
@@ -129,6 +128,7 @@ static int paCallback(
         float phasor = map(ph_saw.play(),-1.f, 1.f, 0.f, 0.99f);
         gr->setGrainSize(s);
         gryn = gr->process(
+          // 0.5,
           phasor, // TRY STATIC VALUE (0.0 <= x < 1.0)
           // RATE + (lfo.play() * PITCH_MOD_AMOUNT),
           r + (lfo.play() * PITCH_MOD_AMOUNT),
@@ -148,12 +148,12 @@ int main(int argc, char** argv) {
 
   printf(
       "\n\n    ╒═════════════════════════════════════════════════════╕\n"
-      "    │ THIS PROGRAM RECORDS THE INPUT OF YOUR AUDIO DEVICE │\n" 
-      "    │ FOR A COUPLE OF SECONDS, THEN PLAYS THE AUDIO BACK  │\n" 
-      "    │ THROUGH A GRANULATED AUDIO EFFECT.                  │\n"
-      "    │                                                     │\n"
-      "    │           ( NOTHING IS SAVED TO MEMORY )            │\n"
-      "    ╘═════════════════════════════════════════════════════╛\n\n");
+          "    │ THIS PROGRAM RECORDS THE INPUT OF YOUR AUDIO DEVICE │\n" 
+          "    │ FOR A %*.*f OF SECONDS, THEN PLAYS THE AUDIO BACK     │\n" 
+          "    │ THROUGH A GRANULATED AUDIO EFFECT.                  │\n"
+          "    │                                                     │\n"
+          "    │           ( NOTHING IS SAVED TO MEMORY )            │\n"
+          "    ╘═════════════════════════════════════════════════════╛\n\n", 1, 1, RECORD_LEN);
 
   // PLAY AROUND WITH CUSTOM ENV CURVES:
   //
@@ -178,11 +178,12 @@ int main(int argc, char** argv) {
   //     &buf
   //   );
 
+
   gr = new Granulator(
       GRAIN_DUR,
       SAMPLE_RATE,
       MAX_GRAINS,
-      &buf,
+      buf,
       interpolation::linear
     );
 

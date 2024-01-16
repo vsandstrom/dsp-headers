@@ -1,9 +1,6 @@
-
 #include "envelope.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
-#include <cstdio>
-#include <iostream>
 
 
 // TODO: Perhaps save segments in separate buffers, making it easier to set duration of attack,
@@ -118,7 +115,6 @@ void Envelope::generateCurve() {
     }
   }
   readptr = pos+1;
-
 };
 
 unsigned Envelope::getBufferlength() {
@@ -200,9 +196,6 @@ float Envelope::play(GATE trigger, float speed) {
 
 bool Envelope::running() {
   bool x = readptr < buffer.bufferlength;
-  if (!x) {
-    printf("not running");
-  }
   return x;
 }
 
@@ -210,12 +203,12 @@ bool Envelope::finished() {
   return readptr >= buffer.bufferlength;
 }
 
-void Envelope::repr() {
-  for (int i = 0; i < buffer.bufferlength; i++) {
-    std::cout << buffer.buffer[i] << '\n';
-  }
-}
-      
+// void Envelope::repr() {
+//   for (int i = 0; i < buffer.bufferlength; i++) {
+//     std::cout << buffer.buffer[i] << '\n';
+//   }
+// }
+
 
 PercEnv::PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned))
   : attack(attack), decay(decay), samplerate(samplerate), buffer(Buffer(attack+decay, samplerate, interpolate)) {

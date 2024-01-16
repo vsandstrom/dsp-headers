@@ -1,9 +1,7 @@
 
 /* ˙ˆ˙ */
-
 #include "buffer.hpp"
-#include "dsp.h"
-#include "dsp_math.h"
+
 
 using namespace dspheaders;
 
@@ -18,6 +16,7 @@ Buffer::Buffer(
     // interpolation
     bufferlength = 4;
   }
+
 
   buffer = new float[bufferlength+1];
   // important for smaller systems that do not clear old memory

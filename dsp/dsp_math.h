@@ -7,6 +7,7 @@
 #define LOGTEN 2.302585092994046
 #define LOGTWO 0.693147180559945
 
+
 namespace dspheaders{
   inline float fast_tanh(double x) {
     if (x < -1.f) return -1.f;

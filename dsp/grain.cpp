@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <memory>
 
+
 using namespace dspheaders;
 
 static int x = 0;
@@ -52,6 +53,7 @@ Grain::Grain(
   float* samplerate,
   std::shared_ptr<Buffer> buffer,
   std::shared_ptr<Envelope> envelope) 
+
   : g_buffer(buffer), 
     g_envelope(envelope), 
     g_samplerate(samplerate),
@@ -61,6 +63,7 @@ Grain::Grain(
 }
 
 Grain::Grain(){}
+
 
 void Grain::test() {
   printf("ALLOCATED");

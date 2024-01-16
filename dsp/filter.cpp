@@ -43,6 +43,7 @@ float Comb::m_feedback(float sample, float feedback) {
   return m_prev;
 }
 
+
 ///
 ///         feedforward comb filter
 ///
@@ -63,6 +64,7 @@ float Comb::m_feedforward(float sample, float amp) {
   return m_prev;
     // sample + (m_read() * amp);
 }
+
 
 float Comb::process(float sample, float feedback, COMBTYPE type) {
   float output = 0.f;

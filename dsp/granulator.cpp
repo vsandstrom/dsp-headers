@@ -6,12 +6,14 @@
 
 using namespace dspheaders;
 
+
 float Granulator::process() {
   float out = 0.f;
   // sum all active grains
   for (int i = 0; i < m_numgrains; i++) {
     if (m_grains[i].m_active) {
       out += m_grains[i].play();
+
     }
   }
   return out;
@@ -28,6 +30,7 @@ float Granulator::process(float position, float trigger) {
     if (m_grains[i].m_active == false) {
       newTriggered = i;
       out += m_grains[i].play(position, m_playbackrate); 
+
       break;
     }
     i++;
@@ -36,10 +39,12 @@ float Granulator::process(float position, float trigger) {
   for (int j = 0; j < m_numgrains; j++) {
     if (j != newTriggered && m_grains->m_active) {
       out += m_grains[j].play();
+
     }
   }
   return out;
 }
+
 
 float Granulator::process(float position, float rate, float trigger) {
   if (m_playbackrate != rate) { m_playbackrate = rate; }
@@ -52,6 +57,7 @@ float Granulator::process(float position, float rate, float trigger) {
     if (m_grains[i].m_active == false) {
       newTriggered = i;
       out += m_grains[i].play(position, m_playbackrate); 
+
       break;
     }
     i++;
@@ -60,18 +66,21 @@ float Granulator::process(float position, float rate, float trigger) {
   for (int j = 0; j < m_numgrains; j++) {
     if (j != newTriggered && m_grains->m_active) {
       out += m_grains[j].play();
+
     }
   }
   return out;
 }
 
 // Ctor
+
 // Default envelope - works fine to get going
 Granulator::Granulator(
   float dur,
   float samplerate, 
   unsigned maxgrains,
   std::shared_ptr<Buffer> buffer,
+
   float (*interpolate)(float, float*, unsigned))
   : g_samplerate(samplerate),
     g_buffer(buffer),
@@ -88,6 +97,7 @@ Granulator::Granulator(
   for (int i = 0; i < m_maxgrains; i++) {
 
     m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
+
   }
 };
 
@@ -112,6 +122,7 @@ Granulator::Granulator(
   if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
     m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
+
   }
 };
 
@@ -133,6 +144,7 @@ Granulator::Granulator(
   if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
     m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
+
   }
 };
 

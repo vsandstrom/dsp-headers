@@ -11,11 +11,13 @@ namespace dspheaders {
     protected:
       Buffer m_buffer;
       float m_prev = 0.f;
+
       float m_read();
       void m_write(float sample);
       unsigned m_writeptr = 0;
       float m_readptr = 0.f;
       float m_damp = 0.f;
+
 ///
 ///   feedback comb filter (IIR: infinite impulse response)
 ///
@@ -50,6 +52,7 @@ namespace dspheaders {
       inline unsigned getBufferLength() {
         return m_buffer.bufferlength;
       }
+
 
 
       Comb(

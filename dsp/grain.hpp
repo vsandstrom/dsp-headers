@@ -4,6 +4,7 @@
 #include "buffer.hpp"
 #include <memory>
 
+
 namespace dspheaders {
 
   class Grain {
@@ -12,6 +13,7 @@ namespace dspheaders {
       std::shared_ptr<Buffer> g_buffer;
       std::shared_ptr<float> g_samplerate;
       std::shared_ptr<Envelope> g_envelope;
+
       
       float m_readptr;
       float m_envptr;
@@ -31,6 +33,7 @@ namespace dspheaders {
       inline void setDur(float dur) {
         // 512 (len) / 48000 (sr) * 0.2 (sec) ≈ 0.05333334 samples/frame
         m_dur = (float)m_envlength / ((*g_samplerate) * dur); };
+
       inline void setRate(float rate) { m_playbackrate = rate; };
       inline void setJitter(float jitter) {m_jitter = jitter;};
 
@@ -45,6 +48,7 @@ namespace dspheaders {
     );
 
     Grain();
+
   };
 
   class Granulator {
@@ -56,6 +60,7 @@ namespace dspheaders {
 
       Grain* m_grains;
       const unsigned m_maxgrains = 32;
+
       float m_position = 0.f;
       float m_playbackrate=1.f;
     public:
@@ -73,6 +78,7 @@ namespace dspheaders {
         m_grainsize = dur;
         for (int i = 0; i < m_maxgrains; i++) {
           m_grains[i].setDur(dur);
+
         }
       };
       inline void setRate(float rate) { m_playbackrate = rate; };
@@ -93,6 +99,7 @@ namespace dspheaders {
         float samplerate,
         unsigned maxgrains,
         std::shared_ptr<Buffer> buffer,
+
         float (*interpolate)(float, float*, unsigned)
       );
      
@@ -105,6 +112,7 @@ namespace dspheaders {
         unsigned tablelength,
         float (interpolate)(float, float*, unsigned),
         std::shared_ptr<Buffer> buffer
+
       );
       
       // Predefined grain envelope in Wavetable
@@ -115,6 +123,7 @@ namespace dspheaders {
         std::shared_ptr<Envelope> grainEnvelope,
         std::shared_ptr<Buffer> buffer
       );
+
 
 
       ~Granulator();

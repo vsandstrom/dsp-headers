@@ -1,7 +1,6 @@
 CC = clang++
 INCLUDES = # -I./portaudio/include
 
-
 SRC_DIR := dsp
 BUILD_DIR := build
 
@@ -44,7 +43,6 @@ $(BUILD_DIR)/graintest: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) graintest.cpp -o $@
 $(BUILD_DIR)/envelope_test: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) envelope_test.cpp -o $@
-
 # Compiling dependencies
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@

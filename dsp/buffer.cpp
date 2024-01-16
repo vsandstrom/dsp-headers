@@ -1,5 +1,7 @@
+
 /* ˙ˆ˙ */
 #include "buffer.hpp"
+
 
 using namespace dspheaders;
 
@@ -14,6 +16,7 @@ Buffer::Buffer(
     // interpolation
     bufferlength = 4;
   }
+
 
   buffer = new float[bufferlength+1];
   // important for smaller systems that do not clear old memory

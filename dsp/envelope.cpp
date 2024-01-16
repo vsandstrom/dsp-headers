@@ -208,7 +208,7 @@ bool Envelope::finished() {
 //     std::cout << buffer.buffer[i] << '\n';
 //   }
 // }
-      
+
 
 PercEnv::PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned))
   : attack(attack), decay(decay), samplerate(samplerate), buffer(Buffer(attack+decay, samplerate, interpolate)) {

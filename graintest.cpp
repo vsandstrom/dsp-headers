@@ -59,7 +59,6 @@ Envelope speed = Envelope(p2, 4, t2, 3, c2, 3, SAMPLE_RATE, interpolation::linea
 float p3[4] = { 0.1f, 0.03f, 2.2f, 0.3f };
 float t3[3] = { 12.f, 8.f, 18.f };
 float c3[3] = { 1.7f, 1.2f, 3.f };
-
 Envelope imp = Envelope(p3, 4, t3, 3, c3, 3, SAMPLE_RATE, interpolation::linear);
 
 bool toggle_size_env = true;
@@ -225,7 +224,6 @@ int main(int argc, char** argv) {
 	
 	err = Pa_CloseStream(stream);
 	if( err != paNoError ) goto error;
-
 
 	Pa_Terminate();
 	printf("Test Finished.\n");

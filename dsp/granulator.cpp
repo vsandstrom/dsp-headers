@@ -1,7 +1,8 @@
+
 #include "grain.hpp"
 #include "waveshape.h"
 #include "envelope.hpp"
-#include <cstdio>
+#include <memory>
 
 using namespace dspheaders;
 
@@ -40,7 +41,6 @@ float Granulator::process(float position, float trigger) {
   return out;
 }
 
-
 float Granulator::process(float position, float rate, float trigger) {
   if (m_playbackrate != rate) { m_playbackrate = rate; }
   if (trigger < 1.f) { return process(); }
@@ -71,19 +71,19 @@ Granulator::Granulator(
   float dur,
   float samplerate, 
   unsigned maxgrains,
-  Buffer* buffer,
+  std::shared_ptr<Buffer> buffer,
   float (*interpolate)(float, float*, unsigned))
   : g_samplerate(samplerate),
     g_buffer(buffer),
     m_maxgrains(maxgrains) {
 
+  unsigned envlen = 512;
   // create default grain envelope
-  float* env = new float[512];
-  hanning(env, 512);
-  g_envelope = new Envelope(env, 512, g_samplerate, interpolate);
-
-  // create grains
-  m_grains = (Grain*)malloc(sizeof(Grain) * m_maxgrains);
+  float* env = new float[envlen];
+  hanning(env, envlen);
+  g_envelope = std::shared_ptr<Envelope>(new Envelope(env, envlen, g_samplerate, interpolate));
+  
+  m_grains = new Grain[m_maxgrains];
   if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
 
@@ -102,17 +102,15 @@ Granulator::Granulator(
   float* table, 
   unsigned tablelength,
   float (interpolate)(float, float*, unsigned),
-  Buffer* buffer)
+  std::shared_ptr<Buffer> buffer)
   : g_samplerate(samplerate),
-    g_envelope(new Envelope(table, tablelength, samplerate, interpolate)),
+    g_envelope(std::shared_ptr<Envelope>(new Envelope(table, tablelength, samplerate, interpolate))),
     g_buffer(buffer),
     m_maxgrains(maxgrains) { 
 
-  // create grains
-  m_grains = (Grain *)malloc(sizeof(Grain) * m_maxgrains);
+  m_grains = new Grain[m_maxgrains];
   if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
-
     m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
   }
 };
@@ -123,19 +121,17 @@ Granulator::Granulator(
   float dur,
   float samplerate, 
   unsigned maxgrains,
-  Envelope* grainEnvelope, 
-  Buffer* buffer)
+  std::shared_ptr<Envelope> grainEnvelope, 
+  std::shared_ptr<Buffer> buffer)
   : g_samplerate(samplerate),
     g_envelope(grainEnvelope),
     g_buffer(buffer),
     m_maxgrains(maxgrains)
 { 
 
-  // allocate memory for all grains
-  m_grains = (Grain *)malloc(sizeof(Grain)*m_maxgrains);
+  m_grains = new Grain[m_maxgrains];
   if (m_grains == nullptr) { return;} 
   for (int i = 0; i < m_maxgrains; i++) {
-    // pass audio buffer and grain envelope by reference,
     m_grains[i] = Grain(0, dur, &g_samplerate, g_buffer, g_envelope);
   }
 };
@@ -143,5 +139,5 @@ Granulator::Granulator(
 // Dtor
 
 Granulator::~Granulator(){
-  free(m_grains);
+  delete m_grains;
 }

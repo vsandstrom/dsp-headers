@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <cmath>
@@ -56,10 +55,30 @@ namespace dspheaders {
     return *x;
   }
 
+#ifdef __ARM_ARCH
+
   inline unsigned wrap(unsigned* x, unsigned int length) {
-    while (*x >= length) *x -= length;
+    int ret;
+    asm ( \
+        "mov %[w]. %[c] " \
+        "subs %[w], %[w], %[s]\n" \
+        "ands %[w], %[w], %[m]\n" \
+        : [w] "=r" (ret) \
+        : [c] "r" (x), [s] "r" (length), [m] "r" (length-1) \
+        : "cc" \
+    );
     return *x;
   }
+
+#else
+
+inline unsigned wrap(unsigned* x, unsigned int length) {
+  while (*x >= length) *x -= length;
+  return *x;
+}
+
+#endif
+
 
   inline unsigned wrap_dangerously(unsigned int* x, unsigned int length) {
     // Should work for both positive and negative overflow of unsigned int

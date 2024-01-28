@@ -43,22 +43,28 @@ Impulse trigger = Impulse(INTERVAL, SAMPLE_RATE);
 Wavetable ph_saw = Wavetable(SAW, 1024, SAMPLE_RATE, interpolation::linear);
 Wavetable lfo = Wavetable(SINE, 1024, SAMPLE_RATE, interpolation::linear);
 
-
+// Values setting the Grains size in seconds
 float p[4] = { 0.01f, 0.8f, 2.2f, 0.3f };
+// Time between the values
 float t[3] = { 12.f, 12.f, 18.f };
+// curve angle between values
 float c[3] = { 0.8f, 0.2f, 1.2f };
 
 Envelope size = Envelope(p, 4, t, 3, c, 3, SAMPLE_RATE, interpolation::linear);
 
+// Values setting the Grains speed of the playhead
 float p2[4] = { 1.f, 0.8f, 2.2f, 0.3f };
+// Values determining the transport between values
 float t2[3] = { 6.f, 20.f, 18.f };
 float c2[3] = { 0.8f, 0.2f, 1.2f };
 
 Envelope speed = Envelope(p2, 4, t2, 3, c2, 3, SAMPLE_RATE, interpolation::linear);
 
+// Values setting the Grains speed of the playhead
 float p3[4] = { 0.1f, 0.03f, 2.2f, 0.3f };
 float t3[3] = { 12.f, 8.f, 18.f };
 float c3[3] = { 1.7f, 1.2f, 3.f };
+
 Envelope imp = Envelope(p3, 4, t3, 3, c3, 3, SAMPLE_RATE, interpolation::linear);
 
 bool toggle_size_env = true;

@@ -12,14 +12,12 @@ namespace dspheaders {
       float time;
 
       float prev = 0.f;
-
       unsigned writeptr = 0;
-
       // Read sample from delay buffer with 
       // delaytime * samplerate number of samples offset
-      float read(float delaytime, float damp);
+      virtual float read(float delaytime, float damp);
       // Write sample to delay buffer
-      void write(float sample);
+      virtual void write(float sample);
 
     public:
       // Set the number of taps in the delay.
@@ -30,8 +28,8 @@ namespace dspheaders {
       void write(float sample, int offset);
       float read(int offset);
 
-      float process(float input, float delaytime, float wet, float feedback);
-
+      virtual float process(float input, float delaytime, float wet, float feedback);
+  
       // Initialize Delay
       // maxdelaytime: the size of the buffer in samples
       Delay(
@@ -47,5 +45,14 @@ namespace dspheaders {
         float maxdelaytime,
         float (*interpolate)(float, float*, unsigned)
       );
+  };
+
+  class IDelay : public Delay {
+    void write();
+
+    float process(float input, float delaytime, float wet, float feedback);
+    float read(float delaytime, float damp);
+    void write(float sample);
+
   };
 }

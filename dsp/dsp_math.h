@@ -18,7 +18,7 @@ namespace dspheaders{
     return x * (27.f+x_sqr) / (27.f + 9.f * x_sqr);
   }
     
-  inline unsigned int findpow2(unsigned x) {
+  inline unsigned int find_pow_two(unsigned x) {
     unsigned y = 1;
     while (x > y) y <<= 1;
     return y;

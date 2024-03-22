@@ -1,4 +1,3 @@
-#include "dsp/envelope.hpp"
 #include <memory>
 #ifdef DEBUG
   #define D(x) x
@@ -17,6 +16,7 @@
 #include "dsp/grain.hpp"
 #include "dsp/interpolation.hpp"
 #include "dsp/trigger.hpp"
+#include "dsp/envelope.hpp"
 
 // SETUP
 const int INPUT_CH = 2;

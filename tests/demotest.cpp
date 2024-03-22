@@ -188,7 +188,7 @@ static int paCallback(  const void* inputBuffer,				// input
     float sig = car * env * amps[scoreptr & 7];
     float sig1 = car1 * env1 * amps1[scoreptr1 % 4];
 
-    del = delay.process(sig + sig1, 0.4 + (vibr * 0.001), 0.4, 0.5);
+    del = delay.process(sig + sig1, 0.5);
     revl = verbl.process(sig + del, 0.8);
     revr = verbr.process(sig1 - del, 0.8);
 

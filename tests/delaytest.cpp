@@ -42,8 +42,8 @@ static int paCallback(
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    *out++ = delay.process(*in++, delaytime, 0.8f, fb); 
-    *out++ = delay.process(*in++, delaytime, 0.8f, fb); 
+    *out++ = delay.process(*in++, fb); 
+    *out++ = delay.process(*in++, fb); 
 	}
 	return 0;
 }

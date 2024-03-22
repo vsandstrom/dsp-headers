@@ -1,17 +1,15 @@
-#include "portaudio/include/portaudio.h"
 #include <iostream>
-#include "dsp/dsp.h"
-#include <cstdio>
-#include "dsp/verb.hpp"
+#include "../portaudio/include/portaudio.h"
+#include "../dsp/dsp.h"
+#include "../dsp/verb.hpp"
 
-// DURATION OF THE GENERATED TONE
-const int DURATION =           4000; // milliseconds
-// IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
-const float  SAMPLE_RATE =   48000.f;
+// DURATION
+const int DUR =           4000; // milliseconds
+// SET SAMPLERATE OF SOUNDCARD
+const float SAMPLE_RATE =   48000.f;
 
 using namespace dspheaders;
-
-ChownVerb verb = ChownVerb(SAMPLE_RATE);
+MoorerVerb verb = MoorerVerb(SAMPLE_RATE);
 static frame data;
 bool impulse = true;
 
@@ -31,14 +29,11 @@ static int paCallback(  const void* inputBuffer,				// input
   float env = 0.f;
   float venv = 0.f;
 
-  // float verb = 0.f;
-
 	(void) inputBuffer; // prevent unused variable warning
-
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     float sig = (impulse == true) ? 1.f : 0.f;
-    sig = verb.process(sig, 0.95);
+    sig = verb.process(sig, 2);
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.3; 
@@ -77,7 +72,7 @@ int main(int argc, char** argv) {
 	if( err != paNoError ) goto error;
 
 	// sound duration
-	Pa_Sleep(DURATION); // NUM_SECONDS is in milliseconds????
+	Pa_Sleep(DUR); // NUM_SECONDS is in milliseconds????
 
 	// stop sound
 	err = Pa_StopStream(stream);

@@ -1,10 +1,10 @@
-#include "dsp/interpolation.hpp"
-#include "portaudio/include/portaudio.h"
+#include "../dsp/dsp.h"
+#include "../dsp/interpolation.hpp"
+#include "../portaudio/include/portaudio.h"
 #include <cstdio>
 #include <iostream>
-#include "dsp/wavetable.hpp"
-#include "dsp/envelope.hpp"
-#include "dsp/delay.hpp"
+#include "../dsp/filter.hpp"
+#include "../dsp/wavetable.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -13,30 +13,28 @@ const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
 const int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
-const float  SAMPLE_RATE =   48000.f;
+const float  SAMPLE_RATE =   48000;
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
 float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
-float breakpoints[] = {0.f, 0.2f, 0.8f, 0.f};
-float breaktimes[] = {0.1f, 1.5f, 1.5f};
-float breakcurves[] = {1.5f, 0.2,  0.2};
-
-// keeps track of the number of the current sample
-unsigned timeline = 0;
-// Progresses the score
-unsigned scoreptr = 0;
-
 using namespace dspheaders;
-Envelope envelope = Envelope(breakpoints, 4, breaktimes, 3, breakcurves, 3, SAMPLE_RATE, interpolation::linear);
-Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
+
+Wavetable *carrier = nullptr;
+
+bool impulse = true;
+
+Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
+Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
+
+
 
 static frame data;
-
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(  const void* inputBuffer,				// input
 						void* outputBuffer,								          // output
@@ -50,69 +48,34 @@ static int paCallback(  const void* inputBuffer,				// input
 	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
-
-  float env = 0.f;
+  float o0 = 0.f;
+  float o1 = 0.f;
+  float o2 = 0.f;
+  float o3 = 0.f;
+  float l  = 0.f;
 
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
+    float sig = (impulse == true) ? 1.f : 0.f;
+    lfo.frequency = 5.4;
+    l = lfo.play();
+    o0 = c0.process(sig, 0.9, COMBTYPE::IIR);
+    o1 = c1.process(sig, .931f, COMBTYPE::IIR);
+    o2 = c2.process(sig, 0.97, COMBTYPE::IIR);
+    o3 = c3.process(sig, 0.98, COMBTYPE::IIR);
 
-    if ( timeline == 48000 || timeline == 48000 * 6) {
-      env = envelope.play(GATE::on);
-    } else {
-      env = envelope.play(GATE::off);
-    }
-    float car = carrier.play(modulator.play());
-    float sig = car*env;
+    sig += (o0 + o1 + o2 + o3) * 0.2;
 
     // Stereo frame: two increments of out buffer
     *out++ = sig; 
     *out++ = sig;
-
-    timeline++;
+    impulse = false;
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
-  carrier.frequency = FREQ;
-  modulator.frequency = FM_FREQ;
-    if ( argc > 3 && argc < 8 ) {
-      argc--;
-      argv++;
-      while (argc > 0){
-        if ((*argv)[0] == '-') {
-          printf("%c\n", (*argv)[1]);
-          switch ((*argv)[1]){
-            case 'c': {
-              argc--;
-              argv++;
-              // carrier.frequency = std::stof(*argv);
-              carrier.frequency = std::stof(*argv);
-              break;
-            }
-            case 'm':{
-              argc--;
-              argv++;
-              modulator.frequency = std::stof(*argv);
-              break;
-            }
-            default:{
-              argc--;
-              argv++;
-              break;
-
-            }
-          }
-        }
-        argc--;
-        argv++;
-      }
-      printf("running user input frequencies\n");
-    } else {
-      printf("running on default frequencies\n");
-    }
-
 	PaStream* stream;
 	PaError err;
 

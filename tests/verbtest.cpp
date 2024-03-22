@@ -1,7 +1,8 @@
-#include "dsp/dsp.h"
+#include <cstdio>
 #include <iostream>
-#include "portaudio/include/portaudio.h"
-#include "dsp/verb.hpp"
+#include "../portaudio/include/portaudio.h"
+#include "../dsp/dsp.h"
+#include "../dsp/verb.hpp"
 
 // DURATION OF THE GENERATED TONE
 const int DURATION =           4000; // milliseconds
@@ -10,7 +11,7 @@ const float  SAMPLE_RATE =   48000.f;
 
 using namespace dspheaders;
 
-SchroederVerb verb = SchroederVerb(SAMPLE_RATE);
+ChownVerb verb = ChownVerb(SAMPLE_RATE);
 static frame data;
 bool impulse = true;
 

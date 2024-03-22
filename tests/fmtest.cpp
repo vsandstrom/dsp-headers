@@ -1,30 +1,35 @@
-#include "dsp/dsp.h"
-#include "portaudio/include/portaudio.h"
 #include <cstdio>
 #include <iostream>
-#include "dsp/delay.hpp"
-#include "dsp/interpolation.hpp"
+#include <string>
+#include "../portaudio/include/portaudio.h"
+#include "../dsp/dsp.h"
+#include "../dsp/interpolation.hpp"
+#include "../dsp/wavetable.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
-const int DURATION =           30000; // milliseconds
+const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-constexpr int TABLE_LEN =      512;
+const int TABLE_LEN =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
-static float delaytime = 0.0f;
-static float fb = 0.0f;
+// CHANGE THE VALUES BELOW FOR OTHER PITCHES 
+float FREQ =                300.0f;
+float FM_FREQ =             180.0f;
+float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-Delay delay = Delay(SAMPLE_RATE, 4.f, 2, interpolation::cubic);
+Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+
+Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
 
 static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
-static int paCallback(
-            const void* inputBuffer,             				// input
+static int paCallback(  const void* inputBuffer,				// input
 						void* outputBuffer,								          // output
 						unsigned long framesPerBuffer,					    // length of buffer in frames
 						const PaStreamCallbackTimeInfo* timeinfo,		//
@@ -33,67 +38,72 @@ static int paCallback(
 {
 
 	// cast data passing through stream
+	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
 
-	float* in = (float*)inputBuffer;
+	(void) inputBuffer; // prevent unused variable warning
 
-    
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    // write and increment output and input buffer simultaneously. 
-    // hardcoded for a stereo i/o setup
-    *out++ = delay.process(*in++, delaytime, 0.8f, fb); 
-    *out++ = delay.process(*in++, delaytime, 0.8f, fb); 
+    float car = carrier.play(modulator.play());
+    float env = envelope.play();
+
+    // Stereo frame: two increments of out buffer
+    *out++ = car * env; 
+    *out++ = car * env;
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
-  // transfer is used as guide wave to determine where between the tables in the vectoroscillator
-  // we want to read.
-  // This readpointer needs to be positive
-  // transfer.frequency = 0.2f;
-    if ( argc > 2 && argc <= 5 ) {
+  carrier.frequency = FREQ;
+  modulator.frequency = FM_FREQ;
+  envelope.frequency = ENV_FREQ;
+    if ( argc > 3 && argc < 8 ) {
       argc--;
       argv++;
       while (argc > 0){
         if ((*argv)[0] == '-') {
           printf("%c\n", (*argv)[1]);
           switch ((*argv)[1]){
-            case 't': {
+            case 'c': {
               argc--;
               argv++;
               // carrier.frequency = std::stof(*argv);
-              delaytime = std::stof(*argv);
+              carrier.frequency = std::stof(*argv);
               break;
             }
-            case 'f':{
+            case 'm':{
               argc--;
               argv++;
-              fb = std::stof(*argv);
+              modulator.frequency = std::stof(*argv);
+              break;
+            }
+            case 'e':{
+              argc--;
+              argv++;
+              envelope.frequency = std::stof(*argv);
               break;
             }
             default:{
               argc--;
               argv++;
               break;
+
             }
           }
         }
         argc--;
         argv++;
       }
-      printf("running user input settings\n");
+      printf("running user input frequencies\n");
     } else {
-      printf("running on default settings\n");
+      printf("running on default frequencies\n");
     }
 
 	PaStream* stream;
 	PaError err;
 
-  // initialize first value, no wierd garbage value
-  // if they are initialized here, make sure to give the variables the correct values
-  // before using it, otherwise there will be an unwanted '0'-sample at the first block
 	data.left = data.right = 0.0f;
 
 	err = Pa_Initialize();
@@ -101,7 +111,7 @@ int main(int argc, char** argv) {
 
 	// open an audio I/O stream:
 	err = Pa_OpenDefaultStream( &stream,  // < --- Callback is in err
-								2, 
+								0, 
 								2,
 								paFloat32,
 								(int)SAMPLE_RATE,

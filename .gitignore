@@ -1,19 +1,23 @@
-test.o
-bkup*/
+# bkup*/
 build/
+examples/
+
 .DS_Store
-t.cpp
-fm.cpp
-vmakefile
-fmakefile
-dmakefile
+*.cpp
+*.h
+# t.cpp
+# fm.cpp
+# song.cpp
+# score.h
+
 */*.dSYM
 *.dSYM
 tests/*
 !tests/interpolation-test.py
 !tests/waveshape-test.py
 .todo
-envelope_test.cpp
+/tests/envelope_test.cpp
+!/tests/*test*.cpp
 
-
-
+/tests/allpass*
+/tests/wave_*

@@ -1,17 +1,12 @@
-#include "dsp/dsp.h"
-#include "portaudio/include/portaudio.h"
+
+#include "../dsp/interpolation.hpp"
+#include "../portaudio/include/portaudio.h"
 #include <cstdio>
 #include <iostream>
 #include <string>
-#include "dsp/wavetable.hpp"
-#include "dsp/vectoroscillator.hpp"
-#include "dsp/interpolation.hpp"
-#include <vector>
+#include "../dsp/wavetable.hpp"
+#include "../dsp/waveshape.h"
 
-struct frame {
-  float left;
-  float right;
-};
 
 
 // MASTER VOLUME OF THE GENERATED TONE
@@ -28,44 +23,51 @@ float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
-static frame data;
-
 using namespace dspheaders;
 
-// SETUP:
-Wavetable sine = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable triangle = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable square = Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::none);
-Wavetable saw = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
-Wavetable transfer = Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable* carrier = nullptr;
+// Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+// Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-std::vector<Wavetable> vecTables = {sine, triangle, square, saw};
-VectorOscillator vec = VectorOscillator(vecTables, interpolation::cubic);
+
+static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
-static int paCallback(  const void* inputBuffer,	
-						void* outputBuffer,								      
-						unsigned long framesPerBuffer,					 
-						const PaStreamCallbackTimeInfo* timeinfo,	
-						PaStreamCallbackFlags statusFlags,         
-						void* userdata )								            
+static int paCallback(  const void* inputBuffer,				// input
+						void* outputBuffer,								          // output
+						unsigned long framesPerBuffer,					    // length of buffer in frames
+						const PaStreamCallbackTimeInfo* timeinfo,		//
+						PaStreamCallbackFlags statusFlags,          //
+						void* userdata )								            // "void"-type can be typecast to other 
 {
 
 	// cast data passing through stream
+	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;
 	unsigned int i;
+
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float vosc = vec.play( map( transfer.play(), -1.f, 1.f, 0.f, 1.f)) * envelope.play();
-    *out++ = clamp(vosc, -1.f, 1.f); 
-    *out++ = clamp(vosc, -1.f, 1.f); 
+    float car = carrier -> play();
+        // modulator.play());
+    float env = envelope.play();
+
+    // Stereo frame: two increments of out buffer
+    *out++ = car * env; 
+    *out++ = car * env;
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
-  vec.frequency = FREQ;
+  float* cartable = new float[513];
+  float amps[] = {1.f, 0.72f, 0.2f, 0.9f};
+  float phases[] = {0.f, 0.2f, 0.94f, 0.5f};
+  cartable = complex_sine(cartable, 512, amps, phases, 4);
+  carrier = new Wavetable(cartable, 512, SAMPLE_RATE, interpolation::cubic);
+  carrier -> frequency = FREQ;
+  // modulator.frequency = FM_FREQ;
   envelope.frequency = ENV_FREQ;
     if ( argc > 3 && argc < 8 ) {
       argc--;
@@ -74,11 +76,17 @@ int main(int argc, char** argv) {
         if ((*argv)[0] == '-') {
           printf("%c\n", (*argv)[1]);
           switch ((*argv)[1]){
-            case 'v': {
+            case 'c': {
               argc--;
               argv++;
               // carrier.frequency = std::stof(*argv);
-              vec.frequency = std::stof(*argv);
+              carrier -> frequency = std::stof(*argv);
+              break;
+            }
+            case 'm':{
+              argc--;
+              argv++;
+              // modulator.frequency = std::stof(*argv);
               break;
             }
             case 'e':{
@@ -103,17 +111,9 @@ int main(int argc, char** argv) {
       printf("running on default frequencies\n");
     }
 
-  // transfer is used as guide wave to determine where between the tables in the vectoroscillator
-  // we want to read.
-  // This readpointer needs to be positive
-  transfer.frequency = 0.2f;
-
 	PaStream* stream;
 	PaError err;
 
-  // initialize first value, no wierd garbage value
-  // if they are initialized here, make sure to give the variables the correct values
-  // before using it, otherwise there will be an unwanted '0'-sample at the first block
 	data.left = data.right = 0.0f;
 
 	err = Pa_Initialize();
@@ -156,6 +156,3 @@ error:
 	std::fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ));
 	return err;
 }
-
-
-

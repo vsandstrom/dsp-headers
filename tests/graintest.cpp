@@ -1,22 +1,21 @@
-#include "dsp/envelope.hpp"
 #include <memory>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include "../portaudio/include/portaudio.h"
+#include "../dsp/dsp.h"
+#include "../dsp/envelope.hpp"
+#include "../dsp/interpolation.hpp"
+#include "../dsp/wavetable.hpp"
+#include "../dsp/grain.hpp"
+#include "../dsp/interpolation.hpp"
+#include "../dsp/trigger.hpp"
+
 #ifdef DEBUG
   #define D(x) x
 #else
   #define D(x) 
 #endif
-
-
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
-#include "portaudio/include/portaudio.h"
-#include "dsp/dsp.h"
-#include "dsp/interpolation.hpp"
-#include "dsp/wavetable.hpp"
-#include "dsp/grain.hpp"
-#include "dsp/interpolation.hpp"
-#include "dsp/trigger.hpp"
 
 // SETUP
 const int INPUT_CH = 2;

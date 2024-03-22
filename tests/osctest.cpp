@@ -1,11 +1,10 @@
-
-#include "dsp/interpolation.hpp"
-#include "portaudio/include/portaudio.h"
 #include <cstdio>
+#include <cstring>
 #include <iostream>
-#include <string>
-#include "dsp/wavetable.hpp"
-#include "dsp/waveshape.h"
+#include "../portaudio/include/portaudio.h"
+#include "../dsp/dsp.h"
+#include "../dsp/interpolation.hpp"
+#include "../dsp/wavetable.hpp"
 
 
 
@@ -25,10 +24,7 @@ float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
 
-Wavetable* carrier = nullptr;
-// Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
-// Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable *carrier = nullptr;
 
 static frame data;
 
@@ -49,55 +45,54 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier -> play();
-        // modulator.play());
-    float env = envelope.play();
+    float car = carrier->play();
 
     // Stereo frame: two increments of out buffer
-    *out++ = car * env; 
-    *out++ = car * env;
+    *out++ = car; 
+    *out++ = car;
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
-  float* cartable = new float[513];
-  float amps[] = {1.f, 0.72f, 0.2f, 0.9f};
-  float phases[] = {0.f, 0.2f, 0.94f, 0.5f};
-  cartable = complex_sine(cartable, 512, amps, phases, 4);
-  carrier = new Wavetable(cartable, 512, SAMPLE_RATE, interpolation::cubic);
-  carrier -> frequency = FREQ;
-  // modulator.frequency = FM_FREQ;
-  envelope.frequency = ENV_FREQ;
-    if ( argc > 3 && argc < 8 ) {
+    if ( argc > 2 && argc < 8 ) {
       argc--;
       argv++;
       while (argc > 0){
+        printf("%s", *argv);
         if ((*argv)[0] == '-') {
           printf("%c\n", (*argv)[1]);
           switch ((*argv)[1]){
-            case 'c': {
+            case 'w': {
               argc--;
               argv++;
+              printf("%s", *argv);
               // carrier.frequency = std::stof(*argv);
-              carrier -> frequency = std::stof(*argv);
-              break;
-            }
-            case 'm':{
-              argc--;
-              argv++;
-              // modulator.frequency = std::stof(*argv);
-              break;
-            }
-            case 'e':{
-              argc--;
-              argv++;
-              envelope.frequency = std::stof(*argv);
+              if (!strcmp(*argv, "square")){
+                carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
+                carrier->frequency = FREQ;
+              } 
+              else if (!strcmp(*argv, "sine")){
+                carrier = new Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+                carrier->frequency = FREQ;
+              } 
+              else if (!strcmp(*argv, "saw")){
+                carrier = new Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
+                carrier->frequency = FREQ;
+              } 
+              else if (!strcmp(*argv, "triangle")){
+                carrier = new Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+                carrier->frequency = FREQ;
+              } else {
+                carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
+                carrier->frequency = FREQ;
+              }
               break;
             }
             default:{
               argc--;
               argv++;
+              carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
               break;
 
             }
@@ -109,6 +104,8 @@ int main(int argc, char** argv) {
       printf("running user input frequencies\n");
     } else {
       printf("running on default frequencies\n");
+      carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+      carrier->frequency = FREQ;
     }
 
 	PaStream* stream;

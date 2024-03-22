@@ -1,15 +1,15 @@
-#include "portaudio/include/portaudio.h"
 #include <vector>
 #include <string>
 #include <iostream>
-#include "dsp/dsp.h"
-#include "dsp/interpolation.hpp"
-#include "dsp/wavetable.hpp"
-#include "dsp/envelope.hpp"
-#include "dsp/verb.hpp"
-#include "dsp/delay.hpp"
-#include "dsp/waveshape.h"
-#include "dsp/vectoroscillator.hpp"
+#include "../portaudio/include/portaudio.h"
+#include "../dsp/dsp.h"
+#include "../dsp/interpolation.hpp"
+#include "../dsp/wavetable.hpp"
+#include "../dsp/envelope.hpp"
+#include "../dsp/verb.hpp"
+#include "../dsp/delay.hpp"
+#include "../dsp/waveshape.h"
+#include "../dsp/vectoroscillator.hpp"
 
 // DURATION OF THE GENERATED TONE
 const int DURATION =           120000; // milliseconds

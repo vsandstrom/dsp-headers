@@ -18,8 +18,8 @@ LDFLAGS := -L./portaudio/lib/.libs/ -lportaudio
 
 all: $(EXAMPLE_DIR)/$(TARGETS)
 
-$(EXAMPLE_DIR)/$(TARGETS): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(TEST_DIR)/$(notdir $@).cpp -o $(EXAMPLE_DIR)/$@
+$(EXAMPLE_DIR)/$(TARGETS): $(OBJS) | $(EXAMPLE_DIR)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(TEST_DIR)/$(notdir $@).cpp -o $(EXAMPLE_DIR)/$(notdir $@)
 
 # Compiling dependencies
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)

@@ -1,6 +1,7 @@
 
 /* ˙ˆ˙ */
 #include "buffer.hpp"
+#include "dsp_math.h"
 
 
 using namespace dspheaders;
@@ -9,7 +10,7 @@ Buffer::Buffer(
   float seconds,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(seconds*samplerate), interpolate(interpolate) {
+: bufferlength(find_pow_two(seconds*samplerate)), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 
@@ -27,7 +28,7 @@ Buffer::Buffer(
   unsigned size,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(size), interpolate(interpolate) {
+: bufferlength(find_pow_two(size)), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 

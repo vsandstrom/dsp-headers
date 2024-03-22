@@ -1,48 +1,58 @@
 #pragma once
 #include "buffer.hpp"
 
+// Note: Delay uses Buffer class, which size is always a power of two, to
+// simplify wrapping of the write head.
+
 namespace dspheaders {
   class Delay {
     protected:
+      Buffer m_buffer;
+      unsigned g_samplerate;
       // magic number... feedback goes too hard
-      float fb_scale_coeff = 0.5;
-      Buffer buffer;
-      unsigned samplerate;
-      unsigned delay_taps = 1;
-      float time;
+      unsigned m_taps = 1;
+      float m_time;
 
-      float prev = 0.f;
-      unsigned writeptr = 0;
+      unsigned m_writeptr = 0;
+      unsigned m_pos_mask;
+      float m_prev = 0.f;
+
       // Read sample from delay buffer with 
       // delaytime * samplerate number of samples offset
       virtual float read(float delaytime, float damp);
+
       // Write sample to delay buffer
       virtual void write(float sample);
 
     public:
       // Set the number of taps in the delay.
-      void taps(unsigned taps);
+      inline void taps(unsigned taps) { m_taps = taps; }
 
       // Set the duration between delay taps
-      void delaytime(float delaytime);
-      void write(float sample, int offset);
-      float read(int offset);
+      inline void delaytime(float time) { m_time = time; }
 
-      virtual float process(float input, float delaytime, float wet, float feedback);
+
+      // Read / write for reverb
+      virtual void write(float sample, int offset);
+      virtual float read(int offset);
+
+      virtual float process(float input, float feedback);
   
       // Initialize Delay
       // maxdelaytime: the size of the buffer in samples
       Delay(
         unsigned samplerate,
-        float maxdelaytime,
-        unsigned delay_taps,
+        float time,
+        float maxtime,
+        unsigned m_taps,
         float (*interpolate)(float, float*, unsigned)
       );
      
       // Initialize Delay without assigning a number of delay taps
       Delay(
         unsigned samplerate,
-        float maxdelaytime,
+        float time,
+        float maxtime,
         float (*interpolate)(float, float*, unsigned)
       );
   };
@@ -50,7 +60,7 @@ namespace dspheaders {
   class IDelay : public Delay {
     void write();
 
-    float process(float input, float delaytime, float wet, float feedback);
+    float process(float input, float time, float wet, float feedback);
     float read(float delaytime, float damp);
     void write(float sample);
 

@@ -1,10 +1,11 @@
 # bkup*/
-build/
-examples/
+*
+build
+examples
 
 .DS_Store
-*.cpp
-*.h
+score.cpp
+song.h
 
 */*.dSYM
 *.dSYM

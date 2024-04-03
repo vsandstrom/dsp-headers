@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
       printf("running user input frequencies\n");
     } else {
       printf("running on default frequencies\n");
-      carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+      carrier = new Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
       carrier->frequency = FREQ;
     }
 

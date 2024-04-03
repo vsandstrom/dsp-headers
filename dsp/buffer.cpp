@@ -10,7 +10,7 @@ Buffer::Buffer(
   float seconds,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(find_pow_two(seconds*samplerate)), interpolate(interpolate) {
+: bufferlength(seconds*samplerate), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 
@@ -28,7 +28,7 @@ Buffer::Buffer(
   unsigned size,
   unsigned samplerate,
   float (*interpolate)(float, float*, unsigned))
-: bufferlength(find_pow_two(size)), interpolate(interpolate) {
+: bufferlength(size), interpolate(interpolate) {
 
   if (bufferlength < 4) {
     // Allow for mini-buffers, but still not in conflict with 

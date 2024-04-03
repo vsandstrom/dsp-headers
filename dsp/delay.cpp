@@ -3,6 +3,7 @@
 
 #include "buffer.hpp"
 #include "delay.hpp"
+#include "dsp_math.h"
 #include "interpolation.hpp"
 
 using namespace dspheaders;
@@ -17,10 +18,10 @@ Delay::Delay(
     float maxtime,
     unsigned taps,
     float (*interpolate)(float, float*, unsigned)
-    ) : m_buffer(Buffer(maxtime, samplerate, interpolate)),
+    ) : m_buffer(Buffer(find_pow_two(maxtime * samplerate), samplerate, interpolate)),
         g_samplerate(samplerate), 
         m_time(time),
-        m_pos_mask(m_buffer.bufferlength -1),
+        m_pos_mask(find_pow_two(maxtime * samplerate) -1),
         m_taps(taps) { }
 
 Delay::Delay(
@@ -28,44 +29,15 @@ Delay::Delay(
     float time,
     float maxtime,
     float (*interpolate)(float, float*, unsigned)
-    ) : m_buffer(Buffer(maxtime, samplerate, interpolate)), 
+    ) : m_buffer(Buffer(find_pow_two(maxtime * samplerate), samplerate, interpolate)),
         g_samplerate(samplerate), 
         m_time(time),
-        m_pos_mask(m_buffer.bufferlength -1),
+        m_pos_mask(find_pow_two(maxtime * samplerate) -1),
         m_taps(1) { }
 
 //////////////////////////////////////////////////////////
 ////////////////// INSTANCE METHODS: /////////////////////
 //////////////////////////////////////////////////////////
-
-float Delay::read(float delaytime, float damp) {
-  float output = 0.f;
-  float taptime = (delaytime * g_samplerate);
-  for (unsigned i = 1; i <= m_taps; i++) {
-    float tap = (float)m_writeptr - (taptime*i);
-    output += m_buffer.readsample(tap) * damp;
-    // damp*=damp;
-    damp /= 2;
-  }
-  return output;
-}
-
-void Delay::write(float sample) {
-  // Within bounds-checking is handled in the Buffer object
-  m_buffer.writesample(sample, (int)m_writeptr++);
-  // wrap_dangerously(&m_writeptr, m_buffer.bufferlength);
-}
-
-// float Delay::process(float input, float time, float wet, float feedback) {
-//   float output = read(time, feedback);
-//   // write the time back to write head with feedback
-//   // MAGIC NUMBER for scaling the feedback of the delay to something managable
-//   output = interpolation::slope((input + output), m_prev);
-//   write(output);
-//   m_prev = output;
-//   // wet controls dry/wet balance of time
-//   return output * wet;
-// }
 
 float Delay::process(float input, float feedback) {
   float out = m_buffer.buffer[m_writeptr];
@@ -78,11 +50,7 @@ float Delay::process(float input, float feedback) {
     m_buffer.buffer[delay] += (input + (out * feedback)) * (0.5 / float(i));
   }
   m_writeptr = (m_writeptr+1) & m_pos_mask;
-
-
-
   return out;
-
 }
 
 //////////////////////////////////////////////////////////
@@ -103,7 +71,40 @@ void Delay::write(float sample, int offset) {
 }
 
 //////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////
+//////////////////////   IDelay   ////////////////////////
 //////////////////////////////////////////////////////////
 
+IDelay::IDelay(
+    unsigned samplerate,
+    float time,
+    float maxtime,
+    unsigned taps, 
+    float (*interpolate)(float, float*, unsigned)
+    ) : Delay{samplerate, time, maxtime, taps, interpolate} { }
+
+IDelay::IDelay(
+    unsigned samplerate,
+    float time,
+    float maxtime,
+    float (*interpolate)(float, float*, unsigned)
+    ) : Delay{samplerate, time, maxtime, interpolate} { }
+
+
+float IDelay::process(float input, float feedback) {
+  float out = 0.0f;
+  float delay = m_time * g_samplerate;
+
+  for (int i = 1; i <= m_taps; i++) {
+    float pos = i*delay;
+    while (pos >= m_buffer.bufferlength) {
+      pos -= m_buffer.bufferlength;
+    }
+    out += m_buffer.readsample(pos) / float(i+1);
+  }
+
+  m_buffer.buffer[m_writeptr] = input + (out * feedback);
+  m_writeptr = (m_writeptr+1) & m_pos_mask;
+
+  return out;
+}
 

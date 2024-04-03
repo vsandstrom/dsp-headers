@@ -19,22 +19,28 @@ namespace dspheaders {
 
       // Read sample from delay buffer with 
       // delaytime * samplerate number of samples offset
-      virtual float read(float delaytime, float damp);
+      // float read(float delaytime, float damp);
 
       // Write sample to delay buffer
-      virtual void write(float sample);
+      // void write(float sample);
 
     public:
       // Set the number of taps in the delay.
       inline void taps(unsigned taps) { m_taps = taps; }
 
       // Set the duration between delay taps
-      inline void delaytime(float time) { m_time = time; }
+      inline void delaytime(float time) { 
+        if (time * g_samplerate > m_pos_mask) {
+          m_time = m_buffer.bufferlength / float(g_samplerate);
+          return;
+        }
+        m_time = time; 
+      }
 
 
       // Read / write for reverb
-      virtual void write(float sample, int offset);
-      virtual float read(int offset);
+      void write(float sample, int offset);
+      float read(int offset);
 
       virtual float process(float input, float feedback);
   
@@ -60,9 +66,26 @@ namespace dspheaders {
   class IDelay : public Delay {
     void write();
 
-    float process(float input, float time, float wet, float feedback);
-    float read(float delaytime, float damp);
-    void write(float sample);
+    // float read(float delaytime, float damp);
+    // void write(float sample);
+    float process(float input, float feedback);
 
+    public:
+
+      IDelay(
+        unsigned samplerate,
+        float time,
+        float maxtime,
+        unsigned m_taps,
+        float (*interpolate)(float, float*, unsigned)
+      );
+     
+      // Initialize Delay without assigning a number of delay taps
+      IDelay(
+        unsigned samplerate,
+        float time,
+        float maxtime,
+        float (*interpolate)(float, float*, unsigned)
+      );
   };
 }

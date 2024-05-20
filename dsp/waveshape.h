@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dsp.h"
+#include "dsp_math.h"
 #include <cmath>
 
 using namespace dspheaders;
@@ -52,13 +53,14 @@ inline void revsquare(float* table, unsigned tablelength) {
   } 
 }
 
-inline void hanning(float* table, unsigned tablelength) {
+inline float* hanning(float* table, unsigned tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = pi / numsamples;
   for (unsigned i = 0; i < tablelength; i++) {
     table[i] = powf(sin(angle), 2.f);
     angle += inc;
   }
+  return table;
 }
 
 inline void triangle(float* table, unsigned tablelength) {

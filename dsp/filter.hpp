@@ -322,5 +322,35 @@ namespace dspheaders {
         return output;
       }
   };
+
+
+  class Biquad {
+    float buffer[2] {0.f};
+
+    // feedforward coeffs
+    const float b[3] = {1.f, 0.f, -1.f};
+    // feedback coeffs
+    float a[3] = { 1.f, -.3835f, .8786f };
+
+    public:
+    Biquad(){}
+    // Supply custom feedback coeffs, must be *at least* 3, only 3 values will 
+    // be read if longer
+    Biquad(const float* coeffs) {
+      for (unsigned i = 0; i<3; ++i) {
+        a[i] = coeffs[i];
+      }
+    }
+
+    float process(float input, float initial_amplitude) {
+      float in = input * initial_amplitude;
+      float out = in * b[0] + buffer[0] * b[1] + buffer[1] * b[2];
+      float next = buffer[0] * a[0] + buffer[1] * a[1];
+
+      buffer[1] = buffer[0];
+      buffer[0] = in + next;
+      return out;
+    }
+  };
 }
 #endif

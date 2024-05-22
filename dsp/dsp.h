@@ -1,9 +1,9 @@
 #pragma once
-
+#include "dsp_math.h"
 #include <cmath>
 #include <cstdlib>
 namespace dspheaders {
-  const float pi = 3.14159265358979323846f;
+  // const float pi = 3.14159265358979323846f;
 
   struct frame {
     float left;

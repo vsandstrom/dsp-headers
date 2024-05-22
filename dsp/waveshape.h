@@ -1,20 +1,20 @@
 #pragma once
 
 #include "dsp.h"
+#include "dsp_math.h"
 #include <cmath>
 
 using namespace dspheaders;
-inline void sine(float* table, unsigned tablelength) {
+constexpr void sine(float* table, unsigned tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
-  inc = pi * 2.f / numsamples;
+  inc = TAU / numsamples;
   for (unsigned i = 0; i < tablelength; i++) {
-    table[i] = sin(angle);
+    table[i] = sin_approx(angle, 10);
     angle += inc;
   }
 }
 
-
-inline void saw(float* table, unsigned tablelength) {
+constexpr void saw(float* table, unsigned tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = 2.0 / (numsamples-1);
   for (unsigned i = 0; i < tablelength; i++) {
@@ -23,7 +23,7 @@ inline void saw(float* table, unsigned tablelength) {
   }
 }
 
-inline void revsaw(float* table, unsigned tablelength) {
+constexpr void revsaw(float* table, unsigned tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = 2.0 / (numsamples-1);
   for (unsigned i = 0; i < tablelength; i++) {
@@ -32,7 +32,7 @@ inline void revsaw(float* table, unsigned tablelength) {
   }
 }
 
-inline void square(float* table, unsigned tablelength) {
+constexpr void square(float* table, unsigned tablelength) {
   float val = -1.f;
   for (unsigned i = 0; i < tablelength; i++) {
     table[i] = val;
@@ -42,7 +42,7 @@ inline void square(float* table, unsigned tablelength) {
   }
 }
 
-inline void revsquare(float* table, unsigned tablelength) {
+constexpr void revsquare(float* table, unsigned tablelength) {
   float val = 1.f;
   for (unsigned i = 0; i < tablelength; i++) {
     table[i] = val;
@@ -52,16 +52,17 @@ inline void revsquare(float* table, unsigned tablelength) {
   } 
 }
 
-inline void hanning(float* table, unsigned tablelength) {
+constexpr float* hanning(float* table, unsigned tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
-  inc = pi / numsamples;
+  inc = PI / numsamples;
   for (unsigned i = 0; i < tablelength; i++) {
-    table[i] = powf(sin(angle), 2.f);
+    table[i] = powf_approx(sin_approx(angle, 10), 2.f);
     angle += inc;
   }
+  return table;
 }
 
-inline void triangle(float* table, unsigned tablelength) {
+constexpr void triangle(float* table, unsigned tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = 2.f / (numsamples * 0.5);
   for (unsigned i = 0; i < tablelength; i++) {
@@ -89,7 +90,7 @@ inline float* complex_sine(
 
   // Make sure amplitudes are within 0 & 1
   // scale(amplitudes, paramslength, 0.f, 1.f);
-  normalize(amplitudes, paramslength);
+  // normalize(amplitudes, paramslength);
 
   // ------------ FORMULA --------------------
   // where n = 1 -> paramslength
@@ -99,12 +100,12 @@ inline float* complex_sine(
   // -----------------------------------------
   
   for (int n=1; n <= paramslength; n++) {
-    inc = pi * 2.f * n / numsamples;
+    inc = TAU * n / numsamples;
     angle = inc * numsamples * phases[n-1];
 
     // magic extra length because of Buffer shenanigans
     for (int i=0; i<tablelength+1; i++) {
-      table[i] += (sin(angle) * amplitudes[n-1]);
+      table[i] += (sin_approx(angle, 10) * amplitudes[n-1]);
       angle += inc;
     }
   }

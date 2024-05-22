@@ -1,14 +1,13 @@
 #pragma once
-
-#include "dsp.h"
+// #include "dsp.h"
 #include <cmath>
-#include <math.h>
-
-#define LOGTEN 2.302585092994046
-#define LOGTWO 0.693147180559945
-
 
 namespace dspheaders{
+  constexpr float PI = 3.14159265358979323846f;
+  constexpr float TAU = 6.28318530717958647692f;
+  constexpr float LOGTEN = 2.302585092994046f;
+  constexpr float LOGTWO = 0.693147180559945f;
+
   inline float fast_tanh(double x) {
     if (x < -1.f) return -1.f;
     if (x > 1.f) return 1.f;
@@ -18,10 +17,37 @@ namespace dspheaders{
     return x * (27.f+x_sqr) / (27.f + 9.f * x_sqr);
   }
     
-  inline unsigned int find_pow_two(unsigned x) {
+  constexpr inline unsigned int find_pow_two(unsigned x) {
     unsigned y = 1;
     while (x > y) y <<= 1;
     return y;
+  }
+  
+  constexpr float powf_approx(float base, float exp) {
+    float result = 1.f;
+    float term = 1.f;
+    for (int i = 1; i <= exp; ++i) {
+      term *= base / i;
+      result += term;
+    }
+    return result;
+  }
+
+  constexpr float factorial(int n) {
+    return (n <= 1) ? 1: n * factorial(n - 1);
+  }
+
+  constexpr float pow_approx(float base, int exp) {
+    return (exp == 0) ? 1 : base * pow_approx(base, exp - 1);
+  }
+
+  constexpr float sin_approx(float x, int n) {
+    float result = 0.f;
+    for(int i = 0; i < n; ++i) {
+      int sign = (i%2 == 0) ? 1 : -1;
+      result +=  sign * pow_approx(x, 2 * i + 1) / factorial(2 * i + 1);
+    }
+    return result;
   }
 
   inline float fast_inverse_sqrt(double x) {
@@ -39,13 +65,13 @@ namespace dspheaders{
     return y;
   }
 
-  inline float freqToRadians(float freq, float samplerate) {
-    return cos(2*pi*freq / samplerate);
+  // Angular velocity
+  constexpr float freqToRadians(float freq, float samplerate) {
+    return TAU*freq / samplerate;
   }
 
   // db -> rms / rms -> db functions are borrowed from PD source
 
-  // 
   inline float dbtorms(float f) {
     if (f <= 0.f) return 0.f;
     if (f > 485) return 485;
@@ -62,7 +88,7 @@ namespace dspheaders{
 
   // Converts midinumber to frequency 
   inline float mtof(int midinumber, float base = 440.f) {
-    return base * pow(2,(midinumber/12));
+    return base * powf_approx(2, (midinumber/12.f));
   }
 
   // Converts frequency to midinumber
@@ -73,15 +99,4 @@ namespace dspheaders{
 
   // inline float radiansToFreq(float radian, float samplerate) { }
 }
-  
-
-  // Converts from dB to linear volume
-  // inline float dbtorms(float dB) {
-  //   return powf(10.f, 0.05f * (dB - 100));
-  // }
-
-  // Converts from linear volume to dB
-  // inline float rmstodb (float volume) {
-  //   return 100 + 20.f * log10f(volume) ;
-  // }
 

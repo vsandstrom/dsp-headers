@@ -67,7 +67,7 @@ namespace dspheaders {
 ///
 ///                 allpass filter
 ///
-///              ╓───> ( * coeff )────────────────────╖
+///              ╓───> ( * coeff )──────────────────╖
 ///              ║   ╓──────────────────────╖       V
 ///  in ─> ( + )─╨─> ║  buffer(n - offset)  ║─╥─> ( + )──> out
 ///          Λ       ╙──────────────────────╜ ║ 
@@ -84,4 +84,114 @@ namespace dspheaders {
         float (*interpolate)(float, float*, size_t)
       );
   };
+
+///
+///                 biquad filter
+///
+///            
+///             
+///  in ─> ( + )───────( * a0 )────╖──────( + )──> out
+///          Λ                     ║             
+///          ╙──( - )──( * a1 )<─|n-1|->( * b1 )
+///          Λ                     ║         
+///          ╙──( - )──( * a2 )<─|n-2|->( * b2 )
+///
+///
+
+  class Biquad {
+    // 2-sample delayline on input side
+    float x1 = 0.f, x2 = 0.f;
+    // 2-sample delayline on output side
+    float y1 = 0.f, y2 = 0.f;
+    // feedforward coeffs
+    float b0 = 0.f, b1 = 0.f, b2 = 0.f;
+    // feedback coeffs
+    float a0 = 1.f, a1 = 0.f, a2 = 0.f;
+      
+    inline void normalizeCoeffs() {
+      b0 /= a0;
+      b1 /= a0;
+      b2 /= a0;
+      a1 /= a0;
+      a2 /= a0;
+    }
+
+    public:
+      Biquad(){}
+
+      float process(float input) {
+        float output = b0*input + b1*x1 + b2*x2 - a1*y1 - a2*y2;
+        x2 = x1;
+        x1 = input;
+        y2 = y1;
+        y1 = output;
+        return output;
+      }
+
+      
+      // Low Pass Filter
+      // float w = Angular velocity: 2PI * Frequency / Samplerate
+      // float q = Frequency / Bandwidth in Hz.
+      inline void calcLPF(float w, float q) {
+        float alpha = sin(w) / (2 * q);
+
+        // See order:
+        b1 = 1 - cos(w);      //  1-cos(w)
+        b0 = b1 / 2;          // (1-cos(w)) / 2
+        b2 = b0;              // (1-cos(w)) / 2
+
+        a0 = 1 + alpha;       //  1 + alpha
+        a1 = -2 * cos(w);   // -2 * cos(w)
+        a2 = 1 - alpha;       //  1 - alpha
+        normalizeCoeffs();
+      }
+
+      // Band Pass Filter
+      // float w = Angular velocity: 2PI * Frequency / Samplerate
+      // float q = Frequency / Bandwidth in Hz.
+      inline void calcBPF(float w, float q) {
+        float alpha = sin(w) / (2 * q);
+
+        b0 = alpha;           // alpha
+        b1 = 0;               // 0
+        b2 = -alpha;          // -alpha
+
+        a0 = 1 + alpha;       // 1 + alpha
+        a1 = -2 * cos(w);   // -2 * cos(w)
+        a2 = 1 - alpha;       // 1 - alpha
+        normalizeCoeffs();
+      }
+
+      // Notch Filter
+      // float w = Angular velocity: 2PI * Frequency / Samplerate
+      // float q = Frequency / Bandwidth in Hz.
+      inline void calcNotch(float w, float q) {
+        float alpha = sin(w) / (2 * q);
+
+        b0 = 1;               //  1
+        b1 = -2 * cos(w);     // -2 * cos(w)
+        b2 = 1;               //  1
+
+        a0 = 1 + alpha;       // 1 + alpha
+        a1 = b1;              // -2 * cos(w)
+        a2 = 1 - alpha;       // 1 - alpha
+        normalizeCoeffs();
+      }
+
+      // High Pass Filter
+      // float w = Angular velocity: 2PI * Frequency / Samplerate
+      // float q = Frequency / Bandwidth in Hz.
+      inline void calcHPF(float w, float q) {
+        float alpha = sin(w) / (2 * q);
+
+        b0 = (1 + cos(w)) / 2;  // (1 + cos(w)) / 2
+        b1 = -(b0 * 2);       // -(1 + cos(w))
+        b2 = b0;              // (1 + cos(w)) / 2
+
+        a0 = 1 + alpha;       // 1 + alpha
+        a1 = -2 * (cos(w));   // -2 * cos(w)
+        a2 = 1 - alpha;       // 1 - alpha
+        normalizeCoeffs();
+      }
+    };
 }

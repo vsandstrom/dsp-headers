@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dsp.h"
+#include "dsp_math.h"
 #include <cmath>
 #include <cstddef>
 
@@ -69,6 +70,7 @@ inline void hanning(float* table, size_t tablelength) {
     table[i] = powf(sin(angle), 2.f);
     angle += inc;
   }
+  return table;
 }
 
 inline void triangle(float* table, size_t tablelength) {
@@ -99,7 +101,7 @@ inline float* complex_sine(
 
   // Make sure amplitudes are within 0 & 1
   // scale(amplitudes, paramslength, 0.f, 1.f);
-  normalize(amplitudes, paramslength);
+  // normalize(amplitudes, paramslength);
 
   // ------------ FORMULA --------------------
   // where n = 1 -> paramslength

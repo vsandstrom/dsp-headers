@@ -54,11 +54,6 @@ void Buffer::writesample(float sample, int writeptr) {
   buffer[wrap(&writeptr, bufferlength)] = sample;
 };
 
-// Experimental interpolated write
-// void Buffer::writesample(float sample, float writeptr) {
-//   writeinterpolation::linear(sample, wrapf(&writeptr, bufferlength), buffer, bufferlength);
-// }
-
 // important for smaller systems that do not clear old memory
 void Buffer::initbuffer() {
   dspheaders::initbuffer(buffer, bufferlength+1);

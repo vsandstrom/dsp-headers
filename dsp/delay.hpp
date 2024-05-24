@@ -68,9 +68,9 @@ namespace dspheaders {
 
     // float read(float delaytime, float damp);
     // void write(float sample);
-    float process(float input, float feedback);
 
     public:
+      float process(float input, float feedback);
 
       IDelay(
         unsigned samplerate,

@@ -18,7 +18,7 @@ static float delaytime = 0.0f;
 static float fb = 0.0f;
 
 using namespace dspheaders;
-Delay delay = Delay(SAMPLE_RATE, 4.f, 2, interpolation::cubic);
+IDelay delay = IDelay(SAMPLE_RATE, 4.f, 2, interpolation::cubic);
 
 static frame data;
 

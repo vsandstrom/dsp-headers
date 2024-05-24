@@ -11,14 +11,13 @@ using namespace dspheaders;
 //////////////////////////////////////////////////////////
 //////////////////// CONSTRUCTORS: ///////////////////////
 //////////////////////////////////////////////////////////
-
 Delay::Delay(
     unsigned samplerate,
     float time,
     float maxtime,
     unsigned taps,
     float (*interpolate)(float, float*, unsigned)
-    ) : m_buffer(Buffer(find_pow_two(maxtime * samplerate), samplerate, interpolate)),
+    ) : m_buffer(Buffer(maxtime * samplerate, samplerate, interpolate)),
         g_samplerate(samplerate), 
         m_time(time),
         m_pos_mask(find_pow_two(maxtime * samplerate) -1),
@@ -29,7 +28,7 @@ Delay::Delay(
     float time,
     float maxtime,
     float (*interpolate)(float, float*, unsigned)
-    ) : m_buffer(Buffer(find_pow_two(maxtime * samplerate), samplerate, interpolate)),
+    ) : m_buffer(Buffer(maxtime * samplerate, samplerate, interpolate)),
         g_samplerate(samplerate), 
         m_time(time),
         m_pos_mask(find_pow_two(maxtime * samplerate) -1),
@@ -49,7 +48,12 @@ float Delay::process(float input, float feedback) {
     }
     m_buffer.buffer[delay] += (input + (out * feedback)) * (0.5 / float(i));
   }
-  m_writeptr = (m_writeptr+1) & m_pos_mask;
+
+  m_writeptr++;
+  while (m_writeptr >= m_buffer.bufferlength) {
+    m_writeptr -= m_buffer.bufferlength;
+  }
+  // m_writeptr = (m_writeptr+1) & m_pos_mask;
   return out;
 }
 
@@ -103,7 +107,10 @@ float IDelay::process(float input, float feedback) {
   }
 
   m_buffer.buffer[m_writeptr] = input + (out * feedback);
-  m_writeptr = (m_writeptr+1) & m_pos_mask;
+  m_writeptr++;
+  while (m_writeptr >= m_buffer.bufferlength) {
+    m_writeptr -= m_buffer.bufferlength;
+  }
 
   return out;
 }

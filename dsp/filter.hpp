@@ -159,7 +159,7 @@ namespace dspheaders {
         b2 = b0;              // (1-cos(w)) / 2
 
         a0 = 1 + alpha;       //  1 + alpha
-        a1 = -2 * cos(w);   // -2 * cos(w)
+        a1 = -2 * cos(w);     // -2 * cos(w)
         a2 = 1 - alpha;       //  1 - alpha
         normalizeCoeffs();
       }
@@ -174,9 +174,25 @@ namespace dspheaders {
         b1 = 0;               // 0
         b2 = -alpha;          // -alpha
 
-        a0 = 1 + alpha;       // 1 + alpha
-        a1 = -2 * cos(w);   // -2 * cos(w)
-        a2 = 1 - alpha;       // 1 - alpha
+        a0 = 1 + alpha;       //  1 + alpha
+        a1 = -2 * cos(w);     // -2 * cos(w)
+        a2 = 1 - alpha;       //  1 - alpha
+        normalizeCoeffs();
+      }
+      
+      // High Pass Filter
+      // float w = Angular velocity: 2PI * Frequency / Samplerate
+      // float q = Frequency / Bandwidth in Hz.
+      inline void calcHPF(float w, float q) {
+        float alpha = sin(w) / (2 * q);
+
+        b0 = (1 + cos(w)) / 2;  //  (1 + cos(w)) / 2
+        b1 = -(b0 * 2);         // -(1 + cos(w))
+        b2 = b0;                //  (1 + cos(w)) / 2
+
+        a0 = 1 + alpha;         //  1 + alpha
+        a1 = -2 * (cos(w));     // -2 * cos(w)
+        a2 = 1 - alpha;         //  1 - alpha
         normalizeCoeffs();
       }
 
@@ -190,25 +206,27 @@ namespace dspheaders {
         b1 = -2 * cos(w);     // -2 * cos(w)
         b2 = 1;               //  1
 
-        a0 = 1 + alpha;       // 1 + alpha
+        a0 = 1 + alpha;       //  1 + alpha
         a1 = b1;              // -2 * cos(w)
-        a2 = 1 - alpha;       // 1 - alpha
+        a2 = 1 - alpha;       //  1 - alpha
         normalizeCoeffs();
       }
-
-      // High Pass Filter
+    
+      // Peak EQ Filter
       // float w = Angular velocity: 2PI * Frequency / Samplerate
       // float q = Frequency / Bandwidth in Hz.
-      inline void calcHPF(float w, float q) {
+      // float gain = Gain in dB
+      inline void calcPEQ(float w, float q, float gain) {
         float alpha = sin(w) / (2 * q);
+        float A = powf(10, gain/40.f);
 
-        b0 = (1 + cos(w)) / 2;  // (1 + cos(w)) / 2
-        b1 = -(b0 * 2);       // -(1 + cos(w))
-        b2 = b0;              // (1 + cos(w)) / 2
+        b0 = 1 + alpha * A;       // 1 + alpha * A
+        b1 = -2 * cos(w);         // -2 * cos(w)
+        b2 = 1 - alpha * A;       // 1 - alpha * A
 
-        a0 = 1 + alpha;       // 1 + alpha
-        a1 = -2 * (cos(w));   // -2 * cos(w)
-        a2 = 1 - alpha;       // 1 - alpha
+        a0 = 1 + alpha / A;       //  1 + alpha
+        a1 = -2 * cos(w);         // -2 * cos(w)
+        a2 = 1 - alpha / A;       //  1 - alpha / A
         normalizeCoeffs();
       }
     };

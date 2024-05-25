@@ -26,11 +26,14 @@ using namespace dspheaders;
 // GLOBALS
 Wavetable* lfo = nullptr;
 Biquad b1 = Biquad();
-Biquad b2 = Biquad();
-Biquad b3 = Biquad();
-Biquad b4 = Biquad();
+// Biquad b2 = Biquad();
+// Biquad b3 = Biquad();
+// Biquad b4 = Biquad();
 
-float table[512] = {0.f};
+Wavetable z1 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
+Wavetable z2 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
+Wavetable z3 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
+Wavetable z4 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
 
 static frame data;
 
@@ -49,9 +52,8 @@ static int paCallback(
 	unsigned i = 0;
 
 	for (; i < framesPerBuffer; i++) { // loop over buffer
-    float sig = *in++;
-    float sigl = *in++;
-    sig = b1.process(sigl);
+    float sig = z1.play() + z2.play() + z3.play() + z4.play();
+    sig = b1.process(sig * 0.1);
     // sig = b2.process(sig);
     // sig = b3.process(sig);
     // sig = b4.process(sig);
@@ -62,51 +64,54 @@ static int paCallback(
 }
 
 int main(int argc, char** argv) {
-
-
-
-  // seed rng for dust  and jitter in graulator object
-  srand(time(NULL));
-
-  lfo = new Wavetable(hanning(table, 512), 512, SAMPLE_RATE, interpolation::linear);
-  lfo -> frequency = 0.1;
-
   float freq = 300.f;
+  float w = 0.f, q = 0.707f;
   if (argc > 2) { freq = atof(argv[2]); }
-  float w = TAU * freq / SAMPLE_RATE;
-  float q = 0.707f;
 
   if (argc==2) {
     if (!strcmp("1", argv[1])) {
+      w = TAU * freq / SAMPLE_RATE;
       b1.calcLPF(w, q);
-      b2.calcLPF(w, q);
-      b3.calcLPF(w, q);
-      b4.calcLPF(w, q);
+      // b2.calcLPF(w, q);
+      // b3.calcLPF(w, q);
+      // b4.calcLPF(w, q);
     } else if (!strcmp("2", argv[1])) {
+      freq = 2500.f;
+      w = TAU * freq / SAMPLE_RATE;
       b1.calcHPF(w, q);
-      b2.calcHPF(w, q);
-      b3.calcHPF(w, q);
-      b4.calcHPF(w, q);
+      // b2.calcHPF(w, q);
+      // b3.calcHPF(w, q);
+      // b4.calcHPF(w, q);
     } else if (!strcmp("3", argv[1])) {
+      freq = 1000.f;
+      w = TAU * freq / SAMPLE_RATE;
       b1.calcBPF(w, q);
-      b2.calcBPF(w, q);
-      b3.calcBPF(w, q);
-      b4.calcBPF(w, q);
+      // b2.calcBPF(w, q);
+      // b3.calcBPF(w, q);
+      // b4.calcBPF(w, q);
     } else if (!strcmp("4", argv[1])) {
+      freq = 1000.f;
+      w = TAU * freq / SAMPLE_RATE;
       b1.calcNotch(w, q);
-      b2.calcNotch(w, q);
-      b3.calcNotch(w, q);
-      b4.calcNotch(w, q);
+      // b2.calcNotch(w, q);
+      // b3.calcNotch(w, q);
+      // b4.calcNotch(w, q);
     }
   } else {
     b1.calcLPF(w, q);
-    b2.calcLPF(w, q);
-    b3.calcLPF(w, q);
-    b4.calcLPF(w, q);
+    // b2.calcLPF(w, q);
+    // b3.calcLPF(w, q);
+    // b4.calcLPF(w, q);
   }
 
 	PaStream* stream;
 	PaError err;
+
+  float zfreq = 205.f;
+  z1.frequency = zfreq;
+  z2.frequency = zfreq * 5/4;
+  z3.frequency = zfreq * 3;
+  z2.frequency = zfreq * 4;
 
   // Initialize silence
 	data.left = data.right = 0.0f;

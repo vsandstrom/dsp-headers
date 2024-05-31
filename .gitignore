@@ -6,6 +6,7 @@ examples
 .DS_Store
 score.cpp
 song.h
+*.s
 
 */*.dSYM
 *.dSYM

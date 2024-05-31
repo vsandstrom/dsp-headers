@@ -41,7 +41,11 @@ namespace dspheaders {
     if (x < -max) return x + (max + x);
     return x;
   }
-  
+
+  // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html 
+  // x = input
+  // xm1 = previous input
+  // ym1 = previous output
   inline float dcblock(float x, float xm1, float ym1) {
       return  x - xm1 + 0.995 * ym1;
   }

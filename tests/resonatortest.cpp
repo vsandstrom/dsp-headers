@@ -6,16 +6,9 @@
 #include "../dsp/filter.hpp"
 #include "../dsp/wavetable.hpp"
 
-#ifdef DEBUG
-  #define D(x) x
-#else
-  #define D(x) 
-#endif
-
 // SETUP
 constexpr int INPUT_CH = 2;
 constexpr int OUTPUT_CH = 2;
-const unsigned POLES = 2;
 
 constexpr int PROGRAM_DURATION = 120000; // milliseconds
 constexpr float  SAMPLE_RATE =   48000;
@@ -29,11 +22,26 @@ Wavetable z2 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
 Wavetable z3 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
 Wavetable z4 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
 
-Biquad b1 = Biquad();
-Biquad b2 = Biquad();
-Biquad b3 = Biquad();
-Biquad b4 = Biquad();
-Biquad bq[4] = {b1, b2, b3, b4};
+Biquad b1 {Biquad()};
+Biquad b2 {Biquad()};
+Biquad b3 {Biquad()};
+Biquad b4 {Biquad()};
+
+Biquad b5 {Biquad()};
+Biquad b6 {Biquad()};
+Biquad b7 {Biquad()};
+Biquad b8 {Biquad()};
+
+Biquad b9 {Biquad()};
+Biquad b10 {Biquad()};
+Biquad b11 {Biquad()};
+Biquad b12 {Biquad()};
+
+Biquad b13 {Biquad()};
+Biquad b14 {Biquad()};
+Biquad b15 {Biquad()};
+Biquad b16 {Biquad()};
+
 static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
@@ -51,14 +59,33 @@ static int paCallback(
 	unsigned i = 0;
 
 	for (; i < framesPerBuffer; i++) { // loop over buffer
-    float sig = z1.play(); // + z2.play() + z3.play() + z4.play();
-    sig *= 0.1;
-    sig = b1.process(sig);
-    sig = b2.process(sig);
-    sig = b3.process(sig);
-    sig = b4.process(sig);
-    *out++ = sig;
-    *out++ = sig;
+    float sig = *in++;
+    void* _ = in++;
+
+      // z1.play(); // + z2.play() + z3.play() + z4.play();
+    // sig *= 0.1;
+    float s1 = sig, s2 = sig, s3 = sig, s4 = sig;
+    s1 = b1.process(s1);
+    s1 = b2.process(s1);
+    s1 = b3.process(s1);
+    s1 = b4.process(s1);
+
+    s2 = b5.process(s2);
+    s2 = b6.process(s2);
+    s2 = b7.process(s2);
+    s2 = b8.process(s2);
+    
+    s3 = b9.process(s3);
+    s3 = b10.process(s3);
+    s3 = b11.process(s3);
+    s3 = b12.process(s3);
+    
+    s4 = b13.process(s4);
+    s4 = b14.process(s4);
+    s4 = b15.process(s4);
+    s4 = b16.process(s4);
+    *out++ = (s1 + s2 + s3 + s4) / 4;
+    *out++ = (s1 + s2 + s3 + s4) / 4;
 	}
 	return 0;
 }
@@ -66,44 +93,36 @@ static int paCallback(
 int main(int argc, char** argv) {
   float freq = 300.f;
   float zfreq = 127.f;
-  float w = 0.f, q = 10.9707f;
-  if (argc > 2) { freq = atof(argv[2]); }
 
-  if (argc==2) {
-    if (!strcmp("1", argv[1])) {
-      w = TAU * freq / SAMPLE_RATE;
-      b1.calcLPF(w, q);
-      b2.calcLPF(w, q);
-      b3.calcLPF(w, q);
-      b4.calcLPF(w, q);
-    } else if (!strcmp("2", argv[1])) {
-      freq = 2500.f;
-      w = TAU * freq / SAMPLE_RATE;
-      b1.calcHPF(w, q);
-      b2.calcHPF(w, q);
-      b3.calcHPF(w, q);
-      b4.calcHPF(w, q);
-    } else if (!strcmp("3", argv[1])) {
-      freq = zfreq * 5.f;
-      w = TAU * freq / SAMPLE_RATE;
-      b1.calcBPF(w, q);
-      b2.calcBPF(w, q);
-      b3.calcBPF(w, q);
-      b4.calcBPF(w, q);
-    } else if (!strcmp("4", argv[1])) {
-      freq = 1000.f;
-      w = TAU * freq / SAMPLE_RATE;
-      b1.calcNotch(w, q);
-      b2.calcNotch(w, q);
-      b3.calcNotch(w, q);
-      b4.calcNotch(w, q);
-    }
-  } else {
-    b1.calcLPF(w, q);
-    b2.calcLPF(w, q);
-    b3.calcLPF(w, q);
-    b4.calcLPF(w, q);
-  }
+  float omega = 0.f, q = 5.f;
+
+  freq = zfreq * 2.f;
+  omega = TAU * freq / SAMPLE_RATE;
+  b1.calcBPF(omega, q);
+  b2.calcBPF(omega, q);
+  b3.calcBPF(omega, q);
+  b4.calcBPF(omega, q);
+
+  freq = zfreq * 5.f;
+  omega = TAU * freq  / SAMPLE_RATE;
+  b5.calcBPF(omega, q);
+  b6.calcBPF(omega, q);
+  b7.calcBPF(omega, q);
+  b8.calcBPF(omega, q);
+  
+  freq = zfreq * 3.f;
+  omega = TAU * freq  / SAMPLE_RATE;
+  b9.calcBPF(omega, q);
+  b10.calcBPF(omega, q);
+  b11.calcBPF(omega, q);
+  b12.calcBPF(omega, q);
+  
+  freq = zfreq * 7.f;
+  omega = TAU * freq  / SAMPLE_RATE;
+  b13.calcBPF(omega, q);
+  b14.calcBPF(omega, q);
+  b15.calcBPF(omega, q);
+  b16.calcBPF(omega, q);
 
 	PaStream* stream;
 	PaError err;
@@ -150,7 +169,7 @@ int main(int argc, char** argv) {
 	return err;
 error:
 	Pa_Terminate();
-	std::fprintf( stderr, "An error occurred while using the portaudio stream\n" );
+	std::fprintf( stderr, "An error occurred omegahile using the portaudio stream\n" );
 	std::fprintf( stderr, "Error number: %d\n", err );
 	std::fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ));
 	return err;

@@ -116,25 +116,29 @@ namespace dspheaders {
 ///
 ///
 
+  // TWO POLE STATE VARIABLE BIQUAD FILTER
   class Biquad {
-    // 2-sample delayline on input side
-    float x1 = 0.f, x2 = 0.f;
-    // 2-sample delayline on output side
-    float y1 = 0.f, y2 = 0.f;
-    // feedforward coeffs
-    float b0 = 0.f, b1 = 0.f, b2 = 0.f;
-    // feedback coeffs
-    float a0 = 1.f, a1 = 0.f, a2 = 0.f;
-    // dc block
-    float x = 0.f, y = 0.f;
+    private:
+      // 2-sample delayline on input side
+      float x1 = 0.f, x2 = 0.f;
+      // 2-sample delayline on output side
+      float y1 = 0.f, y2 = 0.f;
+
+    protected:
+      // feedforward coeffs
+      float b0 = 0.f, b1 = 0.f, b2 = 0.f;
+      // feedback coeffs
+      float a0 = 1.f, a1 = 0.f, a2 = 0.f;
+      // dc block
+      float x = 0.f, y = 0.f;
       
-    constexpr void normalizeCoeffs() {
-      b0 /= a0;
-      b1 /= a0;
-      b2 /= a0;
-      a1 /= a0;
-      a2 /= a0;
-    }
+      constexpr void normalizeCoeffs() {
+        b0 /= a0;
+        b1 /= a0;
+        b2 /= a0;
+        a1 /= a0;
+        a2 /= a0;
+      }
 
     public:
       Biquad(){}
@@ -155,15 +159,15 @@ namespace dspheaders {
       constexpr void calcLPF(float omega, float q) {
         float alpha = sin(omega) / (2 * q);
 
+        a0 = 1 + alpha;             //  1 + alpha
+        a1 = -2 * cos(omega) / a0;  // -2 * cos(omega)
+        a2 = (1 - alpha) / a0;      //  1 - alpha
+                                  
         // See order:
-        b1 = 1 - cos(omega);      //  1-cos(omega)
-        b0 = b1 / 2;              // (1-cos(omega)) / 2
-        b2 = b0;                  // (1-cos(omega)) / 2
-
-        a0 = 1 + alpha;           //  1 + alpha
-        a1 = -2 * cos(omega);     // -2 * cos(omega)
-        a2 = 1 - alpha;           //  1 - alpha
-        normalizeCoeffs();
+        b1 = (1 - cos(omega)) / a0; //  1-cos(omega)
+        b0 = b1 / 2;                // (1-cos(omega)) / 2
+        b2 = b0;                    // (1-cos(omega)) / 2
+        // normalizeCoeffs();
       }
 
       // Band Pass Filter
@@ -171,15 +175,15 @@ namespace dspheaders {
       // float q = Frequency / Bandwidth in Hz.
       constexpr void calcBPF(float omega, float q) {
         float alpha = sin(omega) / (2 * q);
+        a0 = 1 + alpha;             //  1 + alpha
+        a1 = -2 * cos(omega) / a0;  // -2 * cos(omega)
+        a2 = (1 - alpha) / a0;      //  1 - alpha
 
-        b0 = alpha;               // alpha
-        b1 = 0;                   // 0
-        b2 = -alpha;              // -alpha
+        b0 = alpha / a0;            // alpha
+        b1 = 0;                     // 0
+        b2 = -alpha / a0;           // -alpha
 
-        a0 = 1 + alpha;           //  1 + alpha
-        a1 = -2 * cos(omega);     // -2 * cos(omega)
-        a2 = 1 - alpha;           //  1 - alpha
-        normalizeCoeffs();
+        // normalizeCoeffs();
       }
 
       // Band Pass Filter
@@ -190,14 +194,14 @@ namespace dspheaders {
         float alpha = sin(omega) / (2 * q);
         float A = powf(10, gain/40.f);
 
-        b0 = 1 + alpha * A;       // 1 + alpha * A
-        b1 = -2 * cos(omega);     // -2 * cos(omega)
-        b2 = 1 - alpha * A;       // 1 - alpha * A
-
-        a0 = 1 + alpha / A;       //  1 + alpha
-        a1 = -2 * cos(omega);     // -2 * cos(omega)
-        a2 = 1 - alpha / A;       //  1 - alpha / A
-        normalizeCoeffs();
+        a0 = (1 + alpha) / A;       //  1 + alpha
+        a1 = -2 * cos(omega) / a0;  // -2 * cos(omega)
+        a2 = (1 - alpha) / A / a0;  //  1 - alpha / A
+        
+        b0 = (1 + alpha) * A / a0;  // 1 + alpha * A
+        b1 = a1;                    // -2 * cos(omega)
+        b2 = (1 - alpha) * A / a0;  // 1 - alpha * A
+        // normalizeCoeffs();
       }
 
       // Notch Filter
@@ -205,15 +209,14 @@ namespace dspheaders {
       // float q = Frequency / Bandwidth in Hz.
       constexpr void calcNotch(float omega, float q) {
         float alpha = sin(omega) / (2 * q);
+        a0 = 1 + alpha;             //  1 + alpha
+        a1 = -2 * cos(omega) / a0;  // -2 * cos(omega)
+        a2 = (1 - alpha) / a0;      //  1 - alpha
 
-        b0 = 1;                   //  1
-        b1 = -2 * cos(omega);     // -2 * cos(omega)
-        b2 = 1;                   //  1
-
-        a0 = 1 + alpha;           //  1 + alpha
-        a1 = b1;                  // -2 * cos(omega)
-        a2 = 1 - alpha;           //  1 - alpha
-        normalizeCoeffs();
+        b0 = 1 / a0;                //  1
+        b1 = a1;                    // -2 * cos(omega)
+        b2 = b0;                    //  1
+        // normalizeCoeffs();
       }
 
       // High Pass Filter
@@ -221,15 +224,102 @@ namespace dspheaders {
       // float q = Frequency / Bandwidth in Hz.
       constexpr void calcHPF(float omega, float q) {
         float alpha = sin(omega) / (2 * q);
+        a0 = 1 + alpha;                 //  1 + alpha
+        a1 = -2 * cos(omega) / a0;      // -2 * cos(omega)
+        a2 = (1 - alpha) / a0;          //  1 - alpha
 
-        b0 = (1 + cos(omega)) / 2;  //  (1 + cos(omega)) / 2
-        b1 = -(b0 * 2);             // -(1 + cos(omega))
-        b2 = b0;                    //  (1 + cos(omega)) / 2
+        b0 = (1 + cos(omega)) / 2 / a0; //  (1 + cos(omega)) / 2
+        b1 = -(b0 * 2);                 // -(1 + cos(omega))
+        b2 = b0;                        //  (1 + cos(omega)) / 2
+        // normalizeCoeffs();
+      }
+  };
 
-        a0 = 1 + alpha;             //  1 + alpha
-        a1 = -2 * (cos(omega));     // -2 * cos(omega)
-        a2 = 1 - alpha;             //  1 - alpha
-        normalizeCoeffs();
+  // FOUR POLE BIQUAD SVF
+  class Biquad4 : public Biquad {
+    private:
+      // delayline for 1st biquad section.
+      float x1_1 = 0.f, x1_2 = 0.f;
+      float y1_1 = 0.f, y1_2 = 0.f;
+
+      // delayline for 2nd biquad section.
+      float x2_1 = 0.f, x2_2 = 0.f;
+      float y2_1 = 0.f, y2_2 = 0.f;
+    
+    public:
+      Biquad4(){};
+
+      inline float process(float input) {
+        // step 1
+        float output = b0*input + b1*x1_1 + b2*x1_2 - a1*y1_1 - a2*y1_2;
+        x1_2 = x1_1;
+        x1_1 = input;
+        y1_2 = y1_1;
+        y1_1 = output;
+        
+        //step 2
+        output = b0*output + b1*x2_1 + b2*x2_2 - a1*y2_1 - a2*y2_2;
+        x2_2 = x2_1;
+        x2_1 = y1_1;
+        y2_2 = y2_1;
+        y2_1 = output;
+
+        return output;
+      }
+  };
+
+
+  // EIGHT POLE BIQUAD SVF
+  class Biquad8 : public Biquad {
+    private:
+      // delayline for 1st biquad section.
+      float x1_1 = 0.f, x1_2 = 0.f;
+      float y1_1 = 0.f, y1_2 = 0.f;
+
+      // delayline for 2nd biquad section.
+      float x2_1 = 0.f, x2_2 = 0.f;
+      float y2_1 = 0.f, y2_2 = 0.f;
+
+      // delayline for 3rd biquad section.
+      float x3_1 = 0.f, x3_2 = 0.f;
+      float y3_1 = 0.f, y3_2 = 0.f;
+
+      // delayline for 4th biquad section.
+      float x4_1 = 0.f, x4_2 = 0.f;
+      float y4_1 = 0.f, y4_2 = 0.f;
+
+    public:
+      Biquad8(){};
+
+      inline float process(float input) {
+        // step 1
+        float output = b0*input + b1*x1_1 + b2*x1_2 - a1*y1_1 - a2*y1_2;
+        x1_2 = x1_1;
+        x1_1 = input;
+        y1_2 = y1_1;
+        y1_1 = output;
+        
+        //step 2
+        output = b0*output + b1*x2_1 + b2*x2_2 - a1*y2_1 - a2*y2_2;
+        x2_2 = x2_1;
+        x2_1 = y1_1;
+        y2_2 = y2_1;
+        y2_1 = output;
+
+        //step 3
+        output = b0*output + b1*x3_1 + b2*x3_2 - a1*y3_1 - a2*y3_2;
+        x3_2 = x3_1;
+        x3_1 = y2_1;
+        y3_2 = y3_1;
+        y3_1 = output;
+
+        //step 4
+        output = b0*output + b1*x4_1 + b2*x4_2 - a1*y4_1 - a2*y4_2;
+        x4_2 = x4_1;
+        x4_1 = y3_1;
+        y4_2 = y4_1;
+        y4_1 = output;
+        return output;
       }
   };
 }

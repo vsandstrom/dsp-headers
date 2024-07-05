@@ -41,7 +41,6 @@ Buffer::Buffer(
   initbuffer();
 }
 
-
 float Buffer::readsample(float readptr) {
   return interpolate(wrapf(&readptr, bufferlength), buffer, bufferlength); 
 };

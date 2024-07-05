@@ -28,28 +28,30 @@ Wavetable::Wavetable(
   readptr = 0.f;
 };
 
-float Wavetable::read() {
-  wrapf(&(readptr += tablelength / (samplerate / frequency)), tablelength);
-  return interpolate(readptr, table, tablelength);
-}
-
-float Wavetable::read(float phase) {
-  // Make sure phase of the input signal is contained between 0 and 1.f
-	float normalizedPhase = clamp((phase+1) * 0.5, 0.f, 1.f);
-  wrapf(&(readptr += tablelength / (samplerate / (frequency * normalizedPhase))), tablelength);
-  return interpolate(readptr, table, tablelength);
-}
+// float Wavetable::read() {
+//   wrapf(&(readptr += tablelength / (samplerate / frequency)), tablelength);
+//   return interpolate(readptr, table, tablelength);
+// }
+//
+// float Wavetable::read(float phase) {
+//   float normalized_phase = phase * (float)tablelength;
+//   wrapf(&(readptr += tablelength / (samplerate / frequency) + normalized_phase), tablelength);
+//   return interpolate(readptr, table, tablelength);
+// }
 
 float Wavetable::play(){
   // avoid aliasing, freq bigger than nyqvist
   if (frequency > (samplerate / 2)) return 0.f;
-  return read();
+  wrapf(&(readptr += tablelength / (samplerate / frequency)), tablelength);
+  return interpolate(readptr, table, tablelength);
 }
 
 float Wavetable::play(float phase){
   // avoid aliasing - when used in FM, aliasing should be handled more 
   if (frequency > (samplerate / 2)) return 0.f;
-  return read(phase);
+  float normalized_phase = phase * (float)tablelength;
+  wrapf(&(readptr += tablelength / (samplerate / frequency) + normalized_phase), tablelength);
+  return interpolate(readptr, table, tablelength);
 }
 
 unsigned Wavetable::getTablelength() {

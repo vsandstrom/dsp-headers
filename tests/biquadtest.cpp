@@ -23,17 +23,14 @@ constexpr float  SAMPLE_RATE =   48000;
 using namespace dspheaders;
 
 // GLOBALS
-Wavetable* lfo = nullptr;
 Wavetable z1 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-Wavetable z2 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-Wavetable z3 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-Wavetable z4 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-
-Biquad b1 = Biquad();
-Biquad b2 = Biquad();
-Biquad b3 = Biquad();
-Biquad b4 = Biquad();
-Biquad bq[4] = {b1, b2, b3, b4};
+Wavetable v1 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
+Wavetable v2 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
+Wavetable v3 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
+Wavetable v4 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
+Wavetable v5 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
+Biquad bq[2];
+Biquad4 bq4;
 static frame data;
 
 // callback function must contain these inputs as PortAudio expects it.
@@ -51,14 +48,14 @@ static int paCallback(
 	unsigned i = 0;
 
 	for (; i < framesPerBuffer; i++) { // loop over buffer
-    float sig = z1.play(); // + z2.play() + z3.play() + z4.play();
-    sig *= 0.1;
-    sig = b1.process(sig);
-    sig = b2.process(sig);
-    sig = b3.process(sig);
-    sig = b4.process(sig);
-    *out++ = sig;
-    *out++ = sig;
+    float sigl = z1.play(); // + z2.play() + z3.play() + z4.play();
+    float sigr = sigl;
+    for (auto &b: bq) {
+      sigl = b.process(sigl);
+    }
+    sigr = bq4.process(sigr);
+    *out++ = sigl;
+    *out++ = sigr;
 	}
 	return 0;
 }
@@ -72,46 +69,47 @@ int main(int argc, char** argv) {
   if (argc==2) {
     if (!strcmp("1", argv[1])) {
       w = TAU * freq / SAMPLE_RATE;
-      b1.calcLPF(w, q);
-      b2.calcLPF(w, q);
-      b3.calcLPF(w, q);
-      b4.calcLPF(w, q);
+      for (auto &b: bq) {
+        b.calcLPF(w, q);
+      }
+      bq4.calcLPF(w, q);
     } else if (!strcmp("2", argv[1])) {
       freq = 2500.f;
       w = TAU * freq / SAMPLE_RATE;
-      b1.calcHPF(w, q);
-      b2.calcHPF(w, q);
-      b3.calcHPF(w, q);
-      b4.calcHPF(w, q);
+      for (auto &b: bq) {
+        b.calcHPF(w, q);
+      }
+      bq4.calcHPF(w, q);
     } else if (!strcmp("3", argv[1])) {
       freq = zfreq * 5.f;
       w = TAU * freq / SAMPLE_RATE;
-      b1.calcBPF(w, q);
-      b2.calcBPF(w, q);
-      b3.calcBPF(w, q);
-      b4.calcBPF(w, q);
+      for (auto &b: bq) {
+        b.calcBPF(w, q);
+      }
+      bq4.calcBPF(w, q);
     } else if (!strcmp("4", argv[1])) {
       freq = 1000.f;
       w = TAU * freq / SAMPLE_RATE;
-      b1.calcNotch(w, q);
-      b2.calcNotch(w, q);
-      b3.calcNotch(w, q);
-      b4.calcNotch(w, q);
+      for (auto &b: bq) {
+        b.calcNotch(w, q);
+      }
+      bq4.calcNotch(w, q);
     }
   } else {
-    b1.calcLPF(w, q);
-    b2.calcLPF(w, q);
-    b3.calcLPF(w, q);
-    b4.calcLPF(w, q);
+    for (auto &b: bq) {
+      b.calcLPF(w, q);
+    }
+    bq4.calcLPF(w, q);
   }
 
 	PaStream* stream;
 	PaError err;
-
   z1.frequency = zfreq;
-  z2.frequency = zfreq * 5/2;
-  z3.frequency = zfreq * 3;
-  z2.frequency = zfreq * 9/2;
+  v1.frequency = 1.f;
+  v2.frequency = 1.5f;
+  v3.frequency = 2.f;
+  v4.frequency = 2.5f;
+  v5.frequency = 3.f;
 
   // Initialize silence
 	data.left = data.right = 0.0f;

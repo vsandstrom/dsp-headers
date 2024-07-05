@@ -1,10 +1,11 @@
+#include <cstddef>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include "../portaudio/include/portaudio.h"
-#include "../dsp/interpolation.hpp"
 #include "../dsp/filter.hpp"
+#include "../dsp/filterbank.hpp"
 #include "../dsp/wavetable.hpp"
+#include "../dsp/interpolation.hpp"
+
 
 // SETUP
 constexpr int INPUT_CH = 2;
@@ -16,31 +17,15 @@ constexpr float  SAMPLE_RATE =   48000;
 using namespace dspheaders;
 
 // GLOBALS
-Wavetable* lfo = nullptr;
+FilterBank8<5> bank;
 Wavetable z1 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-Wavetable z2 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-Wavetable z3 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-Wavetable z4 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-
-Biquad b1 {Biquad()};
-Biquad b2 {Biquad()};
-Biquad b3 {Biquad()};
-Biquad b4 {Biquad()};
-
-Biquad b5 {Biquad()};
-Biquad b6 {Biquad()};
-Biquad b7 {Biquad()};
-Biquad b8 {Biquad()};
-
-Biquad b9 {Biquad()};
-Biquad b10 {Biquad()};
-Biquad b11 {Biquad()};
-Biquad b12 {Biquad()};
-
-Biquad b13 {Biquad()};
-Biquad b14 {Biquad()};
-Biquad b15 {Biquad()};
-Biquad b16 {Biquad()};
+Wavetable va[5] = {
+  Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none),
+  Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none),
+  Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none),
+  Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none),
+  Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none)
+};
 
 static frame data;
 
@@ -59,78 +44,65 @@ static int paCallback(
 	unsigned i = 0;
 
 	for (; i < framesPerBuffer; i++) { // loop over buffer
-    float sig = *in++;
-    void* _ = in++;
-
-      // z1.play(); // + z2.play() + z3.play() + z4.play();
-    // sig *= 0.1;
-    float s1 = sig, s2 = sig, s3 = sig, s4 = sig;
-    s1 = b1.process(s1);
-    s1 = b2.process(s1);
-    s1 = b3.process(s1);
-    s1 = b4.process(s1);
-
-    s2 = b5.process(s2);
-    s2 = b6.process(s2);
-    s2 = b7.process(s2);
-    s2 = b8.process(s2);
-    
-    s3 = b9.process(s3);
-    s3 = b10.process(s3);
-    s3 = b11.process(s3);
-    s3 = b12.process(s3);
-    
-    s4 = b13.process(s4);
-    s4 = b14.process(s4);
-    s4 = b15.process(s4);
-    s4 = b16.process(s4);
-    *out++ = (s1 + s2 + s3 + s4) / 4;
-    *out++ = (s1 + s2 + s3 + s4) / 4;
+    float sig = z1.play();
+    for (size_t i = 0; i < bank.size(); i++) {
+      bank.setAmp(i, va[i].play());
+    }
+    float filt = bank.process(sig);
+    *out++ = sig;
+    *out++ = filt;
+    // *out++ = (s1 + s2) / 2;
+    // *out++ = (s3 + s4) / 2;
 	}
 	return 0;
 }
 
 int main(int argc, char** argv) {
-  float freq = 300.f;
-  float zfreq = 127.f;
+  float init_freq = 127.f;
 
-  float omega = 0.f, q = 5.f;
+  float omega = 0.f, q = 10.7f;
 
-  freq = zfreq * 2.f;
-  omega = TAU * freq / SAMPLE_RATE;
-  b1.calcBPF(omega, q);
-  b2.calcBPF(omega, q);
-  b3.calcBPF(omega, q);
-  b4.calcBPF(omega, q);
-
-  freq = zfreq * 5.f;
-  omega = TAU * freq  / SAMPLE_RATE;
-  b5.calcBPF(omega, q);
-  b6.calcBPF(omega, q);
-  b7.calcBPF(omega, q);
-  b8.calcBPF(omega, q);
-  
-  freq = zfreq * 3.f;
-  omega = TAU * freq  / SAMPLE_RATE;
-  b9.calcBPF(omega, q);
-  b10.calcBPF(omega, q);
-  b11.calcBPF(omega, q);
-  b12.calcBPF(omega, q);
-  
-  freq = zfreq * 7.f;
-  omega = TAU * freq  / SAMPLE_RATE;
-  b13.calcBPF(omega, q);
-  b14.calcBPF(omega, q);
-  b15.calcBPF(omega, q);
-  b16.calcBPF(omega, q);
+  bank.init(init_freq, 8.f, SAMPLE_RATE);
+  z1.frequency = init_freq;
+  va[0].frequency = 0.2f;
+  va[1].frequency = 0.32f;
+  va[2].frequency = 0.54f;
+  va[3].frequency = 0.89f;
+  va[4].frequency = 1.11f;
+ //  // Octave
+ //  float freq = init_freq * 2.f;
+ //  omega = TAU * freq / SAMPLE_RATE;
+ //  b1.calcBPF(omega, q);
+ //  b2.calcBPF(omega, q);
+ //  b3.calcBPF(omega, q);
+ //  b4.calcBPF(omega, q);
+ //
+ //  // Octave + Octave + Major Third
+ //  freq = init_freq * 5.f;
+ //  omega = TAU * freq  / SAMPLE_RATE;
+ //  b5.calcBPF(omega, q);
+ //  b6.calcBPF(omega, q);
+ //  b7.calcBPF(omega, q);
+ //  b8.calcBPF(omega, q);
+ // 
+ //  // Octave + Perfect Fifth
+ //  freq = init_freq * 3.f;
+ //  omega = TAU * freq  / SAMPLE_RATE;
+ //  b9.calcBPF(omega, q);
+ //  b10.calcBPF(omega, q);
+ //  b11.calcBPF(omega, q);
+ //  b12.calcBPF(omega, q);
+ // 
+ //  // octave + Octave + Minor Seventh
+ //  freq = init_freq * 7.f;
+ //  omega = TAU * freq  / SAMPLE_RATE;
+ //  b13.calcBPF(omega, q);
+ //  b14.calcBPF(omega, q);
+ //  b15.calcBPF(omega, q);
+ //  b16.calcBPF(omega, q);
 
 	PaStream* stream;
 	PaError err;
-
-  z1.frequency = zfreq;
-  z2.frequency = zfreq * 5/2;
-  z3.frequency = zfreq * 3;
-  z2.frequency = zfreq * 9/2;
 
   // Initialize silence
 	data.left = data.right = 0.0f;

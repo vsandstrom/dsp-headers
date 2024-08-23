@@ -6,6 +6,7 @@
 #include "../dsp/waveshape.h"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/envelope.hpp"
+#include "../dsp/wavetable.hpp"
 
 
 // SETUP
@@ -19,11 +20,17 @@ const unsigned envlength = 512;
 using namespace dspheaders;
 
 // GLOBALS
-Envelope* env;
+float p[3] = {0.0, 1.0, 0.0};
+float d[2] = {0.2, 2.2};
+float c[2] = {0.8, 1.2};
+Envelope env = Envelope(p, 3, d, 2, c, 2, SAMPLE_RATE, interpolation::linear);
 float envptr = 0.f;
 
 int duridx = 0;
 float durs[DURLEN] = {0.2, 1.2, 0.987, 0.333, 4, 0.01f, 0.05f};
+
+Wavetable wt = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
+
 
 static frame data;
 
@@ -44,15 +51,16 @@ static int paCallback(
   int i;
   float sig = 0.f;
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    if (envptr >= env->getBufferlength()) {
+    if (envptr >= env.length()) {
       envptr = 0.f;
       duridx++;
     }
     if (duridx == DURLEN) {
       sig = 0.f;
+      sig = env.play(GATE::on) * 0.2;
     } else {
       envptr += setDur(durs[duridx], envlength, SAMPLE_RATE);
-      sig = env->read(envptr);
+      sig = env.play(GATE::off) * 0.2 * wt.play(200);
     }
     *out++ = sig;
     *out++ = sig;
@@ -72,10 +80,10 @@ float setFloatDur(float dur, unsigned length, float samplerate) {
 
 int main(int argc, char** argv) {
 
-  float table[envlength] = {0.f};
-  hanning(table, envlength);
-
-  env = new Envelope(table, envlength, SAMPLE_RATE, interpolation::cubic);
+  // float table[envlength] = {0.f};
+  // hanning(table, envlength);
+  //
+  // env = new Envelope(table, envlength, SAMPLE_RATE, interpolation::cubic);
 
 
 	PaStream* stream;

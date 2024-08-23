@@ -24,7 +24,7 @@ float Grain::play() {
   m_readptr+=m_playbackrate;
   m_envptr += m_dur;
 
-  if (m_envptr > g_envelope->getBufferlength()) { m_active = false; }
+  if (m_envptr > g_envelope->length()) { m_active = false; }
   return out;
 }
 
@@ -56,7 +56,7 @@ Grain::Grain(
   : g_buffer(buffer), 
     g_envelope(envelope), 
     g_samplerate(samplerate),
-    m_envlength(envelope -> getBufferlength()),
+    m_envlength(envelope -> length()),
     m_readptr(readptr)
     { setDur(dur);
 }

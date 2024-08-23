@@ -7,7 +7,8 @@
 #include "../dsp/envelope.hpp"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/wavetable.hpp"
-#include "../dsp/grain.hpp"
+// #include "../dsp/grain.hpp"
+#include "../dsp/grain2.hpp"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/trigger.hpp"
 
@@ -20,7 +21,7 @@
 // SETUP
 const int INPUT_CH = 2;
 const int OUTPUT_CH = 2;
-const int MAX_GRAINS = 32;
+const int MAX_GRAINS = 16;
 const float GRAIN_DUR = 0.01f;
 const float INTERVAL = 0.1f;
 const float RATE = 1.f; // TRY NEGATIVE
@@ -31,10 +32,11 @@ const float RECORD_LEN = 4.f; // seconds
 const int PROGRAM_DURATION = 120000; // milliseconds
 const float  SAMPLE_RATE =   48000;
 
+const size_t BUFSIZE = 48000 * 4;
 using namespace dspheaders;
 
 // GLOBALS
-Granulator* gr;
+Granulator2<16, 4*48000> * gr; // = Granulator2<MAX_GRAINS, BUFSIZE>();
 Envelope* genv;
 std::shared_ptr<Buffer> buf(new Buffer(RECORD_LEN, SAMPLE_RATE, interpolation::linear));
 Impulse trigger = Impulse(INTERVAL, SAMPLE_RATE);
@@ -131,11 +133,11 @@ static int paCallback(
       
         float trig = trigger.play(t);
         float phasor = map(ph_saw.play(),-1.f, 1.f, 0.f, 0.99f);
-        gr->setGrainSize(s);
-        gryn = gr->process(
-          // 0.5,
+        // gr->setGrainSize(s);
+        gryn = gr->play(
           phasor, // TRY STATIC VALUE (0.0 <= x < 1.0)
-          // RATE + (lfo.play() * PITCH_MOD_AMOUNT),
+          0.2,
+          RATE + (lfo.play() * PITCH_MOD_AMOUNT),
           r + (lfo.play() * PITCH_MOD_AMOUNT),
           trig
         ); 
@@ -182,18 +184,28 @@ int main(int argc, char** argv) {
   //     interpolation::linear,
   //     &buf
   //   );
+  
+  const size_t vall = 3;
+  const size_t durl = 2;
 
+  float val[vall] = {0.0, 1.0, 0.0};
+  float dur[durl] = {0.2, 0.2};
+  float cur[durl] = {1.0, 1.0};
 
-  gr = new Granulator(
-      GRAIN_DUR,
-      SAMPLE_RATE,
-      MAX_GRAINS,
-      buf,
-      interpolation::linear
-    );
+  struct BreakPoints<vall, durl> brk = BreakPoints<vall, durl>(
+    val,
+    dur,
+    cur
+  );
 
-  gr->setJitter(JITTER);
-  gr->setNumGrains(MAX_GRAINS);
+  gr = new Granulator2<16, 4*48000>(
+    brk,
+    SAMPLE_RATE,
+    interpolation::linear
+  );
+
+  // gr->setJitter(JITTER);
+  // gr->setNumGrains(MAX_GRAINS);
   
 	PaStream* stream;
 	PaError err;

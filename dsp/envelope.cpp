@@ -3,11 +3,16 @@
 #include "dsp.h"
 #include <cstddef>
 
-
-// TODO: Perhaps save segments in separate buffers, making it easier to set duration of attack,
-// decay etc.
+/*
+ *
+ * TODO: 
+ *        [  ] - Calculate shape on the fly instead of relying on generating
+ *               tables
+ *
+ */
 
 using namespace dspheaders;
+
 // float [points], unsigned pLen, float [times], unsigned tLen, unsigned
 // samplerate, interpolation-callback
 Envelope::Envelope(
@@ -19,12 +24,10 @@ Envelope::Envelope(
     times(times),
     pLen(pLen),
     tLen(tLen),
-    buffer(
-        Buffer(
-          sum(times, tLen), samplerate, interpolate
-        )
-      ), 
+    interpolate(interpolate),
     samplerate(samplerate) {
+  buffer = new float[sum(times, tLen)];
+  bufferlength = sum(times, tLen);
   generate();
 };
 
@@ -40,14 +43,11 @@ Envelope::Envelope(
     pLen(pLen),
     tLen(tLen),
     cLen(cLen),
-    buffer(
-        Buffer(
-          sum(times, tLen), samplerate, interpolate
-        )
-      ), 
+    interpolate(interpolate),
     samplerate(samplerate) {
+  bufferlength = sum(times, tLen);
+  buffer = new float[bufferlength], 
   generateCurve();
-  bufferlength = buffer.bufferlength;
 };
 
 
@@ -57,12 +57,12 @@ Envelope::Envelope(
     float* table,
     unsigned tablesize,
     float samplerate,
-    float (*interpolate)(float, float*, size_t))
-    : buffer(tablesize, samplerate, interpolate){
-      for (int i = 0; i < tablesize; i++) {
-        buffer.buffer[i] = table[i];
-      }
-      bufferlength = tablesize;
+    float (*interpolate)(float, float*, unsigned))
+    : bufferlength(tablesize),
+      interpolate(interpolate),
+      samplerate(samplerate)
+  {
+      buffer = table;
     }
 
 void Envelope::generate() {
@@ -82,16 +82,15 @@ void Envelope::generate() {
       // write function to apply curve on envelope segment here.
       float slope = j * inc;
       if (points[i] > points[i+1]) {
-        buffer.buffer[pos] = points[i] - slope;
+        buffer[pos] = points[i] - slope;
         pos++;
       } else if (points[i] <= points[i+1]){
-        buffer.buffer[pos] = points[i] + slope;
+        buffer[pos] = points[i] + slope;
         pos++;
       }
     }
   }
   readptr = pos;
-  
 };
 
 void Envelope::generateCurve() {
@@ -107,10 +106,10 @@ void Envelope::generateCurve() {
       float slope = q * powf(m * j, curves[i]);
 
       if (points[i] >= points[i+1]) {
-        buffer.buffer[pos] = points[i] - slope;
+        buffer[pos] = points[i] - slope;
         pos++;
       } else {
-        buffer.buffer[pos] = points[i] + slope;
+        buffer[pos] = points[i] + slope;
         pos++;
       }
     }
@@ -118,7 +117,8 @@ void Envelope::generateCurve() {
   readptr = pos+1;
 };
 
-unsigned Envelope::getBufferlength() {
+
+unsigned Envelope::length() {
   return bufferlength;
 }
 
@@ -134,8 +134,8 @@ unsigned Envelope::getBufferlength() {
 
 float Envelope::play() {
   float out = 0.f;
-  if (readptr < buffer.bufferlength) {
-    out = buffer.readsample(readptr);
+  if (readptr < bufferlength) {
+    out = interpolate(readptr, buffer, bufferlength);
     prev = out;
     readptr += 1.f;
   } 
@@ -144,7 +144,7 @@ float Envelope::play() {
 
 // read from envelope without internal readpointer
 float Envelope::read(float ptr) {
-  return buffer.readsample(ptr);
+  return interpolate(ptr, buffer, bufferlength);
 }
 
 
@@ -153,15 +153,15 @@ float Envelope::read(float ptr) {
 float Envelope::play(GATE trigger) {
   float out = 0.f;
   if (trigger == GATE::off) {
-    if (readptr < buffer.bufferlength) {
-      out = buffer.readsample(readptr);
+    if (readptr < bufferlength) {
+      out = interpolate(readptr, buffer, bufferlength);
       prev = out;
       readptr += 1.f;
     }
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
-    out = buffer.readsample(readptr);
+    out = interpolate(readptr, buffer, bufferlength);
     readptr += 1.f;
   }
   return out;
@@ -169,8 +169,8 @@ float Envelope::play(GATE trigger) {
 
 float Envelope::play(float speed) {
   float out = 0.f;
-  if (readptr < buffer.bufferlength) {
-    out = buffer.readsample(readptr);
+  if (readptr < bufferlength) {
+    out = interpolate(readptr, buffer, bufferlength);
     prev = out;
     readptr += speed;
   }
@@ -181,27 +181,27 @@ float Envelope::play(float speed) {
 float Envelope::play(GATE trigger, float speed) {
   float out = 0.f;
   if (trigger == GATE::off) {
-    if (readptr < buffer.bufferlength) {
-      out = buffer.readsample(readptr);
+    if (readptr < bufferlength) {
+      out = interpolate(readptr, buffer, bufferlength);
       prev = out;
       readptr += speed;
     }
   } else if (trigger == GATE::on) {
     readptr = 0.f;
     // Small smoothing step 
-    out = buffer.readsample(readptr);
+    out = interpolate(readptr, buffer, bufferlength);
     readptr += speed;
   }
   return out;
 };
 
 bool Envelope::running() {
-  bool x = readptr < buffer.bufferlength;
+  bool x = readptr < bufferlength;
   return x;
 }
 
 bool Envelope::finished() {
-  return readptr >= buffer.bufferlength;
+  return readptr >= bufferlength;
 }
 
 // void Envelope::repr() {

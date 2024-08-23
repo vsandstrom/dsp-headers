@@ -1,11 +1,22 @@
 #pragma once
 #include "dsp.h"
 #include "buffer.hpp"
+#include <cstddef>
 
 namespace dspheaders {
+  template <size_t VALUES, size_t DURATIONS>
+  struct BreakPoints{
+    float values[VALUES];
+    float durations[DURATIONS];
+    float curves[DURATIONS];
+    BreakPoints(float values[VALUES], float durations[DURATIONS], float curves[DURATIONS]):
+      values(values), durations(durations), curves(curves)
+    { }
+  };
+
   class Envelope {
     protected:
-      Buffer buffer;
+      float* buffer = nullptr;
       unsigned bufferlength = 0;
       float* points;
       float* times;
@@ -16,6 +27,7 @@ namespace dspheaders {
       float samplerate;
       float prev;
       float readptr;
+      float (*interpolate)(float, float*, unsigned);
       void generate();
       void generateCurve();
     public: 
@@ -47,6 +59,24 @@ namespace dspheaders {
           float samplerate,
           float (*interpolate)(float, float*, size_t)
       );
+      
+      template<size_t VALUES, size_t DURATIONS>
+      Envelope(
+          BreakPoints<VALUES, DURATIONS> brk,
+          float samplerate,
+          float (*interpolate)(float, float*, unsigned)
+        ): 
+        points(brk.values),
+        pLen(VALUES),
+        times(brk.durations),
+        tLen(DURATIONS),
+        curves(brk.curves),
+        cLen(DURATIONS),
+        samplerate(samplerate),
+        interpolate(interpolate)
+      {
+        generateCurve();
+      };
 
       // Returns current value from table
       // float play();
@@ -59,7 +89,7 @@ namespace dspheaders {
 
       float read(float ptr);
 
-      unsigned getBufferlength();
+      unsigned length();
       bool running();
       bool finished();
       void repr();

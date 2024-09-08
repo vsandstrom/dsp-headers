@@ -1,7 +1,5 @@
-#include "buffer.hpp"
 #include "dsp.h"
 #include "envelope.hpp"
-#include "grain.hpp"
 #include <cstddef>
 #include <limits>
 #include <vector>
@@ -15,7 +13,7 @@ namespace dspheaders {
       float bufpos    = 0.f;
       float envpos    = 0.f;
       float durations = 0.f;
-      float rates     = 0.f;
+      float rate     = 0.f;
       bool  active    = false;
     };
 
@@ -45,7 +43,7 @@ namespace dspheaders {
     public:
     template<size_t VALUES, size_t DURATIONS>
     Granulator2(
-        BreakPoints<VALUES, DURATIONS> brk,
+        BreakPoints brk,
         float samplerate,
         float (*interpolate)(float, float*, unsigned)
       ):
@@ -80,24 +78,21 @@ namespace dspheaders {
         const float duration = calc_duration(m_envsize, m_sr_recip, dur);
         m_grains[m_next].bufpos    = position;
         m_grains[m_next].envpos    = 0.0;
-        m_grains[m_next].rates     = rate;
+        m_grains[m_next].rate      = rate;
         m_grains[m_next].durations = duration;
         m_grains[m_next].active    = true;
         m_next = (m_next + 1) % NUMGRAINS;
       }
 
       float out = 0.f;
-      for (int i = 0; i < NUMGRAINS; i++) {
-        if (m_grains[i].active) {
-          float sig = interpolate(m_grains[i].bufpos, m_buf.data(), m_buf.size());
-          float env = m_env.read(m_grains[i].envpos);
+      for (auto &grain: m_grains) {
+        if (grain.envpos >= m_envsize) { grain.active = false; }
+        if (grain.active) {
+          float sig = interpolate(grain.bufpos, m_buf.data(), m_buf.size());
+          float env = m_env.read(grain.envpos);
 
-          m_grains[i].bufpos += m_grains[i].rates;
-          m_grains[i].envpos += m_grains[i].durations;
-
-          if (m_grains[i].envpos >= m_envsize) {
-            m_grains[i].active = false;
-          }
+          grain.bufpos += grain.rate;
+          grain.envpos += grain.durations;
           out += (sig * env);
         }
       }

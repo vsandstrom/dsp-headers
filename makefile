@@ -9,7 +9,7 @@ BUILD_DIR := build
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
-TARGETS = combtest fmtest delaytest envtest demotest complextest osctest verbtest verbtest2 verbtest3 graintest envelope_test
+TARGETS = combtest fmtest delaytest envtest demotest complextest osctest verbtest verbtest2 verbtest3 graintest envelope_test wavetest
 # vectest
 CFLAGS := -std=c++14 -O0 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES)
 LDFLAGS := -L./portaudio/lib/.libs/ -lportaudio

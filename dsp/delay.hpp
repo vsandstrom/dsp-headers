@@ -1,5 +1,6 @@
 #pragma once
 #include "buffer.hpp"
+#include <cstddef>
 
 // Note: Delay uses Buffer class, which size is always a power of two, to
 // simplify wrapping of the write head.
@@ -51,7 +52,7 @@ namespace dspheaders {
         float time,
         float maxtime,
         unsigned m_taps,
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
      
       // Initialize Delay without assigning a number of delay taps
@@ -59,7 +60,7 @@ namespace dspheaders {
         unsigned samplerate,
         float time,
         float maxtime,
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
   };
 
@@ -77,7 +78,7 @@ namespace dspheaders {
         float time,
         float maxtime,
         unsigned m_taps,
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
      
       // Initialize Delay without assigning a number of delay taps
@@ -85,7 +86,7 @@ namespace dspheaders {
         unsigned samplerate,
         float time,
         float maxtime,
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
   };
 }

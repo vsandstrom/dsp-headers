@@ -29,6 +29,7 @@ Wavetable transfer = Wavetable::init(SAMPLE_RATE);
 Wavetable envelope = Wavetable::init(SAMPLE_RATE);
 
 // Tables
+// 
 float* tables[WIDTH] = {nullptr};
 float trans[SIZE+1]    = {0.f};
 float env[SIZE+1]      = {0.f};
@@ -52,7 +53,7 @@ static int paCallback(  const void* inputBuffer,
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float vosc = vec.play<SIZE, 2, interpolation::linear>(
+    float vosc = vec.play<SIZE, WIDTH, interpolation::linear>(
         tables,
         FREQ,
         map(transfer.play<SIZE, interpolation::linear>(
@@ -60,10 +61,11 @@ static int paCallback(  const void* inputBuffer,
           0.45,
           0.f), -1.f, 1.f, 0.f, 1.f),
         0.f
-        ) * envelope.play<SIZE, interpolation::linear>(
-        env,
-        0.2,
-        0.f
+        // )
+      // * envelope.play<SIZE, interpolation::linear>(
+      //   env,
+      //   0.2,
+      //   0.f
       );
     *out++ = clamp(vosc, -1.f, 1.f); 
     *out++ = clamp(vosc, -1.f, 1.f); 
@@ -76,7 +78,7 @@ int main(int argc, char** argv) {
 	PaError err;
 
   // fill float arrays with wavetable shapes
-  saw(trans, SIZE);
+  sine(trans, SIZE);
   hanning(env, SIZE);
   sine(t0, SIZE);
   float amp[2] = {1.f, 0.6f};

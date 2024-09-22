@@ -2,6 +2,7 @@
 /* ˙ˆ˙ */
 #include "buffer.hpp"
 #include "dsp_math.h"
+#include <cstddef>
 
 
 using namespace dspheaders;
@@ -9,7 +10,7 @@ using namespace dspheaders;
 Buffer::Buffer(
   float seconds,
   unsigned samplerate,
-  float (*interpolate)(float, float*, unsigned))
+  float (*interpolate)(float, float*, size_t))
 : bufferlength(seconds*samplerate), interpolate(interpolate) {
 
   if (bufferlength < 4) {
@@ -27,7 +28,7 @@ Buffer::Buffer(
 Buffer::Buffer(
   unsigned size,
   unsigned samplerate,
-  float (*interpolate)(float, float*, unsigned))
+  float (*interpolate)(float, float*, size_t))
 : bufferlength(size), interpolate(interpolate) {
 
   if (bufferlength < 4) {

@@ -5,13 +5,14 @@ SRC_DIR := dsp
 EXAMPLE_DIR := examples
 TEST_DIR := tests
 BUILD_DIR := build
+DFLAG :=
 
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
 TARGETS = combtest fmtest delaytest envtest demotest complextest osctest verbtest verbtest2 verbtest3 graintest envelope_test wavetest vectest
 # vectest
-CFLAGS := -std=c++14 -O0 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES)
+CFLAGS := -std=c++14 -O0 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES) $(DFLAG)
 LDFLAGS := -L./portaudio/lib/.libs/ -lportaudio
 
 .PHONY: all clean

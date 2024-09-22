@@ -1,5 +1,13 @@
 #include <cstddef>
 #include <utility>
+
+#ifndef DEBUG
+  #define D(x)  
+#else 
+  #include <assert.h>
+  #define D(x) x
+#endif
+
 namespace dspheaders {
   class VectorOscillator {
     private:
@@ -21,8 +29,20 @@ namespace dspheaders {
       );
     }
 
-    template<unsigned SIZE, size_t WIDTH, float(*interpolate)(float, float*, unsigned)>
+    /*! SIZE determines the size of the wavetables used, 
+     * WIDTH the number of wavetables used,
+     * interpolate is a function pointer to an interpolation algorithm,
+     * with a certain signature, see interpolation.hpp.
+     * `tables` is a 2 dimensional array of floats:
+     * `float[SIZE][WIDTH]` or `float**`.
+     */
+    template<size_t SIZE, size_t WIDTH, float(*interpolate)(float, float*, size_t)>
     float play(float** tables, float frequency, float position, float phase) {
+      D({
+        for (int i = 0; i < WIDTH; i++) {
+          assert(tables[i] != nullptr && "table is not initialized");
+        }
+      })
       if (frequency > m.samplerate * 0.5) return 0.0;
       float sig = 0.f;
       float len = static_cast<float>(SIZE);

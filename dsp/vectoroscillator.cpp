@@ -5,7 +5,7 @@ VectorOscillator::VectorOscillator(){}
 
 VectorOscillator::VectorOscillator(
   std::vector<Wavetable> tables, 
-  float (*interpolate)(float, float*, unsigned))
+  float (*interpolate)(float, float*, size_t))
   : tables(tables), tablelength(tables.size()), interpolate(interpolate) {
   weight = 0.0f;
   crossection = new float[tables.size()]();

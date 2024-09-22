@@ -46,7 +46,6 @@ namespace dspheaders {
       return  x - xm1 + 0.995 * ym1;
   }
 
-
   /// INDEX WRAPPING FUNCTIONS - AVOID AND USE 
   // Makes sure that x is within range of 0 - n 
   inline int wrap(int* x, unsigned int length) {

@@ -5,6 +5,7 @@
 #include "delay.hpp"
 #include "dsp_math.h"
 #include "interpolation.hpp"
+#include <cstddef>
 
 using namespace dspheaders;
 
@@ -17,7 +18,7 @@ Delay::Delay(
     float time,
     float maxtime,
     unsigned taps,
-    float (*interpolate)(float, float*, unsigned)
+    float (*interpolate)(float, float*, size_t)
     ) : m_buffer(Buffer(find_pow_two(maxtime * samplerate), samplerate, interpolate)),
         g_samplerate(samplerate), 
         m_time(time),
@@ -28,7 +29,7 @@ Delay::Delay(
     unsigned samplerate,
     float time,
     float maxtime,
-    float (*interpolate)(float, float*, unsigned)
+    float (*interpolate)(float, float*, size_t)
     ) : m_buffer(Buffer(find_pow_two(maxtime * samplerate), samplerate, interpolate)),
         g_samplerate(samplerate), 
         m_time(time),
@@ -79,14 +80,14 @@ IDelay::IDelay(
     float time,
     float maxtime,
     unsigned taps, 
-    float (*interpolate)(float, float*, unsigned)
+    float (*interpolate)(float, float*, size_t)
     ) : Delay{samplerate, time, maxtime, taps, interpolate} { }
 
 IDelay::IDelay(
     unsigned samplerate,
     float time,
     float maxtime,
-    float (*interpolate)(float, float*, unsigned)
+    float (*interpolate)(float, float*, size_t)
     ) : Delay{samplerate, time, maxtime, interpolate} { }
 
 

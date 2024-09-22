@@ -12,10 +12,9 @@ namespace dspheaders {
       int m_count = 0;
 
     public: 
-      float play();
       float play(float interval);
 
-      Impulse(float interval, float samplerate);
+      Impulse(float samplerate);
   };
 
   class Dust: public Impulse {
@@ -30,9 +29,8 @@ namespace dspheaders {
       float relDur;
 
     public:
-      float play();
       float play(float interval);
-      Dust(float interval, float samplerate);
+      Dust(float samplerate);
 
   };
 }

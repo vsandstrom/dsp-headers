@@ -1,7 +1,16 @@
+#include "waveshape.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
-#include <vector>
+#include <array>
+#ifndef DEBUG
+  #define D(x)  
+#else 
+  #include <assert.h>
+  #define D(x) x
+#endif
+
+static size_t count = 0;
 
 namespace dspheaders {
   template<size_t NUMGRAINS, size_t BUFSIZE>
@@ -19,8 +28,8 @@ namespace dspheaders {
       float* buffer = new float[BUFSIZE];
       float buflen = static_cast<float>(BUFSIZE);
 
-      float* env = new float [512];
-      size_t envlen = 512;
+      float* env;
+      size_t envlen;
 
       size_t recpos = 0;
       bool recording = true;
@@ -29,14 +38,7 @@ namespace dspheaders {
       float sr_recip = 0.f;
       
       size_t next;
-      std::vector<Grain> grains = std::vector<Grain>(NUMGRAINS, GranulatorEX::Grain{
-          .bufpos = 0.f,
-          .envpos = 0.f,
-          .rate = 1.f,
-          .dur = 0.f,
-          .active = false
-        }
-      );
+      std::array<Grain, NUMGRAINS> grains;
     } m;
 
     explicit GranulatorEX<NUMGRAINS, BUFSIZE> (M m): m(std::move(m)){}
@@ -45,13 +47,20 @@ namespace dspheaders {
     static GranulatorEX init(
       float samplerate
     ) {
+
+      size_t envlen = 512;
+      float* env = new float[envlen];
+      hanning(env, envlen);
+
       return GranulatorEX(M{
+        .env = env,
+        .envlen = envlen,
         .samplerate = samplerate,
         .sr_recip = 1.f / samplerate,
       });
     }
 
-    template<float (*BUF_INTERPOLATE)(float, float*, unsigned), float (*ENV_INTERPOLATE)(float, float*, unsigned)>
+    template<float (*BUF_INTERPOLATE)(float, float*, size_t), float (*ENV_INTERPOLATE)(float, float*, size_t)>
     float play(
         float position,
         float duration,
@@ -59,36 +68,34 @@ namespace dspheaders {
         float jitter,
         float trigger
       ) {
+      // D(assert(m.grains[m.next] != nullptr && "grains has not been initialized"));
       if (trigger >= 1.f && !m.grains[m.next].active) {
         // normalize buffer position
         // float pos = (position + jitter) - long(position+jitter);
         // while (pos < 0.f) pos += 1.f;
-        while (position > 1.0f) {
-          position -= 1.f;
-        }
-        while (position < 0.f) {
-          position += 1.f;
-        }
+        while (position > 1.0f) position -= 1.f;
+        while (position < 0.0f) position += 1.f;
+
+        D(printf("trig %zu", count++));
         
         // set params for grain
-        size_t n = m.next;
-        m.grains[n].bufpos = position * m.buflen;
-        m.grains[n].envpos = 0.f;
-        m.grains[n].rate = rate;
-        m.grains[n].dur = calc_duration(
+        m.grains[m.next].bufpos = position * m.buflen;
+        m.grains[m.next].envpos = 0.f;
+        m.grains[m.next].rate = rate;
+        m.grains[m.next].dur = calc_duration(
           static_cast<float>(m.envlen),
           m.sr_recip,
           1.f / duration
         );
-        m.grains[n].active = true;
-        m.next = (n + 1) % NUMGRAINS;
+        m.grains[m.next].active = true;
+        m.next = (m.next + 1) % NUMGRAINS;
       }
 
       // loop over active grains and deactivate stale grains
       float out = 0.f;
       size_t len = static_cast<size_t>(m.buflen);
 
-      for (auto &g: m.grains) {
+      for (Grain &g: m.grains) {
         if (g.envpos >= m.envlen) {g.active = false; continue;}
         if (g.active) {
           float sig = BUF_INTERPOLATE(g.bufpos, m.buffer, len);
@@ -96,6 +103,7 @@ namespace dspheaders {
           g.bufpos += g.rate;
           while (g.bufpos >= len) { g.bufpos -= len; } 
           g.envpos += g.dur;
+          while (g.envpos >= m.envlen) { g.envpos -= m.envlen; } 
           out += sig * env;
         }
       }

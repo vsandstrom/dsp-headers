@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdlib>
 
 namespace dspheaders {
 
@@ -20,7 +21,7 @@ namespace dspheaders {
     float* table;
     unsigned tablelength;
 
-    float (*interpolate)(float, float*, unsigned) = nullptr;
+    float (*interpolate)(float, float*, size_t) = nullptr;
 
     // generates the next sample
     float read();
@@ -60,7 +61,7 @@ namespace dspheaders {
       WAVESHAPE waveshape,
       unsigned tablelength,
       unsigned samplerate,
-      float (*interpolate)(float, float*, unsigned)
+      float (*interpolate)(float, float*, size_t)
     );
 
     // float* table - an pregenerated table.
@@ -78,7 +79,7 @@ namespace dspheaders {
       float* table,
       unsigned tablelength,
       unsigned samplerate,
-      float (*interpolate)(float, float*, unsigned)
+      float (*interpolate)(float, float*, size_t)
     );
   };
 } // namespace dspheaders

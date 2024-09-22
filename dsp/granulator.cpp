@@ -81,7 +81,7 @@ Granulator::Granulator(
   unsigned maxgrains,
   std::shared_ptr<Buffer> buffer,
 
-  float (*interpolate)(float, float*, unsigned))
+  float (*interpolate)(float, float*, size_t))
   : g_samplerate(samplerate),
     g_buffer(buffer),
     m_maxgrains(maxgrains) {
@@ -111,7 +111,7 @@ Granulator::Granulator(
   unsigned maxgrains,
   float* table, 
   unsigned tablelength,
-  float (interpolate)(float, float*, unsigned),
+  float (interpolate)(float, float*, size_t),
   std::shared_ptr<Buffer> buffer)
   : g_samplerate(samplerate),
     g_envelope(std::shared_ptr<Envelope>(new Envelope(table, tablelength, samplerate, interpolate))),

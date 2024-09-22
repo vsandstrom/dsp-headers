@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -32,8 +33,8 @@ using namespace interpolation;
 GranulatorEX<16, 4*48000> gr = GranulatorEX<16, 4*48000>::init(SAMPLE_RATE);
 
 // GLOBALS
-Impulse trigger = Impulse(INTERVAL, SAMPLE_RATE);
-Wavetable phasor = Wavetable::init(SAMPLE_RATE);
+Impulse trigger = Impulse(SAMPLE_RATE);
+Wavetable phase = Wavetable::init(SAMPLE_RATE);
 float table[512] = {0.f};
 
 // Dust trigger = Dust(INTERVAL, SAMPLE_RATE);
@@ -45,6 +46,7 @@ int playhead = 0;
 int writeptr = 0;
 
 static frame data;
+D(static size_t main_count = 0;)
 
 // callback function must contain these inputs as PortAudio expects it.
 static int paCallback(
@@ -63,7 +65,7 @@ static int paCallback(
   float gryn = 0.f;
   float s = 0.f;
   float r = 0.f;
-  float t = 1.f;
+  float t = 0.1f;
 
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
@@ -71,22 +73,13 @@ static int paCallback(
       in++;
     } else {
         float trig = trigger.play(t);
-        float ph =
-          map(
-              phasor.play<SIZE, linear>(
-                table,
-                0.25,
-                0.f
-              ),
-              -1.f,
-              1.f,
-              0.f,
-              0.99f
-            );
+        float ph   = phase.play<SIZE, linear>(table, 0.25, 0.f);
+
+        D(if (trig >= 0.5f) printf("main: %zu", main_count++));
         // printf("phaser position: %f\n", phasor);
         gryn = gr.play<linear, linear>(
             ph,
-            0.4,
+            2.f,
             1.f,
             0.f,
             trig
@@ -103,7 +96,7 @@ int main(int argc, char** argv) {
   // seed rng for dust  and jitter in graulator object
   srand(time(NULL));
 
-  saw(table, SIZE);
+  phasor(table, SIZE);
 
   printf(
       "\n\n    ╒═════════════════════════════════════════════════════╕\n"

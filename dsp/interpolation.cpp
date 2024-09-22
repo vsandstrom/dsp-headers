@@ -5,7 +5,7 @@
 using namespace dspheaders;
 
 // In case there should be no interpolation at all
-float interpolation::none(float position, float* table, unsigned tablelength) {
+float interpolation::none(float position, float* table, size_t tablelength) {
   return table[(int)position];
 };
 
@@ -21,7 +21,7 @@ float interpolation::none(float position, float* table, unsigned tablelength) {
    */ 
 
 // Basic 2 point linear interpolation
-float interpolation::linear(float position, float* table, unsigned tablelength) {
+float interpolation::linear(float position, float* table, size_t tablelength) {
   int a1, b1 = 0;
   float aw, bw, diff = 0.f;
 
@@ -34,7 +34,7 @@ float interpolation::linear(float position, float* table, unsigned tablelength) 
 }
 
 // 2 point cosine interpolation
-float interpolation::cosine(float position, float *table, unsigned tablelength) {
+float interpolation::cosine(float position, float *table, size_t tablelength) {
   int a1, b1 = 0;
   float aw, bw, diff = 0.f;
 
@@ -57,8 +57,8 @@ float interpolation::cosine(float position, float *table, unsigned tablelength) 
    */
   
 // 4 point cubic interpolation
-float interpolation::cubic(float position, float* table, unsigned tableLength) {
-  unsigned int a1, a2, b1, b2;
+float interpolation::cubic(float position, float* table, size_t tableLength) {
+  size_t a1, a2, b1, b2;
   float c0, c1, c2, diff;
 
   // positions
@@ -89,9 +89,9 @@ float interpolation::cubic(float position, float* table, unsigned tableLength) {
 }
 
 // 4 point hermetic interpolation
-float interpolation::hermetic(float position, float *table, unsigned tableLength) {
+float interpolation::hermetic(float position, float *table, size_t tableLength) {
   if (table==NULL) return 0.f;
-  unsigned int a1, a2, b1, b2;
+  size_t a1, a2, b1, b2;
   float c1, c2, c3, sub, diff;
   a2 = position;
   b1 = position + 1;

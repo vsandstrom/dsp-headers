@@ -1,16 +1,15 @@
 #include "wavetable.hpp"
 #include "dsp.h"
 #include "waveshape.h"
+#include <cstddef>
 
 using namespace dspheaders;
-
-
 
 Wavetable::Wavetable(
   WAVESHAPE waveshape,
   unsigned tablelength,
   unsigned samplerate,
-  float (*interpolate)(float pos, float* table, unsigned length)
+  float (*interpolate)(float pos, float* table, size_t length)
 ): tablelength(tablelength), samplerate((float)samplerate), interpolate(interpolate) {
   table = new float[tablelength+1];
   initbuffer(table, tablelength+1);
@@ -23,7 +22,7 @@ Wavetable::Wavetable(
   float* table,
   unsigned tablelength,
   unsigned samplerate,
-  float (*interpolate)(float pos, float* table, unsigned length)
+  float (*interpolate)(float pos, float* table, size_t length)
 ): table(table), tablelength(tablelength), samplerate((float)samplerate), interpolate(interpolate) {
   readptr = 0.f;
 };

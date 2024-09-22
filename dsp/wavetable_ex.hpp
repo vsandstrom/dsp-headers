@@ -1,4 +1,10 @@
 #include <utility>
+#ifndef DEBUG
+  #define D(x)  
+#else 
+  #include <assert.h>
+  #define D(x) x
+#endif
 
 namespace dspheaders {
   class Wavetable {
@@ -20,8 +26,9 @@ namespace dspheaders {
       );
     }
 
-    template <unsigned SIZE, float(*interpolate) (float, float*, unsigned)>
+    template <unsigned SIZE, float(*interpolate) (float, float*, size_t)>
     float play(float* table, float frequency, float phase) {
+      D(assert(table != nullptr && "table has not been initialized");)
       if (frequency > m.samplerate * 0.5f) return 0;
       float len = static_cast<float>(SIZE);
       m.position += (len * m.sr_recip * frequency) + (phase * len);

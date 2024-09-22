@@ -1,6 +1,7 @@
 #include "envelope.hpp"
 #include "buffer.hpp"
 #include "dsp.h"
+#include <cstddef>
 
 
 // TODO: Perhaps save segments in separate buffers, making it easier to set duration of attack,
@@ -13,7 +14,7 @@ Envelope::Envelope(
     float* points, unsigned pLen,
     float* times, unsigned tLen,
     float samplerate,
-    float (*interpolate)(float, float*, unsigned)) 
+    float (*interpolate)(float, float*, size_t)) 
   : points(points), 
     times(times),
     pLen(pLen),
@@ -32,7 +33,7 @@ Envelope::Envelope(
     float* times, unsigned tLen,
     float* curves, unsigned cLen,
     float samplerate,
-    float (*interpolate)(float, float*, unsigned)) 
+    float (*interpolate)(float, float*, size_t)) 
   : points(points), 
     times(times),
     curves(curves),
@@ -56,7 +57,7 @@ Envelope::Envelope(
     float* table,
     unsigned tablesize,
     float samplerate,
-    float (*interpolate)(float, float*, unsigned))
+    float (*interpolate)(float, float*, size_t))
     : buffer(tablesize, samplerate, interpolate){
       for (int i = 0; i < tablesize; i++) {
         buffer.buffer[i] = table[i];
@@ -210,7 +211,7 @@ bool Envelope::finished() {
 // }
 
 
-PercEnv::PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned))
+PercEnv::PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, size_t))
   : attack(attack), decay(decay), samplerate(samplerate), buffer(Buffer(attack+decay, samplerate, interpolate)) {
   generate();
 }

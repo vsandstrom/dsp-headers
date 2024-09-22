@@ -1,7 +1,6 @@
 #pragma once
 #include "buffer.hpp"
-#include "dsp_math.h"
-#include "dsp.h"
+#include <cstddef>
 
 namespace dspheaders {
   enum COMBTYPE {
@@ -60,7 +59,7 @@ namespace dspheaders {
       Comb(
           unsigned offset,
           unsigned samplerate,
-          float (*interpolate)(float, float*, unsigned)
+          float (*interpolate)(float, float*, size_t)
       );
   };
 
@@ -82,7 +81,7 @@ namespace dspheaders {
       Allpass(
         unsigned offset,
         unsigned samplerate,
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
   };
 

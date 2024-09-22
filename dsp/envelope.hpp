@@ -39,7 +39,7 @@ namespace dspheaders {
         float* times,
         unsigned tLen,
         float samplerate,
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
 
       Envelope(
@@ -50,14 +50,14 @@ namespace dspheaders {
         float* curves,
         unsigned cLen,
         float samplerate,
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
 
       Envelope(
           float* table,
           unsigned tablelength,
           float samplerate,
-          float (*interpolate)(float, float*, unsigned)
+          float (*interpolate)(float, float*, size_t)
       );
       
       template<size_t VALUES, size_t DURATIONS>
@@ -106,7 +106,7 @@ namespace dspheaders {
     public: 
       float play();
       float play(GATE trigger);
-      PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, unsigned));
+      PercEnv(float attack, float decay, float samplerate, float (*interpolate)(float, float*, size_t));
   };
 } // namespace dspheaders
   //

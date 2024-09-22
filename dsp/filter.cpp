@@ -2,6 +2,7 @@
 #include "buffer.hpp"
 #include "dsp.h"
 #include "interpolation.hpp"
+#include <cstddef>
 #include <cstdio>
 
 #define undenormalise(sample) if(((*(unsigned int*)&sample)&0x7f800000)==0) sample=0.0f
@@ -145,7 +146,7 @@ float Allpass::process(float sample, float coeff, float mod) {
 Comb::Comb(
     unsigned offset,
     unsigned samplerate,
-    float (*interpolate)(float, float*, unsigned))
+    float (*interpolate)(float, float*, size_t))
   : m_buffer(offset, samplerate, interpolate) { 
       printf("Comb - offset: %i\n", offset); 
       printf("Comb - buflen: %i\n", offset); 
@@ -155,6 +156,6 @@ Comb::Comb(
 Allpass::Allpass(
   unsigned offset,
   unsigned samplerate,
-  float (*interpolate)(float, float*, unsigned))
+  float (*interpolate)(float, float*, size_t))
   : Comb(offset, samplerate, interpolate) {
 }

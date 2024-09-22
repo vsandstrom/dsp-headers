@@ -2,6 +2,7 @@
 #include "buffer.hpp"
 #include "envelope.hpp"
 #include "buffer.hpp"
+#include <cstddef>
 #include <memory>
 
 
@@ -100,7 +101,7 @@ namespace dspheaders {
         unsigned maxgrains,
         std::shared_ptr<Buffer> buffer,
 
-        float (*interpolate)(float, float*, unsigned)
+        float (*interpolate)(float, float*, size_t)
       );
      
       // Predefined grain envelope in float array
@@ -110,7 +111,7 @@ namespace dspheaders {
         unsigned maxgrains,
         float* envtable, 
         unsigned tablelength,
-        float (interpolate)(float, float*, unsigned),
+        float (interpolate)(float, float*, size_t),
         std::shared_ptr<Buffer> buffer
 
       );

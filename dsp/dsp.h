@@ -21,8 +21,8 @@ namespace dspheaders {
   ///////////////////////////////
 
   // Set hard min- and max amplitude limits on signal, where 'x' is signal
-  inline float clamp(float x, float bot, float top) {
-      return fmax(bot, (fmin(x, top)));
+  inline float clamp(float x, float lo, float hi) {
+      return fmax(lo, (fmin(x, hi)));
   }
 
   // Convert signal a range to new range, where 'x' is signal
@@ -49,7 +49,6 @@ namespace dspheaders {
   inline float dcblock(float x, float xm1, float ym1) {
       return  x - xm1 + 0.995 * ym1;
   }
-
 
   /// INDEX WRAPPING FUNCTIONS - AVOID AND USE 
   // Makes sure that x is within range of 0 - n 

@@ -8,7 +8,7 @@ namespace dspheaders {
 class VectorOscillator {
   private:
     std::vector<Wavetable> tables;
-    float (*interpolate)(float position, float* table, unsigned tablelength) = nullptr;
+    float (*interpolate)(float position, float* table, size_t tablelength) = nullptr;
     unsigned tablelength;
     // crossection is the current sample across tables
     float* crossection;
@@ -21,7 +21,7 @@ class VectorOscillator {
     // Feed the VectorOscillator with a vector of 'n' WaveTables
     VectorOscillator( 
         std::vector<Wavetable> tables,
-        float (*interpolate)(float, float*, unsigned));
+        float (*interpolate)(float, float*, size_t));
 
     float play(float transfer);
     // Returns the next sample from the vector oscillator. 

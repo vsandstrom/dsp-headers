@@ -1,5 +1,5 @@
 #pragma once
-#include "dsp.h"
+#include <cstddef>
 
 /* ˙ˆ˙ */
 
@@ -13,7 +13,7 @@ namespace dspheaders {
   class Buffer{
     private:
       // Pointer to assigned interpolation function
-      float (*interpolate)(float, float*, unsigned);
+      float (*interpolate)(float, float*, size_t);
     public:
       float* buffer = nullptr;
       unsigned bufferlength = 0;
@@ -53,23 +53,16 @@ namespace dspheaders {
       Buffer(
         float seconds,
         unsigned samplerate,
-        float (*interpolate)(float, float*, unsigned)
-        ): bufferlength(seconds*samplerate), interpolate(interpolate) {
-        buffer = new float[bufferlength+1];
-        initbuffer();
-      }
+        float (*interpolate)(float, float*, size_t)
+      );
 
       // Initialize buffer based on a duration in samples
       template<unsigned N>
       Buffer(
         unsigned samples,
         unsigned samplerate,
-        float (*interpolate)(float, float*, unsigned)
-        ): samplerate(samplerate), interpolate(interpolate) {
-        buffer = new float[N];
-        bufferlength = N;
-        initbuffer();
-      }
+        float (*interpolate)(float, float*, size_t)
+      );
   };
   
 }

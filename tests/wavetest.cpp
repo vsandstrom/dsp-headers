@@ -4,7 +4,7 @@
 #include "../portaudio/include/portaudio.h"
 #include "../dsp/dsp.h"
 #include "../dsp/interpolation.hpp"
-#include "../dsp/wavetable_ex.hpp"
+#include "../dsp/wavetable.hpp"
 #include "../dsp/waveshape.h"
 
 

@@ -9,12 +9,12 @@
 #include "../dsp/verb.hpp"
 #include "../dsp/delay.hpp"
 #include "../dsp/waveshape.h"
-#include "../dsp/vectoroscillator.hpp"
+#include "../dsp/vectortable.hpp"
 
 // DURATION OF THE GENERATED TONE
 const int DURATION =           120000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-const int TABLE_LEN =      512;
+const int SIZE =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000.f;
 
@@ -63,6 +63,8 @@ unsigned seq = (unsigned)(dur[scoreptr] * SAMPLE_RATE);
 unsigned seq1 = (unsigned)(dur1[scoreptr1] * SAMPLE_RATE);
 
 using namespace dspheaders;
+using namespace interpolation;
+
 
 // VectorOscillator tables
 float amp0[] = {1};
@@ -83,7 +85,13 @@ float amp3[] = {1, 0, 0.6, 0.2, 0.4, 0.1, 0.25};
 float phs3[] = {0, 0, 0.2, 0.45, 0.2, 0, 0.7};
 float table3[513] = {0.0f};
 
-VectorOscillator *vec, *vec1;
+float* tables[4] = {table0, table1, table2, table3};
+
+VectorOscillator vec0 = VectorOscillator::init(SAMPLE_RATE);
+VectorOscillator vec1= VectorOscillator::init(SAMPLE_RATE);
+
+float v0_freq = 0.f;
+float v1_freq = 0.f;
 //  Volume Envelope
 // float ap[] = {0.f, 0.5f, 0.3f, 0.f};
 // float at[] = {0.6f, 1.2f, 0.4};
@@ -104,11 +112,19 @@ float vc[] = {1.2f, .4f};
 Envelope vecenv = Envelope(vp, 3, vt, 2, SAMPLE_RATE, interpolation::linear);
 Envelope vecenv1 = Envelope(vp, 3, vt, 2, SAMPLE_RATE, interpolation::linear);
 
-// Wavetable carrier = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+// Wavetable carrier = Wavetable(TRIANGLE, SIZE, SAMPLE_RATE, interpolation::cubic);
 // Wavetable* modulator 
-Wavetable modulator = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable modulator1 = Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable vib = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable modulator0 = Wavetable::init(SAMPLE_RATE);
+Wavetable modulator1 = Wavetable::init(SAMPLE_RATE);
+Wavetable vib = Wavetable::init(SAMPLE_RATE);
+
+float mod0_t[SIZE +1] = {0.f};
+float mod1_t[SIZE +1] = {0.f};
+float  vib_t[SIZE +1] = {0.f};
+
+float m0_freq = 0.f;
+float m1_freq = 0.f;
+float v_freq = 3.2f;
 
 Delay delay = Delay(SAMPLE_RATE, 4.f, 1, interpolation::cubic);
 
@@ -157,8 +173,8 @@ static int paCallback(  const void* inputBuffer,				// input
       seq += (unsigned)(SAMPLE_RATE * dur[scoreptr % 13]);
       env = ampenv.play(GATE::on);
       venv = vecenv.play(GATE::on);
-      vec -> frequency = score[scoreptr % 13];
-      modulator.frequency = score[scoreptr % 5] * 3; 
+      v0_freq = score[scoreptr % 13];
+      m0_freq = score[scoreptr % 5] * 3; 
     } else {
       env = ampenv.play(GATE::off, 2.f);
       venv = vecenv.play(GATE::off, 3.f);
@@ -169,21 +185,32 @@ static int paCallback(  const void* inputBuffer,				// input
       seq1 += (unsigned)(SAMPLE_RATE * dur1[scoreptr1 % 5]);
       env1 = ampenv1.play(GATE::on);
       venv1 = vecenv1.play(GATE::on);
-      vec1 -> frequency = score1[scoreptr1 % 4];
-      modulator1.frequency = score1[scoreptr1 % 4] * 3;
+      v1_freq = score1[scoreptr1 % 4];
+      m1_freq = score1[scoreptr1 % 4] * 3;
     } else {
       env1 = ampenv1.play(GATE::off, 2.f);
       venv1 = vecenv1.play(GATE::off, 3.f);
     }
 
-    float vibr = vib.play();
+    float vibr = vib.play<SIZE, linear>(vib_t, v_freq, 0.f);
 
-    float mod0 = modulator.play();
-    float mod1 = modulator.play();
+    float mod0 = modulator0.play<SIZE, linear>(mod0_t, m0_freq, 0.f);
+    float mod1 = modulator1.play<SIZE, linear>(mod1_t, m1_freq, 0.f);
 
     // Sound generation section
-    float car = vec -> play(venv , map(mod0+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
-    float car1 = vec1 -> play(venv, map(mod1+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f));
+    float car = vec0.play<SIZE, 4, cubic>(
+        tables,
+        v0_freq,
+        venv,
+        map(mod0+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f)
+      );
+
+    float car1 = vec1.play<SIZE, 4, cubic>(
+        tables,
+        v1_freq,
+        venv,
+        map(mod1+(vibr * 0.01), -1.f, 1.f, 0.f, 1.f)
+      );
     // float car = carrier.play(modulator.play()+(vib.play() * 0.01));
     float sig = car * env * amps[scoreptr & 7];
     float sig1 = car1 * env1 * amps1[scoreptr1 % 4];
@@ -215,10 +242,15 @@ static int paCallback(  const void* inputBuffer,				// input
 int main(int argc, char** argv) {
 
   // Initialize a waveform
-  w0 = new Wavetable(complex_sine(table0, 512, amp0, phs0, 1) , 512, SAMPLE_RATE, interpolation::cubic);
-  w1 = new Wavetable(complex_sine(table1, 512, amp1, phs1, 3) , 512, SAMPLE_RATE, interpolation::cubic);
-  w2 = new Wavetable(complex_sine(table2, 512, amp2, phs2, 5) , 512, SAMPLE_RATE, interpolation::cubic);
-  w3 = new Wavetable(complex_sine(table3, 512, amp3, phs3, 7) , 512, SAMPLE_RATE, interpolation::cubic);
+
+  complex_sine(tables[0], SIZE, amp0, phs0, 1);
+  complex_sine(tables[1], SIZE, amp1, phs1, 3);
+  complex_sine(tables[2], SIZE, amp2, phs2, 5);
+  complex_sine(tables[3], SIZE, amp3, phs3, 7);
+
+  triangle(mod0_t, SIZE);
+  triangle(mod1_t, SIZE);
+  sine(vib_t, SIZE);
 
   for (int i = 0; i < 12; i++){
     score[i] *= 2;
@@ -227,56 +259,6 @@ int main(int argc, char** argv) {
   range(amps1, 4, 0, 0.8, 0, 0.2);
   range(dur, 21, 0, 0.8, 0, 2.2);
   range(dur1, 5, 0, 0.8, 0, 2.2);
-
-  std::vector<Wavetable> t = {*w0, *w1, *w2, *w3};
-  vec = new VectorOscillator(t, interpolation::cubic);
-  vec1 = new VectorOscillator(t, interpolation::cubic);
-
-  vec->frequency = FREQ;
-  modulator.frequency = FM_FREQ;
-  vib.frequency = 3.2f;
-    if ( argc > 3 && argc < 8 ) {
-      argc--;
-      argv++;
-      while (argc > 0){
-        if ((*argv)[0] == '-') {
-          printf("%c\n", (*argv)[1]);
-          switch ((*argv)[1]){
-            case 'c': {
-              argc--;
-              argv++;
-              vec -> frequency = std::stof(*argv);
-              // carrier.frequency = std::stof(*argv);
-              break;
-            }
-            case 'm':{
-              argc--;
-              argv++;
-              // modulator -> frequency = std::stof(*argv);
-              modulator.frequency = std::stof(*argv);
-              break;
-            }
-            case 'f':{
-              argc--;
-              argv++;
-              // verb.feedback(std::stof(*argv));
-              break;
-            }
-            default:{
-              argc--;
-              argv++;
-              break;
-
-            }
-          }
-        }
-        argc--;
-        argv++;
-      }
-      printf("running user input frequencies\n");
-    } else {
-      printf("running on default frequencies\n");
-    }
 
 	PaStream* stream;
 	PaError err;

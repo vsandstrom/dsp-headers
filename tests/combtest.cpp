@@ -5,6 +5,8 @@
 #include <iostream>
 #include "../dsp/filter.hpp"
 #include "../dsp/wavetable.hpp"
+#include "../dsp/waveshape.h"
+#include "../dsp/trigger.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -30,7 +32,10 @@ Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
 Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
-Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
+Wavetable lfo = Wavetable::init(SAMPLE_RATE);
+Dust imp = Dust::init(SAMPLE_RATE);
+
+float lfo_t[TABLE_LEN] = {0};
 
 
 
@@ -57,9 +62,9 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float sig = (impulse == true) ? 1.f : 0.f;
-    lfo.frequency = 5.4;
-    l = lfo.play();
+    float sig = imp.play(0.2);
+      //(impulse == true) ? 1.f : 0.f;
+    l = lfo.play<TABLE_LEN, interpolation::linear>(lfo_t, 5.4, 0.f);
     o0 = c0.process(sig, 0.9, COMBTYPE::IIR);
     o1 = c1.process(sig, .931f, COMBTYPE::IIR);
     o2 = c2.process(sig, 0.97, COMBTYPE::IIR);
@@ -80,6 +85,8 @@ int main(int argc, char** argv) {
 	PaError err;
 
 	data.left = data.right = 0.0f;
+
+  triangle(lfo_t, TABLE_LEN);
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;

@@ -48,8 +48,8 @@ namespace dspheaders {
       float samplerate
     ) {
 
-      size_t envlen = 512;
-      float* env = new float[envlen];
+      size_t envlen = 1<<12;
+      float* env = new float[envlen+1];
       hanning(env, envlen);
 
       return GranulatorEX(M{
@@ -96,7 +96,7 @@ namespace dspheaders {
       size_t len = static_cast<size_t>(m.buflen);
 
       for (Grain &g: m.grains) {
-        if (g.envpos >= m.envlen) {g.active = false; continue;}
+        if (g.envpos >= m.envlen) {g.active = false;}
         if (g.active) {
           float sig = BUF_INTERPOLATE(g.bufpos, m.buffer, len);
           float env = ENV_INTERPOLATE(g.envpos, m.env, m.envlen);

@@ -5,6 +5,7 @@
 #include "../dsp/dsp.h"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/wavetable.hpp"
+#include "../dsp/waveshape.h"
 
 
 
@@ -13,7 +14,7 @@ const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
 const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-const int TABLE_LEN =      512;
+const int SIZE =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
@@ -23,8 +24,10 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
+using namespace interpolation;
 
-Wavetable *carrier = nullptr;
+Wavetable carrier = Wavetable::init(SAMPLE_RATE);
+float car_t[SIZE+1] = {0.f};
 
 static frame data;
 
@@ -45,7 +48,7 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier->play();
+    float car = carrier.play<SIZE, linear>(car_t, 200, 0.f);
 
     // Stereo frame: two increments of out buffer
     *out++ = car; 
@@ -55,63 +58,12 @@ static int paCallback(  const void* inputBuffer,				// input
 }
 
 int main(int argc, char** argv) {
-    if ( argc > 2 && argc < 8 ) {
-      argc--;
-      argv++;
-      while (argc > 0){
-        printf("%s", *argv);
-        if ((*argv)[0] == '-') {
-          printf("%c\n", (*argv)[1]);
-          switch ((*argv)[1]){
-            case 'w': {
-              argc--;
-              argv++;
-              printf("%s", *argv);
-              // carrier.frequency = std::stof(*argv);
-              if (!strcmp(*argv, "square")){
-                carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
-                carrier->frequency = FREQ;
-              } 
-              else if (!strcmp(*argv, "sine")){
-                carrier = new Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-                carrier->frequency = FREQ;
-              } 
-              else if (!strcmp(*argv, "saw")){
-                carrier = new Wavetable(SAW, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
-                carrier->frequency = FREQ;
-              } 
-              else if (!strcmp(*argv, "triangle")){
-                carrier = new Wavetable(TRIANGLE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-                carrier->frequency = FREQ;
-              } else {
-                carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::linear);
-                carrier->frequency = FREQ;
-              }
-              break;
-            }
-            default:{
-              argc--;
-              argv++;
-              carrier = new Wavetable(SQUARE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-              break;
-
-            }
-          }
-        }
-        argc--;
-        argv++;
-      }
-      printf("running user input frequencies\n");
-    } else {
-      printf("running on default frequencies\n");
-      carrier = new Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-      carrier->frequency = FREQ;
-    }
-
 	PaStream* stream;
 	PaError err;
 
 	data.left = data.right = 0.0f;
+
+  triangle(car_t, SIZE);
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;

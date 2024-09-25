@@ -4,6 +4,7 @@
 
 using namespace dspheaders;
 
+
 // In case there should be no interpolation at all
 float interpolation::none(float position, float* table, size_t tablelength) {
   return table[(int)position];

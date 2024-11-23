@@ -49,6 +49,7 @@ static int paCallback(  const void* inputBuffer,				// input
 						void* userdata )								            // "void"-type can be typecast to other 
 {
 
+
 	// cast data passing through stream
 	frame* data = (frame*) userdata;
 	float* out = (float*)outputBuffer;

@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <cstdlib>
+
 namespace dspheaders {
   const float pi =            3.14159265358979323846264338327950288f;
   const float tau =           6.28318530717958647692528676655900577f;

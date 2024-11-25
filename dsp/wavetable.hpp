@@ -17,6 +17,7 @@ namespace dspheaders {
     explicit Wavetable(M m) : m(std::move(m)) {}
 
     public:
+    Wavetable(){}
     static Wavetable init(float samplerate) {
       return Wavetable(M{
           .position = 0.f,

@@ -1,7 +1,6 @@
 #pragma once
 #include <utility>
 
-
 namespace dspheaders {
   class Impulse {
     /*
@@ -9,18 +8,23 @@ namespace dspheaders {
      */
     protected:
       struct M {
-        float samplerate;
+        float samplerate = 0.f;
         size_t dur = 0;
         size_t count = 0;
       } m;
       explicit Impulse(M m) : m(std::move(m)) {}
 
     public: 
+      Impulse(){}
       static Impulse init(float samplerate) {
         return Impulse(M{
           .samplerate = samplerate,
           .count = 0
         });
+      }
+
+      void setSamplerate(float samplerate) {
+        m.samplerate = samplerate;
       }
 
       float play(float dur) {
@@ -47,6 +51,7 @@ namespace dspheaders {
     private:
       explicit Dust(M m) : Impulse(m) {}
     public:
+      Dust(){}
       static Dust init(float samplerate) {
         return Dust(M{
           .samplerate = samplerate,
@@ -64,8 +69,9 @@ namespace dspheaders {
         m.count++;
         return 0.f;
       }
-
-      // Dust(float samplerate);
-
+      
+      void setSamplerate(float samplerate) {
+        m.samplerate = samplerate;
+      }
   };
 }

@@ -1,7 +1,11 @@
 #pragma once
+
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+
+#ifndef DSP_H
+#define DSP_H
 
 namespace dspheaders {
   const float PI =            3.14159265358979323846264338327950288f;
@@ -155,3 +159,5 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
     return buffer;
   }
 } /* namespace dspheaders */
+
+#endif

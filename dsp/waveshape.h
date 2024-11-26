@@ -1,9 +1,10 @@
-#pragma once
 
 #include "dsp.h"
 #include "dsp_math.h"
 #include <cmath>
 #include <cstddef>
+
+#pragma once
 
 using namespace dspheaders;
 inline void sine(float* table, size_t tablelength) {

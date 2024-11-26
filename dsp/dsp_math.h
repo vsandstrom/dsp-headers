@@ -1,6 +1,14 @@
 #pragma once
-// #include "dsp.h"
+#include "dsp.h"
 #include <cmath>
+#include <math.h>
+
+#ifndef DSP_MATH_H
+#define DSP_MATH_H
+
+#define LOGTEN 2.302585092994046
+#define LOGTWO 0.693147180559945
+
 
 namespace dspheaders{
   constexpr float PI = 3.14159265358979323846f;
@@ -100,3 +108,4 @@ namespace dspheaders{
   // inline float radiansToFreq(float radian, float samplerate) { }
 }
 
+#endif

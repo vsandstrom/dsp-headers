@@ -1,92 +1,72 @@
+
 #pragma once
-#include "buffer.hpp"
+#include <array>
 #include <cstddef>
+#include <vector>
 
 // Note: Delay uses Buffer class, which size is always a power of two, to
 // simplify wrapping of the write head.
 
 namespace dspheaders {
   class Delay {
-    protected:
-      Buffer m_buffer;
-      unsigned g_samplerate;
-      // magic number... feedback goes too hard
-      unsigned m_taps = 1;
-      float m_time;
+    struct M {
+      std::vector<float> buffer;
+      size_t position;
+    } m;
 
-      unsigned m_writeptr = 0;
-      unsigned m_pos_mask;
-      float m_prev = 0.f;
-
-      // Read sample from delay buffer with 
-      // delaytime * samplerate number of samples offset
-      // float read(float delaytime, float damp);
-
-      // Write sample to delay buffer
-      // void write(float sample);
-
-    public:
-      // Set the number of taps in the delay.
-      inline void taps(unsigned taps) { m_taps = taps; }
-
-      // Set the duration between delay taps
-      inline void delaytime(float time) { 
-        if (time * g_samplerate > m_pos_mask) {
-          m_time = m_buffer.bufferlength / float(g_samplerate);
-          return;
+    static Delay init(size_t max_samples) {
+      std::vector<float> buffer(max_samples, 0.f);
+      return Delay(M{
+          .buffer = buffer,
+          .position = 0
         }
-        m_time = time; 
+      );
+    }
+
+    template<float (*BUF_INTERPOLATE)(float, const float * const, size_t)>float play(
+      float input,
+      float delay,
+      float feedback
+    ) {
+      float len = m.buffer.size();
+      float time = 0.f;
+
+      if (len < delay) {
+        time = m.position + len;
+      } else {
+        time = m.position + delay;
       }
-
-
-      // Read / write for reverb
-      void write(float sample, int offset);
-      float read(int offset);
-
-      virtual float process(float input, float feedback);
-  
-      // Initialize Delay
-      // maxdelaytime: the size of the buffer in samples
-      Delay(
-        unsigned samplerate,
-        float time,
-        float maxtime,
-        unsigned m_taps,
-        float (*interpolate)(float, float*, size_t)
-      );
-     
-      // Initialize Delay without assigning a number of delay taps
-      Delay(
-        unsigned samplerate,
-        float time,
-        float maxtime,
-        float (*interpolate)(float, float*, size_t)
-      );
+      while (time >= len) time -= len;
+      while (time <  len) time += len;
+      float out = BUF_INTERPOLATE(time, m.buffer.data(), m.buffer.size());
+      m.position %= m.buffer.size();
+      m.buffer[m.position] = input + (out * feedback);
+      m.position += 1;
+      return out;
+    }
+    protected:
+    public:
+      explicit Delay (M m): m(std::move(m)){}
   };
 
-  class IDelay : public Delay {
-    void write();
 
-    // float read(float delaytime, float damp);
-    // void write(float sample);
+  template<const size_t MAXLEN> class FixedDelay {
+    struct M { 
+      std::array<float, MAXLEN> buffer = {0.f};
+      size_t position = 0;
+    } m;
 
-    public:
-      float process(float input, float feedback);
-
-      IDelay(
-        unsigned samplerate,
-        float time,
-        float maxtime,
-        unsigned m_taps,
-        float (*interpolate)(float, float*, size_t)
-      );
-     
-      // Initialize Delay without assigning a number of delay taps
-      IDelay(
-        unsigned samplerate,
-        float time,
-        float maxtime,
-        float (*interpolate)(float, float*, size_t)
-      );
+    float play(
+      float input,
+      float delay,
+      float feedback
+    ) {
+      float time = (m.position + MAXLEN) % MAXLEN;
+      float out = m.buffer[time];
+      m.position %= m.buffer.size();
+      m.buffer[m.position] = input + (out * feedback);
+      m.position += 1;
+      return out;
+    }
   };
 }

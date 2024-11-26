@@ -6,6 +6,8 @@
   #define D(x) x
 #endif
 
+#pragma once
+
 namespace dspheaders {
   class Wavetable {
     struct M {

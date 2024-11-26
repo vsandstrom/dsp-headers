@@ -30,6 +30,7 @@ namespace dspheaders {
       }
 
 
+    public:
       // Read a interpolated float based on position  
       template <float(*interpolate)(const float, const float* const, const size_t)> 
       float readsample(float readptr) {

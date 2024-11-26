@@ -1,4 +1,3 @@
-#pragma once
 
 #ifndef WAVESHAPE_H
 #define WAVESHAPE_H
@@ -6,6 +5,8 @@
 #include "dsp_math.h"
 #include <cmath>
 #include <cstddef>
+
+#pragma once
 
 using namespace dspheaders;
 inline void sine(float* table, size_t tablelength) {

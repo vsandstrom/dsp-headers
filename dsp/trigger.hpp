@@ -5,6 +5,8 @@
 
 #include <utility>
 
+#pragma once
+
 namespace dspheaders {
   class Impulse {
     /*

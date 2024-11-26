@@ -6,6 +6,9 @@
 #include <cmath>
 #include <cstdlib>
 
+#ifndef DSP_H
+#define DSP_H
+
 namespace dspheaders {
   struct frame { float left; float right; };
 

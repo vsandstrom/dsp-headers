@@ -6,6 +6,8 @@
 #include "filter.hpp"
 #include "dsp_math.h"
 
+#pragma once
+
 namespace dspheaders{
   class ChownVerb {
     private:

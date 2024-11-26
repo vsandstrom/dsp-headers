@@ -1,8 +1,10 @@
 #pragma once
-
 #include "dsp.h"
 #include <cmath>
 #include <math.h>
+
+#ifndef DSP_MATH_H
+#define DSP_MATH_H
 
 #define LOGTEN 2.302585092994046
 #define LOGTWO 0.693147180559945
@@ -85,3 +87,4 @@ namespace dspheaders{
   //   return 100 + 20.f * log10f(volume) ;
   // }
 
+#endif

@@ -2,6 +2,8 @@
 
 
 #include <cstddef>
+
+#pragma once
 namespace dspheaders {
 
   struct BreakPoints {

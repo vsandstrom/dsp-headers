@@ -3,7 +3,6 @@
 #include "./dsp.h"
 
 #pragma once
-
 namespace dspheaders {
   namespace interpolation {
     // In case there should be no interpolation at all

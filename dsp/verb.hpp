@@ -1,6 +1,7 @@
-#pragma once
 #include "filter.hpp"
 #include "interpolation.hpp"
+
+#pragma once
 
 namespace dspheaders{
   class ChownVerb {

@@ -7,7 +7,7 @@
 using namespace dspheaders;
 inline void sine(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
-  inc = pi * 2.f / numsamples;
+  inc = PI * 2.f / numsamples;
   for (size_t i = 0; i < tablelength; i++) {
     table[i] = sin(angle);
     angle += inc;
@@ -64,7 +64,7 @@ inline void revsquare(float* table, size_t tablelength) {
 
 inline void hanning(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
-  inc = pi / numsamples;
+  inc = PI / numsamples;
   for (size_t i = 0; i < tablelength; i++) {
     table[i] = powf(sin(angle), 2.f);
     angle += inc;
@@ -103,13 +103,13 @@ inline float* complex_sine(
 
   // ------------ FORMULA --------------------
   // where n = 1 -> paramslength
-  // inc = pi * 2.f * n / numsamples;
+  // inc = PI * 2.f * n / numsamples;
   // positionphase = inc + (numsamples * inc); 
   // value = positionphase * amplitude
   // -----------------------------------------
   
   for (int n=1; n <= paramslength; n++) {
-    inc = pi * 2.f * n / numsamples;
+    inc = PI * 2.f * n / numsamples;
     angle = inc * numsamples * phases[n-1];
 
     // magic extra length because of Buffer shenanigans

@@ -1,12 +1,13 @@
 #pragma once
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 
 namespace dspheaders {
-  const float pi =            3.14159265358979323846264338327950288f;
-  const float tau =           6.28318530717958647692528676655900577f;
-  const float frac_pi_4 =     0.785398163397448309615660845819875721f;
-  const float frac_1_sqrt_2 = 0.707106781186547524400844362104849039;
+  const float PI =            3.14159265358979323846264338327950288f;
+  const float TAU =           6.28318530717958647692528676655900577f;
+  const float FRAC_PI_4 =     0.785398163397448309615660845819875721f;
+  const float FRAC_1_SQRT_2 = 0.707106781186547524400844362104849039;
 
   struct frame { float left; float right; };
 
@@ -129,6 +130,7 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
     }
     return sum;
   }
+
   
   inline unsigned sum(unsigned* buffer, unsigned length) {
     float sum = 0.f;

@@ -20,6 +20,8 @@ namespace dspheaders {
     explicit VectorOscillator(M m) : m(std::move(m)) {}
 
     public:
+    VectorOscillator(){}
+
     static VectorOscillator init(float samplerate) {
       return VectorOscillator(M{
           .position = 0.f,

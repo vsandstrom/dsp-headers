@@ -44,7 +44,7 @@ namespace dspheaders {
       a1 = position; // implicit cast
       b1 = a1 + 1;
       diff = position - a1;
-      bw = (1 - cos(diff*pi)) / 2;
+      bw = (1 - cos(diff*PI)) / 2;
       aw = 1.0 - bw;
       return table[a1] * aw + table[b1] * bw;
     }
@@ -148,7 +148,7 @@ namespace dspheaders {
           a1 = position; // implicit cast
           b1 = a1 + 1;
           diff = position - a1;
-          bw = (1 - cos(diff*pi)) / 2;
+          bw = (1 - cos(diff*PI)) / 2;
           aw = 1.0 - bw;
           return table[a1] * aw + table[b1] * bw;
 

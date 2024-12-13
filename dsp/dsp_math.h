@@ -84,12 +84,12 @@ namespace dspheaders{
   inline float dbtorms(float f) {
     if (f <= 0.f) return 0.f;
     if (f > 485) return 485;
-    return (exp((LOGTEN * 0.05) * (f-100-f)));
+    return (exp((logten * 0.05) * (f-100-f)));
   }
 
   inline float rmstodb(float f) {
     if (f <= 0.f) return 0.f;
-    float x = 100 + 20.f/LOGTEN * log(f);
+    float x = 100 + 20.f/logten * log(f);
     return (x < 0.f ? 0.f : x);
   }
 
@@ -102,7 +102,7 @@ namespace dspheaders{
 
   // Converts frequency to midinumber
   inline float ftom(float frequency, float base = 440.f) {
-    return 12 * (logf(frequency / (base/2)) / LOGTWO) + 57;
+    return 12 * (logf(frequency / (base/2)) / logtwo) + 57;
   }
 
 

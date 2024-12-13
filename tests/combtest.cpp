@@ -28,10 +28,10 @@ Wavetable *carrier = nullptr;
 
 bool impulse = true;
 
-Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
+Comb c0 = Comb::init<17>(0.7, 0.7);
+Comb c1 = Comb::init<23>(0.7, 0.7);
+Comb c2 = Comb::init<27>(0.7, 0.7);
+Comb c3 = Comb::init<41>(0.7, 0.7);
 Wavetable lfo = Wavetable::init(SAMPLE_RATE);
 Dust imp = Dust::init(SAMPLE_RATE);
 
@@ -66,10 +66,10 @@ static int paCallback(  const void* inputBuffer,				// input
     float sig = imp.play(0.2);
       //(impulse == true) ? 1.f : 0.f;
     l = lfo.play<TABLE_LEN, interpolation::linear>(lfo_t, 5.4, 0.f);
-    o0 = c0.process(sig, 0.9, COMBTYPE::IIR);
-    o1 = c1.process(sig, .931f, COMBTYPE::IIR);
-    o2 = c2.process(sig, 0.97, COMBTYPE::IIR);
-    o3 = c3.process(sig, 0.98, COMBTYPE::IIR);
+    o0 = c0.process(sig);
+    o1 = c1.process(sig);
+    o2 = c2.process(sig);
+    o3 = c3.process(sig);
 
     sig += (o0 + o1 + o2 + o3) * 0.2;
 

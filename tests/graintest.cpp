@@ -6,8 +6,8 @@
 #include "../dsp/dsp.h"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/wavetable.hpp"
-// #include "../dsp/grain.hpp"
-#include "../dsp/grain2.hpp"
+#include "../dsp/grain.hpp"
+#include "../dsp/waveshape.h"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/trigger.hpp"
 
@@ -35,41 +35,12 @@ using namespace interpolation;
 
 
 // GLOBALS
-Granulator2<16, 4*48000> * gr; // = Granulator2<MAX_GRAINS, BUFSIZE>();
-Envelope* genv;
-std::shared_ptr<Buffer> buf(new Buffer(RECORD_LEN, SAMPLE_RATE, interpolation::linear));
-Impulse trigger = Impulse(INTERVAL, SAMPLE_RATE);
-// Dust trigger = Dust(INTERVAL, SAMPLE_RATE);
-Wavetable ph_saw = Wavetable(SAW, 1024, SAMPLE_RATE, interpolation::linear);
-Wavetable lfo = Wavetable(SINE, 1024, SAMPLE_RATE, interpolation::linear);
-
-// Values setting the Grains size in seconds
-float p[4] = { 0.01f, 0.8f, 2.2f, 0.3f };
-// Time between the values
-float t[3] = { 12.f, 12.f, 18.f };
-// curve angle between values
-float c[3] = { 0.8f, 0.2f, 1.2f };
-
-Envelope size = Envelope(p, 4, t, 3, c, 3, SAMPLE_RATE, interpolation::linear);
-
-// Values setting the Grains speed of the playhead
-float p2[4] = { 1.f, 0.8f, 2.2f, 0.3f };
-// Values determining the transport between values
-float t2[3] = { 6.f, 20.f, 18.f };
-float c2[3] = { 0.8f, 0.2f, 1.2f };
-
-Envelope speed = Envelope(p2, 4, t2, 3, c2, 3, SAMPLE_RATE, interpolation::linear);
-
-// Values setting the Grains speed of the playhead
-float p3[4] = { 0.1f, 0.03f, 2.2f, 0.3f };
-float t3[3] = { 12.f, 8.f, 18.f };
-float c3[3] = { 1.7f, 1.2f, 3.f };
-
-Envelope imp = Envelope(p3, 4, t3, 3, c3, 3, SAMPLE_RATE, interpolation::linear);
-
-bool toggle_size_env = true;
-bool toggle_rate_env = true;
-bool toggle_impl_env = true;
+Granulator<16, 4*48000> gr = Granulator<16, 4*48000>::init(SAMPLE_RATE);
+Dust trigger = Dust::init(SAMPLE_RATE);
+Wavetable phase = Wavetable::init(SAMPLE_RATE);
+Wavetable mod = Wavetable::init(SAMPLE_RATE);
+float table[SIZE+1] = {0.f};
+float mod_t[SIZE+1] = {0.f};
 
 // Duration in samples
 int playhead = 0;

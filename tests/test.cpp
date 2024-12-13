@@ -1,17 +1,16 @@
-#include "dsp/dsp.h"
-#include <cstdio>
-#include "dsp/envelope.hpp"
-#include "dsp/interpolation.hpp"
+#include <vector>
+#include "../dsp/envelope.hpp"
 
+using namespace dspheaders;
 
-const float envpoints[] = {0, 1, 0};
-const float envtimes[] = {0.2, 0.7};
+std::vector<BreakPoint> bkp {
+  {0.f, 0.f, 0.f},
+  {1.f, 0.2, 0.f},
+  {0.f, 0.7, 0.f}
+};
 
-
-dspheaders::Envelope env = dspheaders::Envelope(envpoints, 3, envtimes, 2, 48000, dspheaders::interpolation::linear);
-
-
+dspheaders::Envelope env = dspheaders::Envelope::init(bkp, 48000);
 
 int main() {
-  env.repr();
+  // env.repr();
 }

@@ -30,7 +30,7 @@ Wavetable envelope = Wavetable::init(SAMPLE_RATE);
 
 // Tables
 // 
-float* tables[WIDTH] = {nullptr};
+float* tables[WIDTH]   = {nullptr};
 float trans[SIZE+1]    = {0.f};
 float env[SIZE+1]      = {0.f};
 float t0[SIZE+1]       = {0.f};

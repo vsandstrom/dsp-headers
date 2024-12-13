@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef WAVETABLE_HPP
+#define WAVETABLE_HPP
+
 #include <utility>
 #ifndef DEBUG
   #define D(x)  
@@ -29,7 +34,7 @@ namespace dspheaders {
       );
     }
 
-    template <unsigned SIZE, float(*interpolate) (float, float*, size_t)>
+    template <unsigned SIZE, float(*interpolate) (const float, const float* const , const size_t)>
     float play(float* table, float frequency, float phase) {
       D(assert(table != nullptr && "table has not been initialized");)
       if (frequency > m.samplerate * 0.5f) return 0;
@@ -46,3 +51,5 @@ namespace dspheaders {
     }
   };
 }
+
+#endif

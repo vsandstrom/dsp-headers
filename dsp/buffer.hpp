@@ -1,6 +1,10 @@
 /* ˙ˆ˙ */
 
 #pragma once
+
+#ifndef BUFFER_HPP
+#define BUFFER_HPP
+
 #include <array>
 #include <cstddef>
 #include "dsp.h"
@@ -64,5 +68,6 @@ namespace dspheaders {
         initbuffer();
       }
   };
-  
-}
+} 
+
+#endif

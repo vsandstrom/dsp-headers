@@ -1,10 +1,7 @@
 #pragma once
 
-#include <cstdlib>
-#include <ctime>
-#include <utility>
-
-using namespace std;
+#ifndef NOISE_HPP
+#define NOISE_HPP
 
 namespace dspheaders {
   class Noise {
@@ -55,3 +52,5 @@ namespace dspheaders {
     }
   };
 }
+
+#endif

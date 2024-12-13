@@ -18,7 +18,7 @@ static float delaytime = 0.0f;
 static float fb = 0.0f;
 
 using namespace dspheaders;
-IDelay delay = IDelay(SAMPLE_RATE, 4.f, 2, interpolation::cubic);
+Delay delay = Delay::init(SAMPLE_RATE * 4.f);
 
 static frame data;
 
@@ -42,8 +42,10 @@ static int paCallback(
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     // write and increment output and input buffer simultaneously. 
     // hardcoded for a stereo i/o setup
-    *out++ = delay.process(*in++, fb); 
-    *out++ = delay.process(*in++, fb); 
+    float l = *in++;
+    float r = *in++;
+    *out++ = delay.play<interpolation::cubic>(l, float(SAMPLE_RATE)*1.f, 0.f); 
+    *out++ = delay.play<interpolation::cubic>(r, float(SAMPLE_RATE)*1.2f, 0.f); 
 	}
 	return 0;
 }

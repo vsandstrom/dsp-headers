@@ -1,23 +1,9 @@
 #pragma once
-#include "buffer.hpp"
+#ifndef FILTER_HPP
+#define FILTER_HPP
+
 #include <cstddef>
-
-namespace dspheaders {
-  enum COMBTYPE {
-    FIR,
-    IIR
-  };
-
-  class Comb {
-    protected:
-      Buffer m_buffer;
-      float m_prev = 0.f;
-
-      float m_read();
-      void m_write(float sample);
-      unsigned m_writeptr = 0;
-      float m_readptr = 0.f;
-      float m_damp = 0.f;
+#include <vector>
 
 ///
 ///   feedback comb filter (IIR: infinite impulse response)
@@ -28,8 +14,7 @@ namespace dspheaders {
 ///         Λ       ╙──────────────────────╜  ║ 
 ///         ╙───────────( * feedback ) <──────╜
 ///
-      float m_feedback(float sample, float feedback);
-      // float m_feedback(float sample, float feedback, float mod);
+
 ///
 ///   feedforward comb filter (FIR: finite impulse response)
 ///
@@ -38,32 +23,7 @@ namespace dspheaders {
 ///  in ───╨─> ║  buffer(n - offset)  ║─> ( + )──> out
 ///            ╙──────────────────────╜    
 ///
-      float m_feedforward(float sample, float amp);
-      // float m_feedforward(float sample, float amp, float mod);
 
-
-    public: 
-      // Feedback
-      float process(float sample, float feedback, COMBTYPE type);
-      float process(float sample, float feedback, float mod, COMBTYPE type);
-      inline void setDamp(float damp) {
-        m_damp = damp;
-      }
-
-      inline unsigned getBufferLength() {
-        return m_buffer.bufferlength;
-      }
-
-
-
-      Comb(
-          unsigned offset,
-          unsigned samplerate,
-          float (*interpolate)(float, float*, size_t)
-      );
-  };
-
-  class Allpass : public Comb {
 ///
 ///                 allpass filter
 ///
@@ -74,15 +34,73 @@ namespace dspheaders {
 ///          ╙───────( * (-coeff)) <───╜
 ///
 ///       where: amp == feedback 
-    public:
-      float process(float sample, float coeff);
-      float process(float sample, float coeff, float mod);
 
-      Allpass(
-        unsigned offset,
-        unsigned samplerate,
-        float (*interpolate)(float, float*, size_t)
-      );
+namespace dspheaders {
+  enum COMBTYPE {
+    FIR,
+    IIR
+  };
+
+  class Comb {
+    protected:
+      struct M {
+        std::vector<float> buffer;
+        size_t bufferlength;
+        float damp;
+        float previous;
+        float feedforward;
+        float feedback;
+        size_t position;
+        size_t delay;
+        float previous_in;
+        float previous_out;
+      } m;
+
+    explicit Comb(M m ): m(std::move(m)){}
+
+    float read();
+    void write(float sample);
+
+
+    public: 
+      template<size_t size> static Comb init(float feedforward, float feedback) {
+        return Comb(M{
+          .buffer = std::vector<float>(size, 0.f),
+          .bufferlength = size,
+          .damp = 0.f,
+          .previous = 0.f, 
+          .feedforward = feedforward,
+          .feedback = feedback,
+          .position = 0,
+          .delay = 0,
+          .previous_in = 0.f,
+          .previous_out = 0.f
+        });
+      }
+      // Feedback
+      inline void setDamp(float damp) {
+        m.damp = damp;
+      }
+
+      inline unsigned getBufferLength() {
+        return m.bufferlength;
+      }
+
+      float process(float sample) {
+        float delayed = m.buffer[m.position];
+        float dc_blocked = sample - m.previous_in + 0.995 * m.previous_out;
+
+        m.previous_in = sample;
+        m.previous_out = dc_blocked;
+
+        m.previous = delayed * (1.f * m.damp) + m.previous * m.damp;
+        float fb = dc_blocked - m.feedback * m.previous;
+        m.buffer[m.position] = fb;
+        m.position = m.position + 1;
+        // handle maximum size of delay line
+        while (m.position >= m.bufferlength) m.position -= m.delay;
+        return m.feedforward * fb + delayed;
+      }
   };
 
 ///
@@ -305,3 +323,5 @@ namespace dspheaders {
       }
   };
 }
+
+#endif

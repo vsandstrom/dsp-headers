@@ -1,12 +1,16 @@
+#pragma once
+
+#ifndef INTERPOLATION_HPP
+#define INTERPOLATION_HPP
+
 #include <cstdlib>
 #include <cmath>
-#include "./dsp.h"
+#include "dsp_math.h"
 
-#pragma once
 namespace dspheaders {
   namespace interpolation {
     // In case there should be no interpolation at all
-    float none(float position, float* table, size_t tablelength){
+    inline float none(const float position, const float* const table, const size_t tablelength) {
       return table[(int)position];
     };
 
@@ -23,7 +27,7 @@ namespace dspheaders {
 
 
     // Basic 2 point linear interpolation
-    float linear(float position, float* table, size_t tablelength) {
+    inline float linear(const float position, const float* const table, const size_t tablelength) {
       int a1, b1 = 0;
       float aw, bw, diff = 0.f;
 
@@ -36,7 +40,7 @@ namespace dspheaders {
     }
 
     // 2 point cosine interpolation
-    float cosine(float position, float* table, size_t tablelength){
+    inline float cosine(const float position, const float* const table, const size_t tablelength){
       int a1, b1 = 0;
       float aw, bw, diff = 0.f;
 
@@ -59,7 +63,7 @@ namespace dspheaders {
      */
 
     // 4 point cubic interpolation
-    float cubic(float position, float* table, size_t tableLength) {
+    inline float cubic(const float position, const float* const table, const size_t tableLength) {
       size_t a1, a2, b1, b2;
       float c0, c1, c2, diff;
 
@@ -91,7 +95,7 @@ namespace dspheaders {
     }
 
     // 4 point hermetic interpolation
-    float hermetic(float position, float* table, size_t tableLength) {
+    inline float hermetic(const float position, const float* const table, const size_t tableLength) {
       if (table==NULL) return 0.f;
       size_t a1, a2, b1, b2;
       float c1, c2, c3, sub, diff;
@@ -109,7 +113,7 @@ namespace dspheaders {
       return 0.5f * ((c3 * diff + c2) * diff + c1) * diff + table[a2];
     }
 
-    float slope(float a, float b) {
+    inline float slope(const float a, const float b) {
       return (a + b) / 2;
     }
     
@@ -211,4 +215,4 @@ namespace dspheaders {
   }
 }
 
-
+#endif

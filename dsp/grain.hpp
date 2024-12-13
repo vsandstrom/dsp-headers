@@ -1,8 +1,14 @@
+#pragma once
+
+#ifndef GRAIN_HPP
+#define GRAIN_HPP
+
 #include "waveshape.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
 #include <array>
+
 #ifndef DEBUG
   #define D(x)  
 #else 
@@ -14,7 +20,7 @@ static size_t count = 0;
 
 namespace dspheaders {
   template<size_t NUMGRAINS, size_t BUFSIZE>
-  class GranulatorEX {
+  class Granulator {
     struct Grain {
       public:
       float bufpos = 0.f;
@@ -41,10 +47,10 @@ namespace dspheaders {
       std::array<Grain, NUMGRAINS> grains;
     } m;
 
-    explicit GranulatorEX<NUMGRAINS, BUFSIZE> (M m): m(std::move(m)){}
+    explicit Granulator<NUMGRAINS, BUFSIZE> (M m): m(std::move(m)){}
 
     public:
-    static GranulatorEX init(
+    static Granulator init(
       float samplerate
     ) {
 
@@ -52,7 +58,7 @@ namespace dspheaders {
       float* env = new float[envlen+1];
       hanning(env, envlen);
 
-      return GranulatorEX(M{
+      return Granulator(M{
         .env = env,
         .envlen = envlen,
         .samplerate = samplerate,
@@ -60,7 +66,9 @@ namespace dspheaders {
       });
     }
 
-    template<float (*BUF_INTERPOLATE)(float, float*, size_t), float (*ENV_INTERPOLATE)(float, float*, size_t)>
+    template<
+      float (*BUF_INTERPOLATE)(const float, const float* const, const size_t), 
+      float (*ENV_INTERPOLATE)(const float, const float* const, const size_t)>
     float play(
         float position,
         float duration,
@@ -114,7 +122,7 @@ namespace dspheaders {
       return envlen * sr_recip * dur_recip;
     }
 
-    ~GranulatorEX(){
+    ~Granulator(){
       delete[] m.buffer;
     }
 
@@ -149,3 +157,5 @@ namespace dspheaders {
     }
   };
 }
+
+#endif

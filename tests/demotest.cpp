@@ -93,24 +93,22 @@ VectorOscillator vec1= VectorOscillator::init(SAMPLE_RATE);
 float v0_freq = 0.f;
 float v1_freq = 0.f;
 //  Volume Envelope
-// float ap[] = {0.f, 0.5f, 0.3f, 0.f};
-// float at[] = {0.6f, 1.2f, 0.4};
-// float ac[] = {2.6f, 1.2f, 3.4};
-float ap[] = {0.f, 0.5f, 0.f};
-float at[] = {2.01f, 2.5f};
-float ac[] = {0.1f, 1.6};
-Envelope ampenv = Envelope(ap, 3, at, 2, ac, 2, SAMPLE_RATE, interpolation::cubic);
-Envelope ampenv1 = Envelope(ap, 3, at, 2, ac, 2, SAMPLE_RATE, interpolation::cubic);
+std::vector<BreakPoint> bp = {
+  {0.f, 0.0, 0.0},
+  {0.5, 2.0, 0.1},
+  {0.f, 2.5, 1.6}
+};
+Envelope ampenv = Envelope::init(bp, SAMPLE_RATE);
+Envelope ampenv1 = Envelope::init(bp, SAMPLE_RATE);
 
 // Vector Movement Envelope
-// float vp[] = {.0f, .8f, .3f, .0f};
-// float vt[] = {1.1f, 0.8f, 1.4f};
-// float vc[] = {.6f, .8f, 1.4f};
-float vp[] = {.0f, .8f, .0f};
-float vt[] = {.21f, .6f};
-float vc[] = {1.2f, .4f};
-Envelope vecenv = Envelope(vp, 3, vt, 2, SAMPLE_RATE, interpolation::linear);
-Envelope vecenv1 = Envelope(vp, 3, vt, 2, SAMPLE_RATE, interpolation::linear);
+std::vector<BreakPoint> vp ={{.0f, .8f, .0f},
+{0.f, .21f, .6f},
+{0.f, 1.2f, .4f}
+};
+
+Envelope vecenv = Envelope::init(vp, SAMPLE_RATE);
+Envelope vecenv1 = Envelope::init(vp, SAMPLE_RATE);
 
 // Wavetable carrier = Wavetable(TRIANGLE, SIZE, SAMPLE_RATE, interpolation::cubic);
 // Wavetable* modulator 
@@ -126,7 +124,7 @@ float m0_freq = 0.f;
 float m1_freq = 0.f;
 float v_freq = 3.2f;
 
-Delay delay = Delay(SAMPLE_RATE, 4.f, 1, interpolation::cubic);
+Delay delay = Delay::init(SAMPLE_RATE * 4.f);
 
 SchroederVerb verbl = SchroederVerb(SAMPLE_RATE);
 SchroederVerb verbr = SchroederVerb(SAMPLE_RATE);
@@ -171,26 +169,27 @@ static int paCallback(  const void* inputBuffer,				// input
     if ( timeline == seq ) {
       scoreptr++;
       seq += (unsigned)(SAMPLE_RATE * dur[scoreptr % 13]);
-      env = ampenv.play(GATE::on);
-      venv = vecenv.play(GATE::on);
+      // env = ampenv.play(GATE::on);
+      // venv = vecenv.play(GATE::on);
       v0_freq = score[scoreptr % 13];
       m0_freq = score[scoreptr % 5] * 3; 
-    } else {
-      env = ampenv.play(GATE::off, 2.f);
-      venv = vecenv.play(GATE::off, 3.f);
-    }
+      ampenv.trig();
+      vecenv.trig();
+    } 
 
     if (timeline == seq1) {
       scoreptr++;
       seq1 += (unsigned)(SAMPLE_RATE * dur1[scoreptr1 % 5]);
-      env1 = ampenv1.play(GATE::on);
-      venv1 = vecenv1.play(GATE::on);
       v1_freq = score1[scoreptr1 % 4];
       m1_freq = score1[scoreptr1 % 4] * 3;
-    } else {
-      env1 = ampenv1.play(GATE::off, 2.f);
-      venv1 = vecenv1.play(GATE::off, 3.f);
-    }
+      ampenv1.trig();
+      vecenv1.trig();
+    } 
+
+    env = ampenv.play();
+    venv = vecenv.play();
+    env1 = ampenv1.play();
+    venv1 = vecenv1.play();
 
     float vibr = vib.play<SIZE, linear>(vib_t, v_freq, 0.f);
 
@@ -215,9 +214,9 @@ static int paCallback(  const void* inputBuffer,				// input
     float sig = car * env * amps[scoreptr & 7];
     float sig1 = car1 * env1 * amps1[scoreptr1 % 4];
 
-    del = delay.process(sig + sig1, 0.5);
-    revl = verbl.process(sig + del, 0.8);
-    revr = verbr.process(sig1 - del, 0.8);
+    del = delay.play<linear>(sig + sig1, 0.5, 0.f);
+    revl = verbl.process(sig + del);
+    revr = verbr.process(sig1 - del);
 
     //
     float left = ((sig * 0.8) + (del * 0.54) + (revl * 0.74));

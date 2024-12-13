@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <iostream>
+#include <vector>
 #include "../portaudio/include/portaudio.h"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/wavetable.hpp"
@@ -21,9 +22,12 @@ float FREQ =                300.0f;
 float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
-float breakpoints[] = {0.f, 0.2f, 0.8f, 0.f};
-float breaktimes[] = {0.1f, 1.5f, 1.5f};
-float breakcurves[] = {1.5f, 0.2,  0.2};
+std::vector<BreakPoint> bkp {
+  {0.f, 0.f, 0.f},
+  {0.2, 0.1, 1.5},
+  {0.8, 1.5, 0.2},
+  {0.f, 1.5, 0.2}
+};
 
 // keeps track of the number of the current sample
 unsigned timeline = 0;
@@ -32,12 +36,12 @@ unsigned scoreptr = 0;
 
 using namespace dspheaders;
 using namespace interpolation;
-Envelope envelope = Envelope(breakpoints, 4, breaktimes, 3, breakcurves, 3, SAMPLE_RATE, interpolation::linear);
+Envelope envelope = Envelope::init(bkp, SAMPLE_RATE);
 Wavetable carrier = Wavetable::init(SAMPLE_RATE);
 Wavetable modulator = Wavetable::init(SAMPLE_RATE);
 float car_t[SIZE] = {0.f};
 float mod_t[SIZE] = {0.f};
-Delay delay = Delay(SAMPLE_RATE, 4.f, 4, interpolation::cubic);
+Delay delay = Delay::init(SAMPLE_RATE* 4.f);
 
 static frame data;
 
@@ -55,22 +59,17 @@ static int paCallback(  const void* inputBuffer,				// input
 	float* out = (float*)outputBuffer;
 	unsigned int i;
 
-  float env = 0.f;
-
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
 
     if ( timeline == 48000 || timeline == 48000 * 6) {
-      env = envelope.play(GATE::on);
-    } else {
-      env = envelope.play(GATE::off);
-    }
-    float car = carrier.play<SIZE, cubic>(
+      envelope.trig();
+    } 
+    float sig = carrier.play<SIZE, cubic>(
       car_t, FREQ, modulator.play<SIZE, cubic>(
         mod_t, FM_FREQ, 0.f)
-    );
-    float sig = car*env;
+    ) * envelope.play();
 
     // Stereo frame: two increments of out buffer
     *out++ = sig; 
@@ -88,6 +87,8 @@ int main(int argc, char** argv) {
 	data.left = data.right = 0.0f;
   triangle(car_t, SIZE);
   sine(mod_t, SIZE);
+
+  envelope.set_reset_type(Reset::SOFT);
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;

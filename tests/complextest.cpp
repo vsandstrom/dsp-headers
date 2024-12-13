@@ -3,7 +3,6 @@
 #include "../portaudio/include/portaudio.h"
 #include <cstdio>
 #include <iostream>
-#include <string>
 #include <sys/_types/_mode_t.h>
 #include "../dsp/wavetable.hpp"
 #include "../dsp/waveshape.h"

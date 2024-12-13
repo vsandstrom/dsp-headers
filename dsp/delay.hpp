@@ -1,11 +1,11 @@
-
 #pragma once
+
+#ifndef DELAY_HPP
+#define DELAY_HPP
+
 #include <array>
 #include <cstddef>
 #include <vector>
-
-// Note: Delay uses Buffer class, which size is always a power of two, to
-// simplify wrapping of the write head.
 
 namespace dspheaders {
   class Delay {
@@ -14,6 +14,9 @@ namespace dspheaders {
       size_t position;
     } m;
 
+    explicit Delay (M m): m(std::move(m)){}
+
+    public:
     static Delay init(size_t max_samples) {
       std::vector<float> buffer(max_samples, 0.f);
       return Delay(M{
@@ -23,7 +26,7 @@ namespace dspheaders {
       );
     }
 
-    template<float (*BUF_INTERPOLATE)(float, const float * const, size_t)>float play(
+    template<float (*BUF_INTERPOLATE)(const float, const float * const, size_t)>float play(
       float input,
       float delay,
       float feedback
@@ -36,17 +39,14 @@ namespace dspheaders {
       } else {
         time = m.position + delay;
       }
-      while (time >= len) time -= len;
       while (time <  len) time += len;
+      while (time >= len) time -= len;
       float out = BUF_INTERPOLATE(time, m.buffer.data(), m.buffer.size());
       m.position %= m.buffer.size();
       m.buffer[m.position] = input + (out * feedback);
       m.position += 1;
       return out;
     }
-    protected:
-    public:
-      explicit Delay (M m): m(std::move(m)){}
   };
 
 
@@ -70,3 +70,5 @@ namespace dspheaders {
     }
   };
 }
+
+#endif

@@ -6,8 +6,8 @@
 #include "../dsp/dsp.h"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/wavetable.hpp"
+#include "../dsp/grain.hpp"
 #include "../dsp/waveshape.h"
-#include "../dsp/grain_ex.hpp"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/trigger.hpp"
 
@@ -32,7 +32,7 @@ using namespace interpolation;
 
 
 // GLOBALS
-GranulatorEX<16, 4*48000> gr = GranulatorEX<16, 4*48000>::init(SAMPLE_RATE);
+Granulator<16, 4*48000> gr = Granulator<16, 4*48000>::init(SAMPLE_RATE);
 Dust trigger = Dust::init(SAMPLE_RATE);
 Wavetable phase = Wavetable::init(SAMPLE_RATE);
 Wavetable mod = Wavetable::init(SAMPLE_RATE);

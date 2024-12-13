@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef ENV_HPP
+#define ENV_HPP
+
 #include "dsp.h"
 #include "buffer.hpp"
 #include <algorithm>
@@ -7,9 +10,6 @@
 #include <iterator>
 #include <vector>
 #include <cassert>
-
-#ifndef ENV_HPP
-#define ENV_HPP
 
 namespace dspheaders {
   struct BreakPoint {
@@ -45,7 +45,7 @@ namespace dspheaders {
 
     public: 
       static Envelope init(std::vector<BreakPoint> breakpoints, float samplerate) {
-        assert(breakpoints.size() < 2 && "BreakPoints need to be at least 2 items long");
+        assert(breakpoints.size() > 2 && "BreakPoints need to be at least 2 items long");
         return Envelope(M{
             .breakpoints = breakpoints,
             .counter = 0.f,

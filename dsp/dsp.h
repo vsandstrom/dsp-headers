@@ -1,17 +1,12 @@
 #pragma once
 
-#include <cmath>
-#include <cstdlib>
-
 #ifndef DSP_H
 #define DSP_H
 
-namespace dspheaders {
-  const float pi =            3.14159265358979323846264338327950288f;
-  const float tau =           6.28318530717958647692528676655900577f;
-  const float frac_pi_4 =     0.785398163397448309615660845819875721f;
-  const float frac_1_sqrt_2 = 0.707106781186547524400844362104849039;
+#include <cmath>
+#include <cstdlib>
 
+namespace dspheaders {
   struct frame { float left; float right; };
 
   enum GATE { on = 1, off = 0, cycle = 2, };

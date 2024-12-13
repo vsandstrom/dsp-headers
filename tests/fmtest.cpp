@@ -23,9 +23,9 @@ float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
 
-Wavetable carrier = Wavetable::init(SAMPLE_RATE);
+Wavetable carrier   = Wavetable::init(SAMPLE_RATE);
 Wavetable modulator = Wavetable::init(SAMPLE_RATE);
-Wavetable envelope = Wavetable::init(SAMPLE_RATE);
+Wavetable envelope  = Wavetable::init(SAMPLE_RATE);
 
 float car_t[SIZE] = {0.f};
 float mod_t[SIZE] = {0.f};
@@ -93,6 +93,7 @@ int main(int argc, char** argv) {
 
 	// sound duration
 	Pa_Sleep(DURATION); // NUM_SECONDS is in milliseconds????
+
 
 	// stop sound
 	err = Pa_StopStream(stream);

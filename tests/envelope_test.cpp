@@ -1,5 +1,6 @@
 
 #include <cstdio>
+#include <vector>
 #include "../portaudio/include/portaudio.h"
 #include "../dsp/dsp.h"
 #include "../dsp/interpolation.hpp"
@@ -19,7 +20,13 @@ const unsigned envlength = 512;
 using namespace dspheaders;
 
 // GLOBALS
-Envelope* env;
+std::vector<BreakPoint> bkp {
+  {0.f, 0.0, 0.0},
+  {.8f, 0.2, 0.0},
+  {0.f, 1.2, 0.0},
+};
+
+Envelope env = Envelope::init(bkp, SAMPLE_RATE);
 float envptr = 0.f;
 
 int duridx = 0;
@@ -44,16 +51,7 @@ static int paCallback(
   int i;
   float sig = 0.f;
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    if (envptr >= env->getBufferlength()) {
-      envptr = 0.f;
-      duridx++;
-    }
-    if (duridx == DURLEN) {
-      sig = 0.f;
-    } else {
-      envptr += setDur(durs[duridx], envlength, SAMPLE_RATE);
-      sig = env->read(envptr);
-    }
+    sig = env.play();
     *out++ = sig;
     *out++ = sig;
 	}
@@ -71,12 +69,7 @@ float setFloatDur(float dur, unsigned length, float samplerate) {
 };
 
 int main(int argc, char** argv) {
-
-  float table[envlength] = {0.f};
-  hanning(table, envlength);
-
-  env = new Envelope(table, envlength, SAMPLE_RATE, interpolation::cubic);
-
+  env.set_loopable(true);
 
 	PaStream* stream;
 	PaError err;

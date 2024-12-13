@@ -37,7 +37,7 @@ static int paCallback(  const void* inputBuffer,				// input
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
     float sig = (impulse == true) ? 1.f : 0.f;
-    sig = verb.process(sig, 0.95);
+    sig = verb.process(sig);
 
     // Stereo frame: two increments of out buffer
     *out++ = sig*0.3; 

@@ -19,3 +19,5 @@ tests/*
 
 /tests/allpass*
 /tests/wave_*
+*rust*
+a.out

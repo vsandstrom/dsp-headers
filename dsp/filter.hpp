@@ -325,31 +325,96 @@ namespace dspheaders {
 
 
   class Biquad {
-    float buffer[2] {0.f};
-
     // feedforward coeffs
-    const float b[3] = {1.f, 0.f, -1.f};
+    struct M {
+      float b0;
+      float b1; 
+      float b2;
     // feedback coeffs
-    float a[3] = { 1.f, -.3835f, .8786f };
+      float a1;
+      float a2;
+    
+      float x1;
+      float x2;
+      float y1;
+      float y2;
+    }m;
 
     public:
     Biquad(){}
     // Supply custom feedback coeffs, must be *at least* 3, only 3 values will 
     // be read if longer
-    Biquad(const float* coeffs) {
-      for (unsigned i = 0; i<3; ++i) {
-        a[i] = coeffs[i];
-      }
+
+    void set_coeffs(BiquadCoeffs* coeffs) {
+      m.a1 = coeffs->a1;
+      m.a2 = coeffs->a2;
+      m.b0 = coeffs->b0;
+      m.b1 = coeffs->b1;
+      m.b2 = coeffs->b2;
     }
 
     float process(float input, float initial_amplitude) {
-      float in = input * initial_amplitude;
-      float out = in * b[0] + buffer[0] * b[1] + buffer[1] * b[2];
-      float next = buffer[0] * a[0] + buffer[1] * a[1];
+      float output = m.b0 * input 
+                     + m.b1 * m.x1
+                     + m.b2 * m.x2
+                     - m.a1 * m.y1
+                     - m.a2 * m.y2;
 
-      buffer[1] = buffer[0];
-      buffer[0] = in + next;
-      return out;
+      m.x2 = m.x1;
+      m.x1 = input;
+      m.y2 = m.y1;
+      m.y1 = output;
+      return output;
+    }
+
+
+    inline auto calc_lpf(float w, float q) -> BiquadCoeffs {
+      float alpha = sinf(w) / (2.0 * q);
+      float a0 = 1.0 + alpha;
+      float a1 = (-1.0 * cosf(w)) / a0 ;
+      float a2 = (1.0 - alpha) / a0;
+
+      float b1 = (1.0 - cosf(w)) / a0;
+      float b0 = b1 / 2.0 / a0;
+      float b2 = b0;
+      return BiquadCoeffs{a1, a2, b0, b1, b2};
+    }
+      
+    inline auto calc_bpf(float w, float q) -> BiquadCoeffs {
+      float alpha = sinf(w) / (2.0 * q);
+      
+      float a0 = 1.0 + alpha;
+      float a1 = (-1.0 * cosf(w)) / a0;
+      float a2 = (1.0 - alpha) / a0;
+
+      float b0 = alpha / a0;
+      float b1 = 0.0;
+      float b2 = -alpha / a0;
+      return BiquadCoeffs{a1, a2, b0, b1, b2};
+    }
+
+    inline auto calc_hpf(float w, float q) -> BiquadCoeffs {
+      float alpha = sinf(w) / (2.0 * q);
+      float a0 = 1.0 + alpha;
+      float a1 = -1.0 * cosf(w) / a0;
+      float a2 = 1.0 - alpha / a0;
+
+      float b0 = (1.0 + cosf(w)) / 2.0 / a0;
+      float b1 = -(b0 * 2.0);
+      float b2 = b0;
+      return BiquadCoeffs{a1, a2, b0, b1, b2};
+    }
+
+    inline auto calc_notch(float w, float q) -> BiquadCoeffs {
+      float alpha = sinf(w) / (2.0 * q);
+      float a0 = 1.0 + alpha;
+      float a1 = -2.0 * cosf(w) / a0;
+      float a2 = (1.0 - alpha) / a0;
+
+      float b0 = 1.0 / a0;
+      float b1 = a1;
+      float b2 = b0;
+      return BiquadCoeffs{a1, a2, b0, b1, b2};
     }
   };
 }

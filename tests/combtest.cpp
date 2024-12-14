@@ -5,6 +5,8 @@
 #include <iostream>
 #include "../dsp/filter.hpp"
 #include "../dsp/wavetable.hpp"
+#include "../dsp/waveshape.h"
+#include "../dsp/trigger.hpp"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
@@ -26,11 +28,14 @@ Wavetable *carrier = nullptr;
 
 bool impulse = true;
 
-Comb c0 = Comb(17, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c1 = Comb(23, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c2 = Comb(27, (unsigned)SAMPLE_RATE, interpolation::linear);
-Comb c3 = Comb(41, (unsigned)SAMPLE_RATE, interpolation::linear);
-Wavetable lfo = Wavetable(TRIANGLE, 512, SAMPLE_RATE, interpolation::linear);
+Comb c0 = Comb::init<17>(0.7, 0.7);
+Comb c1 = Comb::init<23>(0.7, 0.7);
+Comb c2 = Comb::init<27>(0.7, 0.7);
+Comb c3 = Comb::init<41>(0.7, 0.7);
+Wavetable lfo = Wavetable::init(SAMPLE_RATE);
+Dust imp = Dust::init(SAMPLE_RATE);
+
+float lfo_t[TABLE_LEN] = {0};
 
 
 
@@ -43,6 +48,7 @@ static int paCallback(  const void* inputBuffer,				// input
 						PaStreamCallbackFlags statusFlags,          //
 						void* userdata )								            // "void"-type can be typecast to other 
 {
+
 
 	// cast data passing through stream
 	frame* data = (frame*) userdata;
@@ -57,13 +63,13 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float sig = (impulse == true) ? 1.f : 0.f;
-    lfo.frequency = 5.4;
-    l = lfo.play();
-    o0 = c0.process(sig, 0.9, COMBTYPE::IIR);
-    o1 = c1.process(sig, .931f, COMBTYPE::IIR);
-    o2 = c2.process(sig, 0.97, COMBTYPE::IIR);
-    o3 = c3.process(sig, 0.98, COMBTYPE::IIR);
+    float sig = imp.play(0.2);
+      //(impulse == true) ? 1.f : 0.f;
+    l = lfo.play<TABLE_LEN, interpolation::linear>(lfo_t, 5.4, 0.f);
+    o0 = c0.process(sig);
+    o1 = c1.process(sig);
+    o2 = c2.process(sig);
+    o3 = c3.process(sig);
 
     sig += (o0 + o1 + o2 + o3) * 0.2;
 
@@ -80,6 +86,8 @@ int main(int argc, char** argv) {
 	PaError err;
 
 	data.left = data.right = 0.0f;
+
+  triangle(lfo_t, TABLE_LEN);
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;

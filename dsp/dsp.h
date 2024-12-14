@@ -1,20 +1,15 @@
 #pragma once
-#include "dsp_math.h"
+
+#ifndef DSP_H
+#define DSP_H
+
 #include <cmath>
 #include <cstdlib>
+
 namespace dspheaders {
-  // const float pi = 3.14159265358979323846f;
+  struct frame { float left; float right; };
 
-  struct frame {
-    float left;
-    float right;
-  };
-
-  enum GATE {
-    on = 1, 
-    off = 0,
-    cycle = 2,
-  };
+  enum GATE { on = 1, off = 0, cycle = 2, };
 
   ///////////////////////////////
   // Discrete sample manipulation
@@ -157,3 +152,5 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
     return buffer;
   }
 } /* namespace dspheaders */
+
+#endif

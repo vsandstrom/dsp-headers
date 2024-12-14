@@ -1,132 +1,161 @@
 #pragma once
-#include "buffer.hpp"
-#include "envelope.hpp"
-#include "buffer.hpp"
-#include <cstddef>
-#include <memory>
 
+#ifndef GRAIN_HPP
+#define GRAIN_HPP
+
+#include "waveshape.h"
+#include <algorithm>
+#include <cstddef>
+#include <cstdio>
+#include <array>
+
+#ifndef DEBUG
+  #define D(x)  
+#else 
+  #include <assert.h>
+  #define D(x) x
+#endif
+
+static size_t count = 0;
 
 namespace dspheaders {
-
-  class Grain {
-    private: 
-    // Shared across whole swarm
-      std::shared_ptr<Buffer> g_buffer;
-      std::shared_ptr<float> g_samplerate;
-      std::shared_ptr<Envelope> g_envelope;
-
-      
-      float m_readptr;
-      float m_envptr;
-      unsigned m_envlength;
-      float m_jitter = 0.f;
-      float m_random = 0.f;
-
-      float m_playbackrate = 1.f;
-      float m_dur = 0.0533333;
-
-    public:
-      bool m_active = false;
-
-      float play();
-      float play(float position, float rate);
-
-      inline void setDur(float dur) {
-        // 512 (len) / 48000 (sr) * 0.2 (sec) ≈ 0.05333334 samples/frame
-        m_dur = (float)m_envlength / ((*g_samplerate) * dur); };
-
-      inline void setRate(float rate) { m_playbackrate = rate; };
-      inline void setJitter(float jitter) {m_jitter = jitter;};
-
-      void test();
-
-    Grain(
-      float readptr,
-      float graindur,
-      float* samplerate,
-      std::shared_ptr<Buffer> buffer,
-      std::shared_ptr<Envelope> envelope
-    );
-
-    Grain();
-
-  };
-
+  template<size_t NUMGRAINS, size_t BUFSIZE>
   class Granulator {
-    private: 
-    // Shared variables between Granulator and Grain-swarm
-      float g_samplerate;
-      std::shared_ptr<Buffer> g_buffer;
-      std::shared_ptr<Envelope> g_envelope;
+    struct Grain {
+      public:
+      float bufpos = 0.f;
+      float envpos = 0.f;
+      float rate = 1.f;
+      float dur = 0.f;
+      bool  active = false;
+    };
 
-      Grain* m_grains;
-      const unsigned m_maxgrains = 32;
+    struct M{
+      float* buffer = new float[BUFSIZE];
+      float buflen = static_cast<float>(BUFSIZE);
 
-      float m_position = 0.f;
-      float m_playbackrate=1.f;
-    public:
-    // Live variables
-      unsigned m_numgrains = 8;
-      float m_grainsize = 0.2f;
-      float m_jitter = 1.f;
+      float* env;
+      size_t envlen;
 
-    // Setters
+      size_t recpos = 0;
+      bool recording = true;
 
-      inline void setNumGrains(int num)    { m_numgrains = num;  };
-      inline void setJitter (float amount) { 
-      };
-      inline void setGrainSize(float dur) {
-        m_grainsize = dur;
-        for (int i = 0; i < m_maxgrains; i++) {
-          m_grains[i].setDur(dur);
-
-        }
-      };
-      inline void setRate(float rate) { m_playbackrate = rate; };
-
-    // Process / Play
-
-      float process();
-      float process(float position, float trigger);
-
-      // float process(float position, float rate);
-      float process(float position, float rate, float trigger);
-
-    // Construct / Destruct
-
-      // Default envelope - works fine to get going
-      Granulator(
-        float dur,
-        float samplerate,
-        unsigned maxgrains,
-        std::shared_ptr<Buffer> buffer,
-
-        float (*interpolate)(float, float*, size_t)
-      );
-     
-      // Predefined grain envelope in float array
-      Granulator(
-        float dur,
-        float samplerate, 
-        unsigned maxgrains,
-        float* envtable, 
-        unsigned tablelength,
-        float (interpolate)(float, float*, size_t),
-        std::shared_ptr<Buffer> buffer
-
-      );
+      float samplerate = 0.f;
+      float sr_recip = 0.f;
       
-      // Predefined grain envelope in Wavetable
-      Granulator(
-        float dur,
-        float samplerate,
-        unsigned maxgrains,
-        std::shared_ptr<Envelope> grainEnvelope,
-        std::shared_ptr<Buffer> buffer
-      );
+      size_t next;
+      std::array<Grain, NUMGRAINS> grains;
+    } m;
 
+    explicit Granulator<NUMGRAINS, BUFSIZE> (M m): m(std::move(m)){}
 
+    public:
+    static Granulator init(
+      float samplerate
+    ) {
 
-      ~Granulator();
+      size_t envlen = 1<<12;
+      float* env = new float[envlen+1];
+      hanning(env, envlen);
+
+      return Granulator(M{
+        .env = env,
+        .envlen = envlen,
+        .samplerate = samplerate,
+        .sr_recip = 1.f / samplerate,
+      });
+    }
+
+    template<
+      float (*BUF_INTERPOLATE)(const float, const float* const, const size_t), 
+      float (*ENV_INTERPOLATE)(const float, const float* const, const size_t)>
+    float play(
+        float position,
+        float duration,
+        float rate,
+        float jitter,
+        float trigger
+      ) {
+      // D(assert(m.grains[m.next] != nullptr && "grains has not been initialized"));
+      if (trigger >= 1.f && !m.grains[m.next].active) {
+        // normalize buffer position
+        // float pos = (position + jitter) - long(position+jitter);
+        // while (pos < 0.f) pos += 1.f;
+        while (position > 1.0f) position -= 1.f;
+        while (position < 0.0f) position += 1.f;
+
+        D(printf("trig %zu", count++));
+        
+        // set params for grain
+        m.grains[m.next].bufpos = position * m.buflen;
+        m.grains[m.next].envpos = 0.f;
+        m.grains[m.next].rate = rate;
+        m.grains[m.next].dur = calc_duration(
+          static_cast<float>(m.envlen),
+          m.sr_recip,
+          1.f / duration
+        );
+        m.grains[m.next].active = true;
+        m.next = (m.next + 1) % NUMGRAINS;
+      }
+
+      // loop over active grains and deactivate stale grains
+      float out = 0.f;
+      size_t len = static_cast<size_t>(m.buflen);
+
+      for (Grain &g: m.grains) {
+        if (g.envpos >= m.envlen) {g.active = false;}
+        if (g.active) {
+          float sig = BUF_INTERPOLATE(g.bufpos, m.buffer, len);
+          float env = ENV_INTERPOLATE(g.envpos, m.env, m.envlen);
+          g.bufpos += g.rate;
+          while (g.bufpos >= len) { g.bufpos -= len; } 
+          g.envpos += g.dur;
+          while (g.envpos >= m.envlen) { g.envpos -= m.envlen; } 
+          out += sig * env;
+        }
+      }
+      return out;
+    }
+
+    float calc_duration(float envlen, float sr_recip, float dur_recip) {
+      return envlen * sr_recip * dur_recip;
+    }
+
+    ~Granulator(){
+      delete[] m.buffer;
+    }
+
+    void reset_record() { 
+      m.recpos = 0; 
+      m.recording = true;
+    }
+
+    void update_envelope(float*env, size_t envlen) {
+      delete[] m.env;
+      m.env = new float[envlen];
+      for (int i = 0; i < envlen; i++) { m.env[i] = env[i]; }
+      m.envlen = envlen;
+    }
+
+    void set_samplerate(float samplerate) { 
+      m.samplerate = samplerate; 
+      m.sr_recip = 1.f / samplerate; 
+    }
+
+    void set_buffersize(size_t size) { 
+      delete[] m.buffer;
+      m.buffer = new float[size];
+      m.buflen = size;
+    }
+
+    bool record(float sample) {
+      if (m.recpos == m.buflen) { m.recording = false; return m.recording; } 
+      m.buffer[m.recpos] = sample;
+      m.recpos++;
+      return m.recording;
+    }
   };
 }
+
+#endif

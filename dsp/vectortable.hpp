@@ -1,3 +1,8 @@
+#pragma
+
+#ifndef VECOSC_HPP
+#define VECOSC_HPP
+
 #include <cstddef>
 #include <utility>
 
@@ -20,6 +25,8 @@ namespace dspheaders {
     explicit VectorOscillator(M m) : m(std::move(m)) {}
 
     public:
+    VectorOscillator(){}
+
     static VectorOscillator init(float samplerate) {
       return VectorOscillator(M{
           .position = 0.f,
@@ -36,7 +43,7 @@ namespace dspheaders {
      * `tables` is a 2 dimensional array of floats:
      * `float[SIZE][WIDTH]` or `float**`.
      */
-    template<size_t SIZE, size_t WIDTH, float(*interpolate)(float, float*, size_t)>
+    template<size_t SIZE, size_t WIDTH, float(*interpolate)(const float, const float* const, const size_t)>
     float play(float** tables, float frequency, float position, float phase) {
       D({
         for (int i = 0; i < WIDTH; i++) {
@@ -69,3 +76,5 @@ namespace dspheaders {
     }
   };
 }
+
+#endif

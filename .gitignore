@@ -19,5 +19,8 @@ tests/*
 
 /tests/allpass*
 /tests/wave_*
-*rust*
+
+rust_dsp.h
+rusttest.cpp
+librust*
 a.out

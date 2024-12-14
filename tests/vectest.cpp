@@ -3,21 +3,21 @@
 #include <iostream>
 #include "../portaudio/include/portaudio.h"
 #include "../dsp/dsp.h"
-#include "../dsp/vector_ex.hpp"
-#include "../dsp/wavetable_ex.hpp"
+#include "../dsp/vectortable.hpp"
+#include "../dsp/wavetable.hpp"
 #include "../dsp/waveshape.h"
 #include "../dsp/interpolation.hpp"
 
-const float AMP =              1.0f;
-const int DURATION =           25000; // milliseconds
-const size_t SIZE =      512;
-const size_t WIDTH =      3;
-const float  SAMPLE_RATE =   48000;
+const float AMP               = 1.0f;
+const int DURATION            = 25000; // milliseconds
+const size_t SIZE             = 512;
+const size_t WIDTH            = 4;
+const float  SAMPLE_RATE      = 48000;
 
 // CHANGE THE VALUES BELOW FOR OTHER PITCHES 
-float FREQ =                200.0f;
-float FM_FREQ =             180.0f;
-float ENV_FREQ =              4.0f;
+float FREQ                    = 200.0f;
+float FM_FREQ                 = 180.0f;
+float ENV_FREQ                = 4.0f;
 
 static frame data;
 
@@ -30,12 +30,13 @@ Wavetable envelope = Wavetable::init(SAMPLE_RATE);
 
 // Tables
 // 
-float* tables[WIDTH] = {nullptr};
+float* tables[WIDTH]   = {nullptr};
 float trans[SIZE+1]    = {0.f};
 float env[SIZE+1]      = {0.f};
 float t0[SIZE+1]       = {0.f};
 float t1[SIZE+1]       = {0.f};
 float t2[SIZE+1]       = {0.f};
+float t3[SIZE+1]       = {0.f};
 
 
 // callback function must contain these inputs as PortAudio expects it.
@@ -78,22 +79,29 @@ int main(int argc, char** argv) {
 	PaError err;
 
   // fill float arrays with wavetable shapes
+  // transform table
   sine(trans, SIZE);
+  // envelope table
   hanning(env, SIZE);
+  // vector table 1
   sine(t0, SIZE);
+  // vector table 2
   float amp[2] = {1.f, 0.6f};
   float phs[2] = {0.f, 0.f};
   complex_sine(t1, SIZE, amp, phs, 2);
+  // vector table 3
   float amp2[6] = {1.f, 0.3, 0.8f, 0.5f, 0.1f, 0.3f};
   float phs2[6] = {0.f, 0.3f, 0.6f, 0.1f, 0.8f, 0.75f};
   complex_sine(t2, SIZE, amp2, phs2, 2);
+  // vector table 4
+  saw(t3, SIZE);
+
   tables[0] = t0;
   tables[1] = t1;
   tables[2] = t2;
+  tables[3] = t3;
 
   // initialize first value, no wierd garbage value
-  // if they are initialized here, make sure to give the variables the correct values
-  // before using it, otherwise there will be an unwanted '0'-sample at the first block
 	data.left = data.right = 0.0f;
 
 	err = Pa_Initialize();

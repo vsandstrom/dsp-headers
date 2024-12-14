@@ -3,7 +3,7 @@
 #include "../portaudio/include/portaudio.h"
 #include <cstdio>
 #include <iostream>
-#include <string>
+#include <sys/_types/_mode_t.h>
 #include "../dsp/wavetable.hpp"
 #include "../dsp/waveshape.h"
 
@@ -14,7 +14,7 @@ const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
 const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-const int TABLE_LEN =      512;
+const int SIZE =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
@@ -24,11 +24,16 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
+using namespace interpolation;
 
-Wavetable* carrier = nullptr;
-// Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
-// Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
+Wavetable carrier = Wavetable::init(SAMPLE_RATE);
+Wavetable envelope = Wavetable::init(SAMPLE_RATE);
+
+float car_t[SIZE+1] = {0.f};
+float amps[] = {1.f, 0.72f, 0.2f, 0.9f};
+float phases[] = {0.f, 0.2f, 0.94f, 0.5f};
+float env_t[SIZE+1] = {0.f};
+
 
 static frame data;
 
@@ -49,10 +54,8 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier -> play();
-        // modulator.play());
-    float env = envelope.play();
-
+    float car = carrier.play<SIZE, linear>(car_t, FREQ, 0.f);
+    float env = envelope.play<SIZE, linear>(env_t, ENV_FREQ, 0.f);
     // Stereo frame: two increments of out buffer
     *out++ = car * env; 
     *out++ = car * env;
@@ -61,56 +64,8 @@ static int paCallback(  const void* inputBuffer,				// input
 }
 
 int main(int argc, char** argv) {
-  float* cartable = new float[513];
-  float amps[] = {1.f, 0.72f, 0.2f, 0.9f};
-  float phases[] = {0.f, 0.2f, 0.94f, 0.5f};
-  cartable = complex_sine(cartable, 512, amps, phases, 4);
-  carrier = new Wavetable(cartable, 512, SAMPLE_RATE, interpolation::cubic);
-  carrier -> frequency = FREQ;
-  // modulator.frequency = FM_FREQ;
-  envelope.frequency = ENV_FREQ;
-    if ( argc > 3 && argc < 8 ) {
-      argc--;
-      argv++;
-      while (argc > 0){
-        if ((*argv)[0] == '-') {
-          printf("%c\n", (*argv)[1]);
-          switch ((*argv)[1]){
-            case 'c': {
-              argc--;
-              argv++;
-              // carrier.frequency = std::stof(*argv);
-              carrier -> frequency = std::stof(*argv);
-              break;
-            }
-            case 'm':{
-              argc--;
-              argv++;
-              // modulator.frequency = std::stof(*argv);
-              break;
-            }
-            case 'e':{
-              argc--;
-              argv++;
-              envelope.frequency = std::stof(*argv);
-              break;
-            }
-            default:{
-              argc--;
-              argv++;
-              break;
-
-            }
-          }
-        }
-        argc--;
-        argv++;
-      }
-      printf("running user input frequencies\n");
-    } else {
-      printf("running on default frequencies\n");
-    }
-
+  complex_sine(car_t, SIZE, amps, phases, 4);
+  hanning(env_t, SIZE);
 	PaStream* stream;
 	PaError err;
 

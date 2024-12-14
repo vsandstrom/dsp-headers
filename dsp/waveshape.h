@@ -1,6 +1,8 @@
 #pragma once
 
-#include "dsp.h"
+#ifndef WAVESHAPE_H
+#define WAVESHAPE_H
+
 #include "dsp_math.h"
 #include <cmath>
 #include <cstddef>
@@ -126,3 +128,5 @@ inline float* complex_sine(
   // return for simplicity, the function mutates array in place through pointer.
   return table;
 }
+
+#endif

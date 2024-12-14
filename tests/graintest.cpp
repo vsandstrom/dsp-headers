@@ -5,9 +5,9 @@
 #include "../portaudio/include/portaudio.h"
 #include "../dsp/dsp.h"
 #include "../dsp/interpolation.hpp"
-#include "../dsp/wavetable_ex.hpp"
+#include "../dsp/wavetable.hpp"
+#include "../dsp/grain.hpp"
 #include "../dsp/waveshape.h"
-#include "../dsp/grain_ex.hpp"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/trigger.hpp"
 
@@ -25,21 +25,20 @@ const float RECORD_LEN = 4.f; // seconds
 
 const int PROGRAM_DURATION = 120000; // milliseconds
 const float  SAMPLE_RATE =   48000;
-const unsigned SIZE = 512;
+const unsigned SIZE = 1<<13;
 
 const size_t BUFSIZE = 48000 * 4;
 using namespace dspheaders;
 using namespace interpolation;
 
-GranulatorEX<16, 4*48000> gr = GranulatorEX<16, 4*48000>::init(SAMPLE_RATE);
 
 // GLOBALS
-Impulse trigger = Impulse(SAMPLE_RATE);
+Granulator<16, 4*48000> gr = Granulator<16, 4*48000>::init(SAMPLE_RATE);
+Dust trigger = Dust::init(SAMPLE_RATE);
 Wavetable phase = Wavetable::init(SAMPLE_RATE);
-float table[512] = {0.f};
-
-// Dust trigger = Dust(INTERVAL, SAMPLE_RATE);
-
+Wavetable mod = Wavetable::init(SAMPLE_RATE);
+float table[SIZE+1] = {0.f};
+float mod_t[SIZE+1] = {0.f};
 
 // Duration in samples
 int playhead = 0;
@@ -75,13 +74,13 @@ static int paCallback(
     } else {
         float trig = trigger.play(t);
         float ph   = phase.play<SIZE, linear>(table, 0.25, 0.f);
-
+        float m    = map(mod.play<SIZE, linear>(mod_t, 0.1, 0.0), -1.0, 1.0, 0.89, 0.99);
         D(if (trig >= 0.5f) printf("main: %zu", main_count++));
         // printf("phaser position: %f\n", phasor);
         gryn = gr.play<linear, linear>(
             ph,
-            2.f,
-            1.f,
+            0.1f,
+            m,
             0.f,
             trig
         ) * 0.2; 
@@ -97,7 +96,9 @@ int main(int argc, char** argv) {
   // seed rng for dust  and jitter in graulator object
   srand(time(NULL));
 
-  phasor(table, SIZE);
+  sine(table, SIZE);
+  scale(table, SIZE, 0.f, 1.f);
+  sine(mod_t, SIZE);
 
   printf(
       "\n\n    ╒═════════════════════════════════════════════════════╕\n"

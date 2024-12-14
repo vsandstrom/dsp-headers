@@ -5,13 +5,14 @@
 #include "../dsp/dsp.h"
 #include "../dsp/interpolation.hpp"
 #include "../dsp/wavetable.hpp"
+#include "../dsp/waveshape.h"
 
 // MASTER VOLUME OF THE GENERATED TONE
 const float AMP =              1.0f;
 // DURATION OF THE GENERATED TONE
 const int DURATION =           10000; // milliseconds
 // DEFAULT LENGHT OF THE WAVETABLE
-const int TABLE_LEN =      512;
+const int SIZE =      512;
 // IF YOUR SOUNDCARD DO NOT FOR SUPPORT 48kHz, CHANGE IT HERE:
 const float  SAMPLE_RATE =   48000;
 
@@ -21,10 +22,14 @@ float FM_FREQ =             180.0f;
 float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
-Wavetable carrier = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
-Wavetable modulator = Wavetable(SINE, TABLE_LEN, SAMPLE_RATE, interpolation::cubic);
 
-Wavetable envelope = Wavetable(HANNING, TABLE_LEN, SAMPLE_RATE, interpolation::hermetic);
+Wavetable carrier   = Wavetable::init(SAMPLE_RATE);
+Wavetable modulator = Wavetable::init(SAMPLE_RATE);
+Wavetable envelope  = Wavetable::init(SAMPLE_RATE);
+
+float car_t[SIZE] = {0.f};
+float mod_t[SIZE] = {0.f};
+float env_t[SIZE] = {0.f};
 
 static frame data;
 
@@ -45,8 +50,8 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier.play(modulator.play());
-    float env = envelope.play();
+    float car = carrier.play<SIZE, interpolation::cubic>(car_t, FREQ, modulator.play<SIZE, interpolation::cubic>(mod_t, FM_FREQ, 0.f));
+    float env = envelope.play<SIZE, interpolation::hermetic>(env_t, ENV_FREQ, 0.f);
 
     // Stereo frame: two increments of out buffer
     *out++ = car * env; 
@@ -56,55 +61,15 @@ static int paCallback(  const void* inputBuffer,				// input
 }
 
 int main(int argc, char** argv) {
-  carrier.frequency = FREQ;
-  modulator.frequency = FM_FREQ;
-  envelope.frequency = ENV_FREQ;
-    if ( argc > 3 && argc < 8 ) {
-      argc--;
-      argv++;
-      while (argc > 0){
-        if ((*argv)[0] == '-') {
-          printf("%c\n", (*argv)[1]);
-          switch ((*argv)[1]){
-            case 'c': {
-              argc--;
-              argv++;
-              // carrier.frequency = std::stof(*argv);
-              carrier.frequency = std::stof(*argv);
-              break;
-            }
-            case 'm':{
-              argc--;
-              argv++;
-              modulator.frequency = std::stof(*argv);
-              break;
-            }
-            case 'e':{
-              argc--;
-              argv++;
-              envelope.frequency = std::stof(*argv);
-              break;
-            }
-            default:{
-              argc--;
-              argv++;
-              break;
-
-            }
-          }
-        }
-        argc--;
-        argv++;
-      }
-      printf("running user input frequencies\n");
-    } else {
-      printf("running on default frequencies\n");
-    }
-
 	PaStream* stream;
 	PaError err;
 
 	data.left = data.right = 0.0f;
+
+  sine(car_t, SIZE);
+  sine(mod_t, SIZE);
+  hanning(env_t, SIZE);
+  
 
 	err = Pa_Initialize();
 	if ( err != paNoError ) goto error;
@@ -128,6 +93,7 @@ int main(int argc, char** argv) {
 
 	// sound duration
 	Pa_Sleep(DURATION); // NUM_SECONDS is in milliseconds????
+
 
 	// stop sound
 	err = Pa_StopStream(stream);

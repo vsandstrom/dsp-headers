@@ -113,7 +113,7 @@ inline float* complex_sine(
     angle = inc * numsamples * phases[n-1];
 
     // magic extra length because of Buffer shenanigans
-    for (int i=0; i<tablelength+1; i++) {
+    for (size_t i=0; i<tablelength+1; i++) {
       table[i] += (sin(angle) * amplitudes[n-1]);
       angle += inc;
     }

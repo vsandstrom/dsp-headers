@@ -69,5 +69,9 @@ namespace dspheaders {
       m.samplerate = samplerate;
       m.sr_recip = 1.f / samplerate;
     }
+
+    void resetPhase() {
+      m.position = 0.f;
+    }
   };
 }

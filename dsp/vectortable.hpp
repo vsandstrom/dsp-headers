@@ -1,3 +1,4 @@
+#include <algorithm>
 #pragma
 
 #ifndef VECOSC_HPP
@@ -5,6 +6,7 @@
 
 #include <cstddef>
 #include <utility>
+#include "dsp.h"
 
 #ifndef DEBUG
   #define D(x)  
@@ -55,7 +57,7 @@ namespace dspheaders {
       float len = static_cast<float>(SIZE);
       float wid = static_cast<float>(WIDTH);
 
-      if (position >= 1.f) position = 0.999999999999;
+      position = clamp(position, 0, 0.999999999999);
       position *= wid - 1.f;
       unsigned table1 = static_cast<size_t>(position) % WIDTH;
       unsigned table2 = (table1 + 1) % WIDTH;
@@ -77,6 +79,72 @@ namespace dspheaders {
 
     void resetPhase() {
       m.position = 0.f;
+    }
+  };
+  
+
+// Inline Linear interpolation
+  class VectorOscillatorLinear {
+    private:
+    struct M {
+      float position = 0.f;
+      float samplerate = 0.f;
+      float sr_recip = 0.f;
+    } m; 
+
+    explicit VectorOscillatorLinear(M m) : m(std::move(m)) {}
+
+    public:
+    VectorOscillatorLinear(){}
+
+    static VectorOscillatorLinear init(float samplerate) {
+      return VectorOscillatorLinear(M{
+          .position = 0.f,
+          .samplerate = samplerate,
+          .sr_recip = 1.f / samplerate
+        }
+      );
+    }
+
+    /*! SIZE determines the size of the wavetables used, 
+     * WIDTH the number of wavetables used,
+     * interpolate is a function pointer to an interpolation algorithm,
+     * with a certain signature, see interpolation.hpp.
+     * `tables` is a 2 dimensional array of floats:
+     * `float[SIZE][WIDTH]` or `float**`.
+     */
+    template<size_t SIZE, size_t WIDTH>
+    float play(float** tables, float frequency, float position, float phase) {
+      D({
+        for (int i = 0; i < WIDTH; i++) {
+          assert(tables[i] != nullptr && "table is not initialized");
+        }
+      })
+      if (frequency > m.samplerate * 0.5) return 0.0;
+      float sig = 0.f;
+      float len = static_cast<float>(SIZE);
+      float wid = static_cast<float>(WIDTH);
+
+      position = clamp(position, 0.f, 0.999999999999f);
+      position *= wid - 1.f;
+      unsigned table1 = static_cast<size_t>(position) % WIDTH;
+      unsigned table2 = (table1 + 1) % WIDTH;
+      float weight = position - size_t(position);
+
+      int a = m.position;
+      int b = a + 1;
+      float w = m.position - a;
+      sig += tables[table1][a] * (1.f - w) + tables[table1][b] * w * (1.f - weight);
+      sig += tables[table2][a] * (1.f - w) + tables[table2][b] * w * weight;
+      m.position += len * m.sr_recip * frequency + (phase * len);
+      while (m.position <  0.f) m.position += len;
+      while (m.position >= len) m.position -= len;
+      return sig;
+    }
+
+    void setSamplerate(float samplerate) {
+      m.samplerate = samplerate;
+      m.sr_recip = 1.f / samplerate;
     }
   };
 }

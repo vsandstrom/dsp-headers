@@ -2,6 +2,10 @@
 
 build
 examples
+makefile
+tests
+idelaytest.cpp
+portaudio
 
 .DS_Store
 score.cpp
@@ -24,6 +28,3 @@ rust_dsp.h
 rusttest.cpp
 librust*
 a.out
-makefile
-tests
-idelaytest.cpp

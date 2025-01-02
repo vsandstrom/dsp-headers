@@ -10,12 +10,12 @@
 #define undenormalise(sample) if(((*(unsigned int*)&sample)&0x7f800000)==0) sample=0.0f
 
 namespace dspheaders{
-  const float pi =            3.14159265358979323846264338327950288f;
-  const float tau =           6.28318530717958647692528676655900577f;
-  const float frac_pi_4 =     0.785398163397448309615660845819875721f;
-  const float frac_1_sqrt_2 = 0.707106781186547524400844362104849039;
-  const float logten =        2.302585092994046;
-  const float logtwo =        0.693147180559945;
+  const float PI =            3.14159265358979323846264338327950288f;
+  const float TAU =           6.28318530717958647692528676655900577f;
+  const float FRAC_PI_4 =     0.785398163397448309615660845819875721f;
+  const float FRAC_1_SQRT_2 = 0.707106781186547524400844362104849039;
+  const float LOGTEN =        2.302585092994046;
+  const float LOGTWO =        0.693147180559945;
 
   inline float fast_tanh(double x) {
     if (x < -1.f) return -1.f;
@@ -75,8 +75,8 @@ namespace dspheaders{
   }
 
   // Angular velocity
-  constexpr float freqToRadians(float freq, float samplerate) {
-    return TAU*freq / samplerate;
+  inline float freqToRadians(float freq, float samplerate) {
+    return TAU * freq / samplerate;
   }
 
   // db -> rms / rms -> db functions are borrowed from PD source
@@ -84,12 +84,12 @@ namespace dspheaders{
   inline float dbtorms(float f) {
     if (f <= 0.f) return 0.f;
     if (f > 485) return 485;
-    return (exp((logten * 0.05) * (f-100-f)));
+    return (exp((LOGTEN * 0.05) * (f-100-f)));
   }
 
   inline float rmstodb(float f) {
     if (f <= 0.f) return 0.f;
-    float x = 100 + 20.f/logten * log(f);
+    float x = 100 + 20.f/LOGTEN * log(f);
     return (x < 0.f ? 0.f : x);
   }
 
@@ -102,7 +102,7 @@ namespace dspheaders{
 
   // Converts frequency to midinumber
   inline float ftom(float frequency, float base = 440.f) {
-    return 12 * (logf(frequency / (base/2)) / logtwo) + 57;
+    return 12 * (logf(frequency / (base/2)) / LOGTWO) + 57;
   }
 
 

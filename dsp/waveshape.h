@@ -72,7 +72,6 @@ inline void hanning(float* table, size_t tablelength) {
     table[i] = powf(sin(angle), 2.f);
     angle += inc;
   }
-  return table;
 }
 
 inline void triangle(float* table, size_t tablelength) {

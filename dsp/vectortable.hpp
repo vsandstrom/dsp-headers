@@ -134,8 +134,13 @@ namespace dspheaders {
       int a = m.position;
       int b = a + 1;
       float w = m.position - a;
-      sig += tables[table1][a] * (1.f - w) + tables[table1][b] * w * (1.f - weight);
-      sig += tables[table2][a] * (1.f - w) + tables[table2][b] * w * weight;
+
+
+      float t1 = tables[table1][a] + w * (tables[table1][b] - tables[table1][a]);
+      float t2 = tables[table2][a] + w * (tables[table2][b] - tables[table2][a]);
+      sig = t1 + weight * (t2 - t1);
+      // sig += tables[table1][a] * (1.f - w) + tables[table1][b] * w * (1.f - weight);
+      // sig += tables[table2][a] * (1.f - w) + tables[table2][b] * w * weight;
       m.position += len * m.sr_recip * frequency + (phase * len);
       while (m.position <  0.f) m.position += len;
       while (m.position >= len) m.position -= len;

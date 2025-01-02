@@ -36,10 +36,10 @@
 ///       where: amp == feedback 
 
 namespace dspheaders {
-  enum COMBTYPE {
-    FIR,
-    IIR
-  };
+  // enum COMBTYPE {
+  //   FIR,
+  //   IIR
+  // };
 
   class Comb {
     protected:
@@ -219,7 +219,7 @@ namespace dspheaders {
 ///
 
   // TWO POLE STATE VARIABLE BIQUAD FILTER
-  class Biquad {
+  class _Biquad {
     private:
       // 2-sample delayline on input side
       float x1 = 0.f, x2 = 0.f;
@@ -243,7 +243,7 @@ namespace dspheaders {
       }
 
     public:
-      Biquad(){}
+      _Biquad(){}
 
       inline float process(float input) {
         float output = b0*input + b1*x1 + b2*x2 - a1*y1 - a2*y2;
@@ -338,7 +338,7 @@ namespace dspheaders {
   };
 
   // FOUR POLE BIQUAD SVF
-  class Biquad4 : public Biquad {
+  class Biquad4 : public _Biquad {
     private:
       // delayline for 1st biquad section.
       float x1_1 = 0.f, x1_2 = 0.f;
@@ -372,7 +372,7 @@ namespace dspheaders {
 
 
   // EIGHT POLE BIQUAD SVF
-  class Biquad8 : public Biquad {
+  class Biquad8 : public _Biquad {
     private:
       // delayline for 1st biquad section.
       float x1_1 = 0.f, x1_2 = 0.f;

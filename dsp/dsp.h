@@ -47,9 +47,9 @@ namespace dspheaders {
 
   /// INDEX WRAPPING FUNCTIONS - AVOID AND USE 
   // Makes sure that x is within range of 0 - n 
-  inline int wrap(int* x, unsigned int length) {
+  inline int wrap(int* x, size_t length) {
     while (*x < 0) *x += length;
-    while (*x >= length) *x -= length;
+    while ((size_t)*x >= length) *x -= length;
     return *x;
   }
 
@@ -105,19 +105,19 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   
   // Mutate values in array with dspheaders::map, for each value
   inline void range(
-      float* buffer, unsigned int bufferLength,
+      float* buffer, size_t bufferLength,
       float inmin, float inmax,
       float outmin, float outmax) {
     // Convert values in input buffer within input range to new range
-    for (int i = 0; i < bufferLength; i++) {
+    for (size_t i = 0; i < bufferLength; i++) {
       buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
     }
   }
   
   // Mutate
-  inline void scale(float* buffer, unsigned length, float outmin, float outmax) {
+  inline void scale(float* buffer, size_t length, float outmin, float outmax) {
     float min = 0.f, max = 0.f;
-    for (int i=0; i<length; i++){
+    for (size_t i=0; i<length; i++){
       if (buffer[i] < min) {min = buffer[i];}
       if (buffer[i] > max) {max = buffer[i];}
     }
@@ -125,9 +125,9 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   }   
 
   
-  inline float sum(float* buffer, unsigned length) {
+  inline float sum(float* buffer, size_t length) {
     float sum = 0.f;
-    for (unsigned i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
       sum += buffer[i];
     }
     return sum;
@@ -144,10 +144,9 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
 
   // Softmax function, useful when creating a wavetable, where total amplitude
   // should not excede -1 - 1
-  inline float* normalize(float* buffer, unsigned length) {
+  inline float* normalize(float* buffer, size_t length) {
     float factor = 1 / sum(buffer, length);
-    int i;
-    for (i=0; i<length; i++){
+    for (size_t i=0; i<length; i++){
       buffer[i] *= factor;
     }
     return buffer;

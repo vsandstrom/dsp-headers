@@ -10,7 +10,7 @@
 namespace dspheaders {
   namespace interpolation {
     // In case there should be no interpolation at all
-    inline float none(const float position, const float* const table, const size_t tablelength) {
+    inline float none(const float position, const float* const table, const size_t _tablelength) {
       return table[(int)position];
     };
 
@@ -39,7 +39,7 @@ namespace dspheaders {
     }
 
     // 2 point cosine interpolation
-    inline float cosine(const float position, const float* const table, const size_t tablelength){
+    inline float cosine(const float position, const float* const table, const size_t _tablelength){
       int a1, b1 = 0;
       float aw, bw, diff = 0.f;
 

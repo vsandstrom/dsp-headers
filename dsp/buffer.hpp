@@ -57,27 +57,6 @@ namespace dspheaders {
       void initbuffer() {
         dspheaders::initbuffer(m.buffer.data(), m.length);
       }
-
-      // Initialize m.buffer based on a duration in seconds
-      Buffer(
-        float seconds,
-        unsigned samplerate,
-        float (*interpolate)(float, float*, unsigned)
-        ): bufferlength(seconds*samplerate), interpolate(interpolate) {
-        buffer = new float[bufferlength+1];
-        initbuffer();
-      }
-
-      // Initialize m.buffer based on a duration in samples
-      Buffer(
-        unsigned samples,
-        unsigned samplerate,
-        float (*interpolate)(float, float*, unsigned)
-        ): samplerate(samplerate), interpolate(interpolate) {
-        buffer = new float[N];
-        bufferlength = N;
-        initbuffer();
-      }
   };
 } 
 

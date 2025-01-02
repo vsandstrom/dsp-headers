@@ -29,14 +29,13 @@ namespace dspheaders {
     // Basic 2 point linear interpolation
     inline float linear(const float position, const float* const table, const size_t tablelength) {
       int a1, b1 = 0;
-      float aw, bw, diff = 0.f;
+      float w, diff = 0.f;
 
       a1 = position; // implicit cast
       b1 = a1 + 1;
       diff = position - a1;
-      bw = diff;
-      aw = 1 - diff;
-      return table[a1] * aw + table[b1] * bw;
+      w = diff;
+      return table[a1] + w * (table[b1] - table[a1]);
     }
 
     // 2 point cosine interpolation

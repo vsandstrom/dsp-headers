@@ -1,10 +1,10 @@
 #include <algorithm>
-#pragma
 
 #ifndef VECOSC_HPP
 #define VECOSC_HPP
 
 #include <cstddef>
+#include <cstdlib>
 #include <utility>
 #include "dsp.h"
 
@@ -127,18 +127,25 @@ namespace dspheaders {
 
       position = clamp(position, 0.f, 0.999999999999f);
       position *= wid - 1.f;
-      unsigned table1 = static_cast<size_t>(position) % WIDTH;
-      unsigned table2 = (table1 + 1) % WIDTH;
-      float weight = position - size_t(position);
+      size_t table1 = static_cast<size_t>(position) % WIDTH;
+      size_t table2 = (table1 + 1) % WIDTH;
+      float weight = position - static_cast<int>(position);
 
-      int a = m.position;
-      int b = a + 1;
-      float w = m.position - a;
+      size_t p1 = static_cast<size_t>(m.position);
+      size_t p2 = p1 + 1;
+      float w = m.position - p1;
 
+      float a = tables[table1][p1];
+      float b = tables[table1][p2];
+      float c = tables[table2][p1];
+      float d = tables[table2][p2];
 
-      float t1 = tables[table1][a] + w * (tables[table1][b] - tables[table1][a]);
-      float t2 = tables[table2][a] + w * (tables[table2][b] - tables[table2][a]);
-      sig = t1 + weight * (t2 - t1);
+      float x1 = b - a;
+      float x2 = w*(x1+(c-d)); 
+      sig = a + w * x1 + weight * ((c-a) + x2);
+      // float t1 = tables[table1][a] + w * (tables[table1][b] - tables[table1][a]);
+      // float t2 = tables[table2][a] + w * (tables[table2][b] - tables[table2][a]);
+      // sig = t1 + weight * (t2 - t1);
       // sig += tables[table1][a] * (1.f - w) + tables[table1][b] * w * (1.f - weight);
       // sig += tables[table2][a] * (1.f - w) + tables[table2][b] * w * weight;
       m.position += len * m.sr_recip * frequency + (phase * len);

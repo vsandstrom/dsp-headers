@@ -115,6 +115,12 @@ namespace dspheaders {
     inline float slope(const float a, const float b) {
       return (a + b) / 2;
     }
+
+    inline float bilinear(const float a, const float b, const float c, const float d, const float x, const float y) {
+      const float n = b - a;
+      const float m = x * (n + (c-d));
+      return a + x * n + y * (n + x * m);
+    }
     
     namespace functors {
       struct Interpolation {

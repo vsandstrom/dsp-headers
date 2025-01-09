@@ -1,11 +1,10 @@
-#include <algorithm>
-
 #ifndef VECOSC_HPP
 #define VECOSC_HPP
 
 #include <cstddef>
 #include <cstdlib>
 #include <utility>
+#include <algorithm>
 #include "dsp.h"
 
 #ifndef DEBUG
@@ -121,7 +120,6 @@ namespace dspheaders {
         }
       })
       if (frequency > m.samplerate * 0.5) return 0.0;
-      float sig = 0.f;
       float len = static_cast<float>(SIZE);
       float wid = static_cast<float>(WIDTH);
 
@@ -140,9 +138,11 @@ namespace dspheaders {
       float c = tables[table2][p1];
       float d = tables[table2][p2];
 
+      // a + x(b - a) + y((c - a) + x((b - a - d + c)))
       float x1 = b - a;
       float x2 = w*(x1-d+c); 
       float sig = a + w * x1 + weight * (c-a + x2);
+
       m.position += len * m.sr_recip * frequency + (phase * len);
       while (m.position <  0.f) m.position += len;
       while (m.position >= len) m.position -= len;

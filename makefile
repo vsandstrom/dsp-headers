@@ -10,7 +10,7 @@ DFLAG :=
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
-TARGETS = combtest fmtest delaytest envtest demotest complextest osctest verbtest verbtest2 verbtest3 graintest envelope_test biquad
+TARGETS = combtest fmtest delaytest envtest demotest complextest osctest verbtest verbtest2 verbtest3 biquadtest
 # vectest
 CFLAGS := -std=c++20 -O0 -march=native -msse -mavx -I./$(SRC_DIR) $(INCLUDES) $(DFLAG) -Wall -Wextra #-pedantic -Werror #-fsanitize=address -fsanitize=undefined
 LDFLAGS := -L./portaudio/lib/.libs/ -lportaudio

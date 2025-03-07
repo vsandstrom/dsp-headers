@@ -1,5 +1,7 @@
-#include "filter.hpp"
 #include "dsp_math.h"
+#include "biquad.hpp"
+#include <cassert>
+#include <cstddef>
 
 namespace dspheaders {
   template <unsigned T>
@@ -14,7 +16,7 @@ namespace dspheaders {
       constexpr void init(float freq, float q, float samplerate) {
         for (int i = 0; i < T; i++) {
           float omega = freq * ((i * 2) + 1) * TAU / samplerate;
-          bank[i].calcBPF(omega, q);
+          bank[i].calc_bpf(omega, q);
         }
       }
 
@@ -32,6 +34,14 @@ namespace dspheaders {
 
       size_t size() {
         return T;
+      }
+
+      void set_coeff(size_t i, BiquadCoeffs coeff) {
+        assert((i < T) && "index of Biquad bank must be within bounds");
+        if (i < T) {
+          bank[i].set_coeff(coeff);
+
+        }
       }
   };
 

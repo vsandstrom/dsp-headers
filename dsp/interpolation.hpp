@@ -55,12 +55,12 @@ namespace dspheaders {
      */
 
     // 4 point cubic interpolation
-    inline float cubic(const float position, const float* const table, const size_t tableLength) {
+    inline float cubic(const float position, const float* const table, const size_t tablelength) {
       // positions
       const size_t a2 = position; // implicit cast
       const size_t b1 = a2+1;
-      const size_t a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wrap-around guard
-      const size_t b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
+      const size_t a1 = a2-1 < tablelength ? a2-1 : tablelength-1; // uint wrap-around guard
+      const size_t b2 = a2+2 < tablelength ? a2+2 : 0;             // out-of-bounds guard
 
       const float diff = position - a2;
 
@@ -84,11 +84,11 @@ namespace dspheaders {
     }
 
     // 4 point hermetic interpolation
-    inline float hermetic(const float position, const float* const table, const size_t tableLength) {
+    inline float hermetic(const float position, const float* const table, const size_t tablelength) {
       const size_t a2 = position;
       const size_t b1 = position + 1;
-      const size_t a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wrap-around guard
-      const size_t b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
+      const size_t a1 = a2-1 < tablelength ? a2-1 : tablelength-1; // uint wrap-around guard
+      const size_t b2 = a2+2 < tablelength ? a2+2 : 0;             // out-of-bounds guard
 
       const float diff = position - a2;
       
@@ -151,8 +151,8 @@ namespace dspheaders {
           // positions
           const size_t a2 = position; // implicit cast
           const size_t b1 = a2+1;
-          const size_t a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wrap-around guard
-          const size_t b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
+          const size_t a1 = a2-1 < tablelength ? a2-1 : tablelength-1; // uint wrap-around guard
+          const size_t b2 = a2+2 < tablelength ? a2+2 : 0;             // out-of-bounds guard
 
           const float diff = position - a2;
 
@@ -180,8 +180,8 @@ namespace dspheaders {
         float operator() (float position, float* table, size_t tablelength) const {
           const size_t a2 = position;
           const size_t b1 = position + 1;
-          const size_t a1 = a2-1 < tableLength ? a2-1 : tableLength-1; // uint wrap-around guard
-          const size_t b2 = a2+2 < tableLength ? a2+2 : 0;             // out-of-bounds guard
+          const size_t a1 = a2-1 < tablelength ? a2-1 : tablelength-1; // uint wrap-around guard
+          const size_t b2 = a2+2 < tablelength ? a2+2 : 0;             // out-of-bounds guard
 
           const float diff = position - a2;
           

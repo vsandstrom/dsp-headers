@@ -83,8 +83,8 @@ namespace dspheaders {
       return (c0 * pow(diff, 3)) + (c1 * (diff*diff)) + (c2 * diff) + x1;
     }
 
-    // 4 point hermetic interpolation
-    inline float hermetic(const float position, const float* const table, const size_t tablelength) {
+    // 4 point hermite interpolation
+    inline float hermite(const float position, const float* const table, const size_t tablelength) {
       const size_t a2 = position;
       const size_t b1 = position + 1;
       const size_t a1 = a2-1 < tablelength ? a2-1 : tablelength-1; // uint wrap-around guard
@@ -176,7 +176,7 @@ namespace dspheaders {
         }
       };
       
-      struct hermetic : public Interpolation {
+      struct hermite : public Interpolation {
         float operator() (float position, float* table, size_t tablelength) const {
           const size_t a2 = position;
           const size_t b1 = position + 1;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #ifndef DSP_H
 #define DSP_H
 
@@ -75,7 +76,7 @@ namespace dspheaders {
 
 #ifdef __ARM_ARCH
 
-  inline unsigned wrap(unsigned* x, unsigned int length) {
+  inline unsigned wrap(unsigned* x, size_t length) {
     int ret;
     asm ( \
         "mov %[w]. %[c] " \
@@ -90,7 +91,7 @@ namespace dspheaders {
 
 #else
 
-inline unsigned wrap(unsigned* x, unsigned int length) {
+inline unsigned wrap(unsigned* x, size_t length) {
   while (*x >= length) *x -= length;
   return *x;
 }
@@ -98,7 +99,7 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
 #endif
 
 
-  inline unsigned wrap_dangerously(unsigned int* x, unsigned int length) {
+  inline unsigned wrap_dangerously(unsigned int* x, size_t length) {
     // Should work for both positive and negative overflow of unsigned int
     // Since index should always be <= 0 this should work.
     *x &= (length -1);
@@ -108,7 +109,7 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   // Makes sure that x is within range of 0.0 - n
   //
   // x is a kept as float for interpolation purposes.
-  inline float wrapf(float* x, unsigned int length) {
+  inline float wrapf(float* x, size_t length) {
     float lengthf = (float)length;
     while (*x < 0.f) *x += lengthf;
     while (*x >= lengthf) *x -= lengthf;
@@ -119,8 +120,8 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   // Array/Buffer manipulation
   ////////////////////////////
 
-  inline void initbuffer(float* buffer, unsigned bufferlength) {
-    for (unsigned i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
+  inline void initbuffer(float* buffer, size_t bufferlength) {
+    for (size_t i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
   }
   
   // Mutate values in array with dspheaders::map, for each value
@@ -154,9 +155,9 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   }
 
   
-  inline unsigned sum(unsigned* buffer, unsigned length) {
+  inline unsigned sum(unsigned* buffer, size_t length) {
     float sum = 0.f;
-    for (unsigned i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
       sum += buffer[i];
     }
     return sum;

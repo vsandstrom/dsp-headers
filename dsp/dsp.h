@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #ifndef DSP_H
 #define DSP_H
 
@@ -14,10 +15,30 @@ namespace dspheaders {
   ///////////////////////////////
   // Discrete sample manipulation
   ///////////////////////////////
+  
+  inline float fmax(float a, float b) {
+    float r;
+#ifdef __arm__
+    asm("vmaxnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
+#else
+    r = (a > b) ? a : b;
+#endif // __arm__
+    return r;
+  }
+
+  inline float fmin(float a, float b) {
+    float r;
+#ifdef __arm__
+    asm("vminnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
+#else
+    r = (a < b) ? a : b;
+#endif // __arm__
+    return r;
+  }
 
   // Set hard min- and max amplitude limits on signal, where 'x' is signal
-  inline float clamp(float x, float lo, float hi) {
-      return fmax(lo, (fmin(x, hi)));
+  inline float clamp(float in, float min, float max) {
+      return fmin(fmax(in, min), max);
   }
 
   // Convert signal a range to new range, where 'x' is signal
@@ -47,15 +68,15 @@ namespace dspheaders {
 
   /// INDEX WRAPPING FUNCTIONS - AVOID AND USE 
   // Makes sure that x is within range of 0 - n 
-  inline int wrap(int* x, unsigned int length) {
+  inline int wrap(int* x, size_t length) {
     while (*x < 0) *x += length;
-    while (*x >= length) *x -= length;
+    while ((size_t)*x >= length) *x -= length;
     return *x;
   }
 
 #ifdef __ARM_ARCH
 
-  inline unsigned wrap(unsigned* x, unsigned int length) {
+  inline unsigned wrap(unsigned* x, size_t length) {
     int ret;
     asm ( \
         "mov %[w]. %[c] " \
@@ -70,7 +91,7 @@ namespace dspheaders {
 
 #else
 
-inline unsigned wrap(unsigned* x, unsigned int length) {
+inline unsigned wrap(unsigned* x, size_t length) {
   while (*x >= length) *x -= length;
   return *x;
 }
@@ -78,7 +99,7 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
 #endif
 
 
-  inline unsigned wrap_dangerously(unsigned int* x, unsigned int length) {
+  inline unsigned wrap_dangerously(unsigned int* x, size_t length) {
     // Should work for both positive and negative overflow of unsigned int
     // Since index should always be <= 0 this should work.
     *x &= (length -1);
@@ -88,7 +109,7 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   // Makes sure that x is within range of 0.0 - n
   //
   // x is a kept as float for interpolation purposes.
-  inline float wrapf(float* x, unsigned int length) {
+  inline float wrapf(float* x, size_t length) {
     float lengthf = (float)length;
     while (*x < 0.f) *x += lengthf;
     while (*x >= lengthf) *x -= lengthf;
@@ -99,25 +120,25 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   // Array/Buffer manipulation
   ////////////////////////////
 
-  inline void initbuffer(float* buffer, unsigned bufferlength) {
-    for (unsigned i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
+  inline void initbuffer(float* buffer, size_t bufferlength) {
+    for (size_t i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
   }
   
   // Mutate values in array with dspheaders::map, for each value
   inline void range(
-      float* buffer, unsigned int bufferLength,
+      float* buffer, size_t bufferLength,
       float inmin, float inmax,
       float outmin, float outmax) {
     // Convert values in input buffer within input range to new range
-    for (int i = 0; i < bufferLength; i++) {
+    for (size_t i = 0; i < bufferLength; i++) {
       buffer[i] = map(buffer[i], inmin, inmax, outmin, outmax);
     }
   }
   
   // Mutate
-  inline void scale(float* buffer, unsigned length, float outmin, float outmax) {
+  inline void scale(float* buffer, size_t length, float outmin, float outmax) {
     float min = 0.f, max = 0.f;
-    for (int i=0; i<length; i++){
+    for (size_t i=0; i<length; i++){
       if (buffer[i] < min) {min = buffer[i];}
       if (buffer[i] > max) {max = buffer[i];}
     }
@@ -125,17 +146,18 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
   }   
 
   
-  inline float sum(float* buffer, unsigned length) {
+  inline float sum(float* buffer, size_t length) {
     float sum = 0.f;
-    for (unsigned i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
       sum += buffer[i];
     }
     return sum;
   }
+
   
-  inline unsigned sum(unsigned* buffer, unsigned length) {
+  inline unsigned sum(unsigned* buffer, size_t length) {
     float sum = 0.f;
-    for (unsigned i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
       sum += buffer[i];
     }
     return sum;
@@ -143,10 +165,9 @@ inline unsigned wrap(unsigned* x, unsigned int length) {
 
   // Softmax function, useful when creating a wavetable, where total amplitude
   // should not excede -1 - 1
-  inline float* normalize(float* buffer, unsigned length) {
+  inline float* normalize(float* buffer, size_t length) {
     float factor = 1 / sum(buffer, length);
-    int i;
-    for (i=0; i<length; i++){
+    for (size_t i=0; i<length; i++){
       buffer[i] *= factor;
     }
     return buffer;

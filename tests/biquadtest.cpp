@@ -5,6 +5,7 @@
 #include "../dsp/interpolation.hpp"
 #include "../dsp/filter.hpp"
 #include "../dsp/wavetable.hpp"
+#include "../dsp/waveshape.h"
 
 #ifdef DEBUG
   #define D(x) x
@@ -23,12 +24,8 @@ constexpr float  SAMPLE_RATE =   48000;
 using namespace dspheaders;
 
 // GLOBALS
-Wavetable z1 = Wavetable(SAW, 512, SAMPLE_RATE, interpolation::none);
-Wavetable v1 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
-Wavetable v2 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
-Wavetable v3 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
-Wavetable v4 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
-Wavetable v5 = Wavetable(HANNING, 512, SAMPLE_RATE, interpolation::none);
+Wavetable z1 = Wavetable::init(SAMPLE_RATE);
+float table[512] {0.f};
 Biquad bq[2];
 Biquad4 bq4;
 static frame data;
@@ -48,10 +45,10 @@ static int paCallback(
 	unsigned i = 0;
 
 	for (; i < framesPerBuffer; i++) { // loop over buffer
-    float sigl = z1.play(); // + z2.play() + z3.play() + z4.play();
+    float sigl = z1.play<512, interpolation::hermetic>(table, 200.f, 0.f) * 0.05;
     float sigr = sigl;
     for (auto &b: bq) {
-      sigl = b.process(sigl);
+      sigl = b.process(sigl, 1.0);
     }
     sigr = bq4.process(sigr);
     *out++ = sigl;
@@ -69,47 +66,41 @@ int main(int argc, char** argv) {
   if (argc==2) {
     if (!strcmp("1", argv[1])) {
       w = TAU * freq / SAMPLE_RATE;
-      for (auto &b: bq) {
-        b.calcLPF(w, q);
-      }
-      bq4.calcLPF(w, q);
+      auto c = BiquadCoeffs::calc_lpf(w, q);
+      for (auto &b: bq) b.set_coeffs(&c);
+      bq4.set_coeffs(&c);
+
     } else if (!strcmp("2", argv[1])) {
       freq = 2500.f;
       w = TAU * freq / SAMPLE_RATE;
-      for (auto &b: bq) {
-        b.calcHPF(w, q);
-      }
-      bq4.calcHPF(w, q);
+      auto c = BiquadCoeffs::calc_hpf(w, q);
+      for (auto &b: bq) b.set_coeffs(&c);
+      bq4.set_coeffs(&c);
+
     } else if (!strcmp("3", argv[1])) {
       freq = zfreq * 5.f;
       w = TAU * freq / SAMPLE_RATE;
-      for (auto &b: bq) {
-        b.calcBPF(w, q);
-      }
-      bq4.calcBPF(w, q);
+      auto c = BiquadCoeffs::calc_bpf(w, q);
+      for (auto &b: bq) b.set_coeffs(&c);
+      bq4.set_coeffs(&c);
+
     } else if (!strcmp("4", argv[1])) {
       freq = 1000.f;
       w = TAU * freq / SAMPLE_RATE;
-      for (auto &b: bq) {
-        b.calcNotch(w, q);
-      }
-      bq4.calcNotch(w, q);
+      auto c = BiquadCoeffs::calc_notch(w, q);
+      for (auto &b: bq) b.set_coeffs(&c);
+      bq4.set_coeffs(&c);
+
     }
   } else {
-    for (auto &b: bq) {
-      b.calcLPF(w, q);
-    }
-    bq4.calcLPF(w, q);
+    auto c = BiquadCoeffs::calc_lpf(w, q);
+    for (auto &b: bq) b.set_coeffs(&c);
+    bq4.set_coeffs(&c);
   }
 
 	PaStream* stream;
 	PaError err;
-  z1.frequency = zfreq;
-  v1.frequency = 1.f;
-  v2.frequency = 1.5f;
-  v3.frequency = 2.f;
-  v4.frequency = 2.5f;
-  v5.frequency = 3.f;
+  saw(table, 512);
 
   // Initialize silence
 	data.left = data.right = 0.0f;

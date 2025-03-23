@@ -11,12 +11,24 @@
 
 namespace dspheaders {
 // Self-wrapping and interpolating Buffer
+  template <const size_t MAXSIZE> 
   class Buffer{
     private:
       struct M {
         size_t length;
-        std::array<float, size> buffer;
+        std::array<float, MAXSIZE> buffer;
       } m;
+    
+      explicit Buffer(M m) : m(std::move(m)) {}
+
+    public:
+      static Buffer init() {
+        return Buffer(M{
+          .length = MAXSIZE,
+          .buffer = std::array<float, MAXSIZE>{0.f}
+        });
+      }
+
 
     public:
       // Read a interpolated float based on position  
@@ -46,20 +58,6 @@ namespace dspheaders {
       void initbuffer() {
         dspheaders::initbuffer(m.buffer.data(), m.length);
       }
-
-      // Initialize m.buffer based on a duration in seconds
-      Buffer(
-        float seconds,
-        unsigned samplerate,
-        float (*interpolate)(float, float*, size_t)
-      );
-
-      // Initialize m.buffer based on a duration in samples
-      Buffer(
-        unsigned samples,
-        unsigned samplerate,
-        float (*interpolate)(float, float*, size_t)
-      );
   };
 } 
 

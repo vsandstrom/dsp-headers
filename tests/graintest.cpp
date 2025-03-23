@@ -20,6 +20,8 @@
 // SETUP
 const int INPUT_CH = 2;
 const int OUTPUT_CH = 2;
+const int MAX_GRAINS = 16;
+const float GRAIN_DUR = 0.01f;
 const float INTERVAL = 0.1f;
 const float RECORD_LEN = 4.f; // seconds
 
@@ -113,12 +115,44 @@ int main(int argc, char** argv) {
   // float env[512] = {0.f};
   // hanning(env, 512);
 
-  // gr.update_envelope(env, 512);
+  // genv = new Envelope(
+  //     envtable,
+  //     512,
+  //     SAMPLE_RATE,
+  //     interpolation::linear
+  //   );
+
+  // gr = new Granulator(
+  //     GRAIN_DUR,
+  //     SAMPLE_RATE,
+  //     MAX_GRAINS,
+  //     envtable,
+  //     512,
+  //     interpolation::linear,
+  //     &buf
+  //   );
+  
+  const size_t vall = 3;
+  const size_t durl = 2;
 
   float val[vall] = {0.0, 1.0, 0.0};
   float dur[durl] = {0.2, 0.2};
   float cur[durl] = {1.0, 1.0};
 
+  struct BreakPoints<vall, durl> brk = BreakPoints<vall, durl>(
+    val,
+    dur,
+    cur
+  );
+
+  gr = new Granulator2<16, 4*48000>(
+    brk,
+    SAMPLE_RATE,
+    interpolation::linear
+  );
+
+  // gr->setJitter(JITTER);
+  // gr->setNumGrains(MAX_GRAINS);
   
 	PaStream* stream;
 	PaError err;

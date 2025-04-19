@@ -51,10 +51,7 @@ namespace dspheaders{
         return sig;
       };
 
-      ChownVerb(unsigned samplerate) : samplerate(samplerate) {
-        for (auto &c: cvec) c.setDamp(0.3f);
-        for (auto &a: avec) a.setDamp(0.0f);
-      };
+      ChownVerb(unsigned samplerate) : samplerate(samplerate) { };
   };
 
 
@@ -96,8 +93,6 @@ namespace dspheaders{
       }
 
       SchroederVerb(unsigned samplerate) : samplerate(samplerate) {
-        for (auto &c: cvec) c.setDamp(0.3f);
-        for (auto &a: avec) a.setDamp(0.0f);
       };
   };
 
@@ -142,7 +137,6 @@ namespace dspheaders{
       }
 
       MoorerVerb(unsigned samplerate) : samplerate(samplerate) {
-        for (auto &c: cvec) c.setDamp(0.1f);
       };
   };
 }

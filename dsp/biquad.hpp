@@ -96,24 +96,24 @@ namespace dspheaders {
       float x2;
       float y1;
       float y2;
-    } self;
+    }m;
 
-    explicit Biquad(M self): self(std::move(self)){}
+    explicit Biquad(M m ): m(std::move(m)){}
     private:
     float inline calc_result(float input) {
-      float output = self.c.b0 * input 
-                   + self.c.b1 * self.x1
-                   + self.c.b2 * self.x2
-                   - self.c.a1 * self.y1
-                   - self.c.a2 * self.y2;
+      float output = m.c.b0 * input 
+                   + m.c.b1 * m.x1
+                   + m.c.b2 * m.x2
+                   - m.c.a1 * m.y1
+                   - m.c.a2 * m.y2;
       return output;
     }
 
     void inline update_values(float input, float output) {
-      self.x2 = self.x1;
-      self.x1 = input;
-      self.y2 = self.y1;
-      self.y1 = output;
+      m.x2 = m.x1;
+      m.x1 = input;
+      m.y2 = m.y1;
+      m.y1 = output;
     }
 
     public:
@@ -132,8 +132,8 @@ namespace dspheaders {
     // Supply custom feedback coeffs, must be *at least* 3, only 3 values will 
     // be read if longer
 
-    void update(BiquadCoeffs coeffs) {
-      self.c = coeffs;
+    void set_coeffs(BiquadCoeffs coeffs) {
+      m.c = coeffs;
     }
 
     float process(float input, float initial_amplitude) {
@@ -159,12 +159,12 @@ namespace dspheaders {
     inline auto calc_lpf(float w, float q){
       float alpha = sinf(w) / (2.0 * q);
       float a0 = 1.0 + alpha;
-      self.c.a1 = (-2.0 * cosf(w)) / a0 ;
-      self.c.a2 = (1.0 - alpha) / a0;
+      m.c.a1 = (-2.0 * cosf(w)) / a0 ;
+      m.c.a2 = (1.0 - alpha) / a0;
 
-      self.c.b1 = (1.0 - cosf(w)) / a0;
-      self.c.b0 = self.c.b1 / 2.0 / a0;
-      self.c.b2 = self.c.b0;
+      m.c.b1 = (1.0 - cosf(w)) / a0;
+      m.c.b0 = m.c.b1 / 2.0 / a0;
+      m.c.b2 = m.c.b0;
     }
       
     // angular frequency = 'w'
@@ -185,12 +185,12 @@ namespace dspheaders {
       float alpha = sinf(w) / (2.0 * q);
       
       float a0 = 1.0 + alpha;
-      self.c.a1 = (-2.0 * cosf(w)) / a0 ;
-      self.c.a2 = (1.0 - alpha) / a0;
+      m.c.a1 = (-2.0 * cosf(w)) / a0 ;
+      m.c.a2 = (1.0 - alpha) / a0;
 
-      self.c.b0 = alpha / a0;
-      self.c.b1 = 0.0;
-      self.c.b2 = -alpha / a0;
+      m.c.b0 = alpha / a0;
+      m.c.b1 = 0.0;
+      m.c.b2 = -alpha / a0;
     }
 
     // angular frequency = 'w'
@@ -210,12 +210,12 @@ namespace dspheaders {
     inline void calc_hpf(float w, float q) {
       float alpha = sinf(w) / (2.0 * q);
       float a0 = 1.0 + alpha;
-      self.c.a1 = (-2.0 * cosf(w)) / a0;
-      self.c.a2 = 1.0 - alpha / a0;
+      m.c.a1 = (-2.0 * cosf(w)) / a0;
+      m.c.a2 = 1.0 - alpha / a0;
 
-      self.c.b0 = (1.0 + cosf(w)) / 2.0 / a0;
-      self.c.b1 = -(self.c.b0 * 2.0);
-      self.c.b2 = self.c.b0;
+      m.c.b0 = (1.0 + cosf(w)) / 2.0 / a0;
+      m.c.b1 = -(m.c.b0 * 2.0);
+      m.c.b2 = m.c.b0;
     }
 
     // angular frequency = 'w'
@@ -235,12 +235,12 @@ namespace dspheaders {
     inline void calc_notch(float w, float q) {
       float alpha = sinf(w) / (2.0 * q);
       float a0 = 1.0 + alpha;
-      self.c.a1 = -2.0 * cosf(w) / a0;
-      self.c.a2 = (1.0 - alpha) / a0;
+      m.c.a1 = -2.0 * cosf(w) / a0;
+      m.c.a2 = (1.0 - alpha) / a0;
 
-      self.c.b0 = 1.0 / a0;
-      self.c.b1 = self.c.a1;
-      self.c.b2 = self.c.b0;
+      m.c.b0 = 1.0 / a0;
+      m.c.b1 = m.c.a1;
+      m.c.b2 = m.c.b0;
     }
 
   };
@@ -261,22 +261,22 @@ namespace dspheaders {
 
       inline float process(float input) {
         // step 1
-        float output = self.c.b0*input 
-                     + self.c.b1*x1_1 
-                     + self.c.b2*x1_2 
-                     - self.c.a1*y1_1 
-                     - self.c.a2*y1_2;
+        float output = m.c.b0*input 
+                     + m.c.b1*x1_1 
+                     + m.c.b2*x1_2 
+                     - m.c.a1*y1_1 
+                     - m.c.a2*y1_2;
         x1_2 = x1_1;
         x1_1 = input;
         y1_2 = y1_1;
         y1_1 = output;
         
         //step 2
-        output = self.c.b0*output 
-               + self.c.b1*x2_1 
-               + self.c.b2*x2_2
-               - self.c.a1*y2_1 
-               - self.c.a2*y2_2;
+        output = m.c.b0*output 
+               + m.c.b1*x2_1 
+               + m.c.b2*x2_2
+               - m.c.a1*y2_1 
+               - m.c.a2*y2_2;
         x2_2 = x2_1;
         x2_1 = y1_1;
         y2_2 = y2_1;
@@ -312,44 +312,44 @@ namespace dspheaders {
       inline float process(float input) {
         float output = 0.f;
         // step 1
-        output = self.c.b0*input
-               + self.c.b1*x1_1
-               + self.c.b2*x1_2 
-               - self.c.a1*y1_1 
-               - self.c.a2*y1_2;
+        output = m.c.b0*input
+               + m.c.b1*x1_1
+               + m.c.b2*x1_2 
+               - m.c.a1*y1_1 
+               - m.c.a2*y1_2;
         x1_2 = x1_1;
         x1_1 = input;
         y1_2 = y1_1;
         y1_1 = output;
         
         //step 2
-        output = self.c.b0*output 
-               + self.c.b1*x2_1
-               + self.c.b2*x2_2 
-               - self.c.a1*y2_1 
-               - self.c.a2*y2_2;
+        output = m.c.b0*output 
+               + m.c.b1*x2_1
+               + m.c.b2*x2_2 
+               - m.c.a1*y2_1 
+               - m.c.a2*y2_2;
         x2_2 = x2_1;
         x2_1 = y1_1;
         y2_2 = y2_1;
         y2_1 = output;
 
         //step 3
-        output = self.c.b0*output 
-               + self.c.b1*x3_1
-               + self.c.b2*x3_2 
-               - self.c.a1*y3_1 
-               - self.c.a2*y3_2;
+        output = m.c.b0*output 
+               + m.c.b1*x3_1
+               + m.c.b2*x3_2 
+               - m.c.a1*y3_1 
+               - m.c.a2*y3_2;
         x3_2 = x3_1;
         x3_1 = y2_1;
         y3_2 = y3_1;
         y3_1 = output;
 
         //step 4
-        output = self.c.b0*output 
-               + self.c.b1*x4_1
-               + self.c.b2*x4_2 
-               - self.c.a1*y4_1 
-               - self.c.a2*y4_2;
+        output = m.c.b0*output 
+               + m.c.b1*x4_1
+               + m.c.b2*x4_2 
+               - m.c.a1*y4_1 
+               - m.c.a2*y4_2;
         x4_2 = x4_1;
         x4_1 = y3_1;
         y4_2 = y4_1;

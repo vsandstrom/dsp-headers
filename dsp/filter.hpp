@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdlib>
+#include <tuple>
 #ifndef FILTER_HPP
 #define FILTER_HPP
 
@@ -55,9 +56,9 @@ namespace dspheaders {
         size_t delay;
         float previous_in;
         float previous_out;
-      } self;
+      } m;
 
-    explicit Comb(M self ): self(std::move(self)){}
+    explicit Comb(M m ): m(std::move(m)){}
 
     float read();
     void write(float sample);
@@ -76,20 +77,20 @@ namespace dspheaders {
       }
 
       inline unsigned getBufferLength() {
-        return self.bufferlength;
+        return m.bufferlength;
       }
 
       float process(float sample) {
-        float delayed = self.buffer[self.position];
+        float delayed = m.buffer[m.position];
 
 
-        float fb = sample - self.feedback * delayed;
-        self.buffer[self.position] = fb;
-        float out = self.feedforward * fb + delayed;
-        self.position = self.position + 1;
+        float fb = sample - m.feedback * delayed;
+        m.buffer[m.position] = fb;
+        float out = m.feedforward * fb + delayed;
+        m.position = m.position + 1;
         // handle maximum size of delay line
-        while (self.position >= self.bufferlength) self.position -= self.delay;
-        return self.feedforward * fb + delayed;
+        while (m.position >= m.bufferlength) m.position -= m.delay;
+        return m.feedforward * fb + delayed;
       }
   };
 
@@ -99,25 +100,25 @@ namespace dspheaders {
       struct M {
         float prev  = 0.f; 
         float coeff = 0.f;
-      } self;
+      } m;
       public: 
-      /* self.damp has the range of -1 .. 1
-       * self.damp > 0 == lowpass
-       * self.damp < 0 == highpass
-       * keep |self.damp| < 1 for stability
+      /* m.damp has the range of -1 .. 1
+       * m.damp > 0 == lowpass
+       * m.damp < 0 == highpass
+       * keep |m.damp| < 1 for stability
       */
       auto set_coeff(float coeff) {
-        self.coeff = coeff;
+        m.coeff = coeff;
       }
 
-      /* self.damp has the range of -1 .. 1
-       * self.damp > 0 == lowpass
-       * self.damp < 0 == highpass
-       * keep |self.damp| < 1 for stability
+      /* m.damp has the range of -1 .. 1
+       * m.damp > 0 == lowpass
+       * m.damp < 0 == highpass
+       * keep |m.damp| < 1 for stability
       */
       inline auto process(float sample) {
-        self.prev = ((1.f - std::abs(self.coeff))*sample) + (self.coeff * self.prev);
-        return self.prev;;
+        m.prev = ((1.f - std::abs(m.coeff))*sample) + (m.coeff * m.prev);
+        return m.prev;;
       }
     };
   }
@@ -131,137 +132,188 @@ namespace dspheaders {
       float m1 = 0.f;
       float m2 = 0.f;
       float k = 0.f;
+      float a = 0.f;
 
       public:
-      inline auto lpf(float w, float q) -> SVFCoeffs {
+      inline auto lpf(float w, float q){
         float g = tanf(w/2.0);
-        float k = 1.0/q;
-        float a1 = 1.0 / (1.0 + g * (g + k));
-        float a2 = g * a1;
-        float a3 = g * a2;
-        float m0 = 0.0;
-        float m1 = 0.0;
-        float m2 = 1.0;
-        return SVFCoeffs{a1, a2, a3, m0, m1, m2, k};
+        k = 1.0/q;
+        a1 = 1.0 / (1.0 + g * (g + k));
+        a2 = g * a1;
+        a3 = g * a2;
+
+        m0 = 0.0;
+        m1 = 0.0;
+        m2 = 1.0;
       }
       
-      inline auto bpf(float w, float q) -> SVFCoeffs {
+      inline void bpf(float w, float q) {
         float g = tanf(w/2.0);
-        float k = 1.0/q;
-        float a1 = 1.0 / (1.0 + g * (g + k));
-        float a2 = g * a1;
-        float a3 = g * a2;
-        float m0 = 0.0;
-        float m1 = 1.0;
-        float m2 = 0.0;
-        return SVFCoeffs{a1, a2, a3, m0, m1, m2, k};
+        k = 1.0/q;
+        a1 = 1.0 / (1.0 + g * (g + k));
+        a2 = g * a1;
+        a3 = g * a2;
+
+        m0 = 0.0;
+        m1 = 1.0;
+        m2 = 0.0;
       }
 
-      inline auto hpf(float w, float q) -> SVFCoeffs {
+      inline void hpf(float w, float q) {
         float g = tanf(w/2.0);
-        float k = 1.0/q;
-        float a1 = 1.0 / (1.0 + g * (g + k));
-        float a2 = g * a1;
-        float a3 = g * a2;
-        float m0 = 1.0;
-        float m1 = -k;
-        float m2 = -1.0;
-        return SVFCoeffs{a1, a2, a3, m0, m1, m2, k};
+        k = 1.0/q;
+        a1 = 1.0 / (1.0 + g * (g + k));
+        a2 = g * a1;
+        a3 = g * a2;
+
+        m0 = 1.0;
+        m1 = -k;
+        m2 = -1.0;
       }
 
-      inline auto peq(float w, float q, float gain) -> SVFCoeffs {
-        float a = powf(10.0, gain / 40.0);
-        float g = tanf(w/2.0) * sqrt(gain);
-        float k = 1.0/q;
-        float a1 = 1.0 / (1.0 + g * (g + k));
-        float a2 = g * a1;
-        float a3 = g * a2;
-        float m0 = 1.0;
-        float m1 = k * (a * a - 1.0);
-        float m2 = 0.0;
-        return SVFCoeffs{a1, a2, a3, m0, m1, m2, k};
-      }
-
-      inline auto notch(float w, float q) -> SVFCoeffs {
+      inline void notch(float w, float q) {
         float g = tanf(w/2.0);
-        float k = 1.0/q;
-        float a1 = 1.0 / (1.0 + g * (g + k));
-        float a2 = g * a1;
-        float a3 = g * a2;
-        float m0 = 1.0;
-        float m1 = -k;
-        float m2 = 0.0;
-        return SVFCoeffs{a1, a2, a3, m0, m1, m2, k};
+        k = 1.0/q;
+        a1 = 1.0 / (1.0 + g * (g + k));
+        a2 = g * a1;
+        a3 = g * a2;
+
+        m0 = 1.0;
+        m1 = -k;
+        m2 = 0.0;
+
+      }
+      
+      inline void peq(float w, float q, float gain) {
+        float g = tanf(w/2.0) * sqrt(gain);
+        a = powf(10.0, gain / 40.0);
+        k = 1.0/q;
+        a1 = 1.0 / (1.0 + g * (g + k));
+        a2 = g * a1;
+        a3 = g * a2;
+
+        m0 = 1.0;
+        m1 = k * (a * a - 1.0);
+        m2 = 0.0;
       }
 
-      inline auto low_shelf(float w, float q, float gain) -> SVFCoeffs { 
-        float a = powf(10.0, gain / 40.0);
+      inline void low_shelf(float w, float q, float gain) { 
         float g = tanf(w/2.0) * sqrt(gain);
-        float k = 1.0/q;
-        float a1 = 1.0 / (1.0 + g * (g + k));
-        float a2 = g * a1;
-        float a3 = g * a2;
-        float m0 = 1.0;
-        float m1 = k * (a - 1.0);
-        float m2 = a * a - 1.0;
-        return SVFCoeffs{a1, a2, a3, m0, m1, m2, k};
+        a = powf(10.0, gain / 40.0);
+        k = 1.0/q;
+        a1 = 1.0 / (1.0 + g * (g + k));
+        a2 = g * a1;
+        a3 = g * a2;
+        m0 = 1.0;
+        m1 = k * (a - 1.0);
+        m2 = a * a - 1.0;
       }
 
-      inline auto high_shelf(float w, float q, float gain) -> SVFCoeffs { 
-        float a = powf(10.0, gain / 40.0);
+      inline void high_shelf(float w, float q, float gain) { 
         float g = tanf(w/2.0) * sqrt(gain);
-        float k = 1.0/q;
-        float a1 = 1.0 / (1.0 + g * (g + k));
-        float a2 = g * a1;
-        float a3 = g * a2;
-        float m0 = a * a;
-        float m1 = k * (1.0 - a) * a;
-        float m2 = 1.0 - a * a;
-        return SVFCoeffs{a1, a2, a3, m0, m1, m2, k};
+        a = powf(10.0, gain / 40.0);
+        k = 1.0/q;
+        a1 = 1.0 / (1.0 + g * (g + k));
+        a2 = g * a1;
+        a3 = g * a2;
+        m0 = a * a;
+        m1 = k * (1.0 - a) * a;
+        m2 = 1.0 - a * a;
       }
     };
 
     class SVFilter {
-
+      SVFCoeffs c;
       struct M {
         float ic1eq = 0.f; // integrator capacitor 1 (equalized)
         float ic2eq = 0.f; // integrator capacitor 2 (equalized)
-        SVFCoeffs coeffs;
-      } self;
-      explicit SVFilter(M self ): self(std::move(self)){}
+        float curr = 0.f;  // sample of current tick
+        float v1, v2, v3;
+        float a_sq;
+        float filter[6]{0.f};
+      } m;
+
+      explicit SVFilter(M m ): m(std::move(m)){}
+
+      enum FilterType {
+        LPF = 0,
+        BPF,
+        HPF,
+        LOW_SHELF,
+        HIGH_SHELF,
+        PEQ
+      };
+
       public:
 
       static SVFilter init() {{
         return SVFilter(M{
           0.f,
           0.f,
-          SVFCoeffs()
+          0.f,
+          0.f,
+          0.f,
+          0.f,
+          0.f,
         });
       }}
 
-      SVFilter() {};
-      float process(float sample) {
+      SVFilter() {}
+
+      /* This function sets up the values for calling getting any type of
+       * filtertype from the filter.
+       *
+       * Should be followed up with a call to one of the filter type functions:
+       * [ lpf, bpf, hpf, low_shelf, high_m, peq ]
+       */
+      void process(float sample, float w, float q, float gain) {
+        float g = tanf(w/2.0) * sqrt(gain);
+        c.a = powf(10.0, gain / 40.0);
+        c.k = 1.0/q;
+        c.a1 = 1.0 / (1.0 + g * (g + c.k));
+        c.a2 = g * c.a1;
+        c.a3 = g * c.a2;
+
         // v0 is sample
         //
-        // v3 = v0 - self.ic2eq
-        // v1 = a1 * self.ic1eq + a2 * v3
-        // v2 = self.ic2eq + a2 * self.ic1eq + a3 * v3
-        // self.ic1eq = 2 * v1 - self.ic1eq
-        // self.ic2eq = 2 * v2 - self.ic2eq
+        // v3 = v0 - m.ic2eq
+        // v1 = a1 * m.ic1eq + a2 * v3
+        // v2 = m.ic2eq + a2 * m.ic1eq + a3 * v3
+        // m.ic1eq = 2 * v1 - m.ic1eq
+        // m.ic2eq = 2 * v2 - m.ic2eq
         //
         // output = m0 * v0 + m1 * v1 + m2 * v2
 
-        float v3 = sample - self.ic2eq;
-        float v1 = self.coeffs.a1 * self.ic1eq + self.coeffs.a2 * v3;
-        float v2 = self.ic2eq + self.coeffs.a2 * self.ic1eq + self.coeffs.a3 * v3;
-        self.ic1eq = 2.0 * v1 - self.ic1eq;
-        self.ic2eq = 2.0 * v2 - self.ic2eq;
-        return self.coeffs.m0 * sample + self.coeffs.m1 * v1 + self.coeffs.m2 * v2;
+        m.v3 = sample - m.ic2eq;
+        m.v1 = c.a1 * m.ic1eq + c.a2 * m.v3;
+        m.v2 = m.ic2eq + c.a2 * m.ic1eq + c.a3 * m.v3;
+        m.ic1eq = 2.0 * m.v1 - m.ic1eq;
+        m.ic2eq = 2.0 * m.v2 - m.ic2eq;
+        m.a_sq = c.a * c.a;
+      }
+
+      inline float lpf() { return m.v2; }
+      inline float bpf() { return m.v1; }
+      inline float hpf() { return m.curr + -c.k * m.v1 - m.v2; }
+      inline float low_shelf(float gain) { 
+        float a = powf(10.0, gain / 40.0);
+        return m.curr + (c.k * (a - 1.f) * m.v1) + (a * a -1.0) * m.v2; 
+      }
+      inline float high_shelf(float gain) { 
+        float a = powf(10.0, gain / 40.0);
+        float a2 = a*a;
+        return a2 * m.curr + (c.k * (1.f - a) * a * m.v1) + (1.f - a2) * m.v2; 
+      }
+      inline float peq(float gain) { 
+        float a = powf(10.0, gain / 40.0);
+        float a2 = a*a;
+        return m.curr + (c.k * (a2 - 1.f) * m.v1);
       }
 
       void update(SVFCoeffs coeffs) {
-        self.coeffs = coeffs;
+        c = coeffs;
       };
+
     };
   }
 }

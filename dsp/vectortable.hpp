@@ -45,7 +45,7 @@ namespace dspheaders {
      * `float[SIZE][WIDTH]` or `float**`.
      */
     template<size_t SIZE, size_t WIDTH, float(*interpolate)(const float, const float* const, const size_t)>
-    float play(float** tables, float frequency, float position, float phase) {
+    float play(const float** tables, float frequency, float position, float phase) {
       D({
         for (int i = 0; i < WIDTH; i++) {
           assert(tables[i] != nullptr && "table is not initialized");
@@ -113,7 +113,7 @@ namespace dspheaders {
      * `float[SIZE][WIDTH]` or `float**`.
      */
     template<size_t SIZE, size_t WIDTH>
-    float play(float** tables, float frequency, float position, float phase) {
+    float play(const float** tables, float frequency, float position, float phase) {
       D({
         for (int i = 0; i < WIDTH; i++) {
           assert(tables[i] != nullptr && "table is not initialized");

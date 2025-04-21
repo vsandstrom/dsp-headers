@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <stddef.h>
 #ifndef WAVETABLE_HPP
@@ -47,11 +48,22 @@ namespace dspheaders {
       return interpolate(m.position, table, SIZE);
     };
 
+    template<unsigned SIZE, float(*interpolate)(const float, const float* const, const size_t)>
+    float play(std::array<float, SIZE> table, float frequency, float phase) {
+      if (frequency > m.samplerate * 0.5f) return 0;
+      float len = static_cast<float>(SIZE);
+      m.position += (len * m.sr_recip * frequency) + (phase * len);
+      while (m.position <  0.f) m.position += len;
+      while (m.position >= len) m.position -= len;
+      return interpolate(m.position, table, SIZE);
+    }
+
     void setSamplerate(float samplerate) {
       m.samplerate = samplerate;
       m.sr_recip = 1.0 / samplerate;
     }
   };
+
   
   class WavetableLinear {
     struct M {

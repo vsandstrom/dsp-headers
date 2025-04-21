@@ -10,12 +10,12 @@
 #define undenormalise(sample) if(((*(unsigned int*)&sample)&0x7f800000)==0) sample=0.0f
 
 namespace dspheaders{
-  const float PI =            3.14159265358979323846264338327950288f;
-  const float TAU =           6.28318530717958647692528676655900577f;
-  const float FRAC_PI_4 =     0.785398163397448309615660845819875721f;
-  const float FRAC_1_SQRT_2 = 0.707106781186547524400844362104849039;
-  const float LOGTEN =        2.302585092994046;
-  const float LOGTWO =        0.693147180559945;
+  constexpr float PI =            3.14159265358979323846264338327950288f;
+  constexpr float TAU =           6.28318530717958647692528676655900577f;
+  constexpr float FRAC_PI_4 =     0.785398163397448309615660845819875721f;
+  constexpr float FRAC_1_SQRT_2 = 0.707106781186547524400844362104849039;
+  constexpr float LOGTEN =        2.302585092994046;
+  constexpr float LOGTWO =        0.693147180559945;
 
   inline float fast_tanh(double x) {
     if (x < -1.f) return -1.f;
@@ -104,7 +104,6 @@ namespace dspheaders{
   inline float ftom(float frequency, float base = 440.f) {
     return 12 * (logf(frequency / (base/2)) / LOGTWO) + 57;
   }
-
 
   // inline float radiansToFreq(float radian, float samplerate) { }
 }

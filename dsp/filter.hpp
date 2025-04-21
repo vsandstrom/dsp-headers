@@ -1,4 +1,6 @@
 #pragma once
+#include <cstdlib>
+#include <tuple>
 #ifndef FILTER_HPP
 #define FILTER_HPP
 
@@ -67,19 +69,11 @@ namespace dspheaders {
         return Comb(M{
           .buffer = std::vector<float>(size, 0.f),
           .bufferlength = size,
-          .damp = 0.f,
-          .previous = 0.f, 
           .feedforward = feedforward,
           .feedback = feedback,
           .position = 0,
           .delay = 0,
-          .previous_in = 0.f,
-          .previous_out = 0.f
         });
-      }
-      // Feedback
-      inline void setDamp(float damp) {
-        m.damp = damp;
       }
 
       inline unsigned getBufferLength() {
@@ -88,14 +82,11 @@ namespace dspheaders {
 
       float process(float sample) {
         float delayed = m.buffer[m.position];
-        float dc_blocked = sample - m.previous_in + 0.995 * m.previous_out;
 
-        m.previous_in = sample;
-        m.previous_out = dc_blocked;
 
-        m.previous = delayed * (1.f * m.damp) + m.previous * m.damp;
-        float fb = dc_blocked - m.feedback * m.previous;
+        float fb = sample - m.feedback * delayed;
         m.buffer[m.position] = fb;
+        float out = m.feedforward * fb + delayed;
         m.position = m.position + 1;
         // handle maximum size of delay line
         while (m.position >= m.bufferlength) m.position -= m.delay;
@@ -418,4 +409,5 @@ namespace dspheaders {
     }
   };
 }
+
 #endif

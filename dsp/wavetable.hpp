@@ -86,13 +86,13 @@ namespace dspheaders {
     }
 
     template <unsigned SIZE>
-    float play(float* table, float frequency, float phase) {
+    float play(float* table, size_t len, float frequency, float phase) {
       D(assert(table != nullptr && "table has not been initialized");)
       if (frequency > m.samplerate * 0.5f) return 0;
-      float len = static_cast<float>(SIZE);
+      float l = static_cast<float>(len);
       m.position += (len * m.sr_recip * frequency) + (phase * len);
-      while (m.position <  0.f) m.position += len;
-      while (m.position >= len) m.position -= len;
+      while (m.position <  0.f) m.position += l;
+      while (m.position >= l) m.position -= l;
       size_t a = m.position;
       size_t b = a + 1;
       float w = m.position - a;
@@ -102,6 +102,36 @@ namespace dspheaders {
     void setSamplerate(float samplerate) {
       m.samplerate = samplerate;
       m.sr_recip = 1.0 / samplerate;
+    }
+  };
+
+  template <float(*interpolate) (const float, const float*, const size_t)>
+  class Osc {
+    private:
+    struct M {
+      float position = 0.f;
+      float samplerate = 0.f;
+      float sr_recip = 0.f;
+    } self;
+    explicit Osc(M self) : self(std::move(self)) {}
+    public:
+
+    static Osc init(float samplerate) {
+      return Osc(M {
+          .position=0.f,
+          .samplerate=samplerate,
+          .sr_recip=1.f/samplerate
+        }
+      );
+    }
+
+    float play(float * table, size_t len, float frequency, float phase) {
+      if (frequency > self.samplerate * 0.5f) {return 0.f;}
+      float l = static_cast<float>(len);
+      self.position += len * (self.sr_recip * frequency + phase);
+      while (self.position > len) { self.position -= len; }
+      while (self.position > len) { self.position -= len; }
+      return interpolate(self.position, table, len);
     }
   };
 }

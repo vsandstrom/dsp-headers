@@ -26,7 +26,8 @@ float ENV_FREQ =              4.0f;
 using namespace dspheaders;
 using namespace interpolation;
 
-Wavetable carrier = Wavetable::init(SAMPLE_RATE);
+// Wavetable carrier = Wavetable::init(SAMPLE_RATE);
+Osc osc = Osc<interpolation::linear>::init(SAMPLE_RATE);
 float car_t[SIZE+1] = {0.f};
 
 static frame data;
@@ -48,7 +49,7 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier.play<SIZE, linear>(car_t, 200, 0.f);
+    float car = osc.play(car_t, SIZE, 200, 0.f);
 
     // Stereo frame: two increments of out buffer
     *out++ = car; 

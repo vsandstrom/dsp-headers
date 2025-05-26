@@ -6,14 +6,6 @@
 #include "filter.hpp"
 #include "dsp_math.h"
 
-#pragma once
-
-#ifndef VERB_HPP
-#define VERB_HPP
-
-#include "filter.hpp"
-#include "dsp_math.h"
-
 namespace dspheaders{
   class ChownVerb {
     private:

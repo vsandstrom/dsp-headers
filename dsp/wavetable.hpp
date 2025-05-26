@@ -115,22 +115,21 @@ namespace dspheaders {
     } self;
     explicit Osc(M self) : self(std::move(self)) {}
     public:
-
     static Osc init(float samplerate) {
-      return Osc(M {
+      return Osc(
+        M {
           .position=0.f,
           .samplerate=samplerate,
           .sr_recip=1.f/samplerate
         }
       );
     }
-
     float play(float * table, size_t len, float frequency, float phase) {
       if (frequency > self.samplerate * 0.5f) {return 0.f;}
       float l = static_cast<float>(len);
       self.position += len * (self.sr_recip * frequency + phase);
-      while (self.position > len) { self.position -= len; }
-      while (self.position > len) { self.position -= len; }
+      while (self.position > len) { self.position -= l; }
+      while (self.position < 0.f) { self.position += l; }
       return interpolate(self.position, table, len);
     }
   };

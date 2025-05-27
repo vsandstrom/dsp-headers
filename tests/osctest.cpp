@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -28,6 +29,7 @@ using namespace interpolation;
 
 // Wavetable carrier = Wavetable::init(SAMPLE_RATE);
 Osc osc = Osc<interpolation::linear>::init(SAMPLE_RATE);
+Wavetable wt = Wavetable::init(SAMPLE_RATE);
 float car_t[SIZE+1] = {0.f};
 
 static frame data;
@@ -49,11 +51,11 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = osc.play(car_t, SIZE, 200, 0.f);
-
+    float car = osc.play(car_t, SIZE, 200.f, 0.f);
+    float ca2 = wt.play<SIZE, interpolation::linear>(car_t, 200.f, 0.f);
     // Stereo frame: two increments of out buffer
-    *out++ = car; 
-    *out++ = car;
+    *out++ = car * 0.2; 
+    *out++ = ca2 * 0.2;
 	}
 	return 0;
 }

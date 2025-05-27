@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 #ifndef INTERPOLATION_HPP
 #define INTERPOLATION_HPP
 
@@ -9,6 +10,9 @@
 #include "dsp_math.h"
 
 namespace dspheaders {
+
+  typedef float (*interpolate_t)(const float, const float* const, const size_t);
+
   namespace interpolation {
     // In case there should be no interpolation at all
     inline float none(const float position, const float* const table, const size_t _tablelength) {

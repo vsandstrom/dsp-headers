@@ -8,8 +8,10 @@
 #include <array>
 #include <cstddef>
 #include <vector>
+#include "interpolation.hpp"
 
 namespace dspheaders {
+  template<interpolate_t BUF_INTERPOLATE>
   class Delay {
     struct M {
       std::vector<float> buffer;
@@ -28,7 +30,7 @@ namespace dspheaders {
       );
     }
 
-    template<float (*BUF_INTERPOLATE)(const float, const float * const, size_t)>float play(
+    float play(
       float input,
       float delay,
       float feedback

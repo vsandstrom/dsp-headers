@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interpolation.hpp"
 #ifndef GRAIN_HPP
 #define GRAIN_HPP
 
@@ -19,7 +20,7 @@
 static size_t count = 0;
 
 namespace dspheaders {
-  template<size_t NUMGRAINS, size_t BUFSIZE>
+  template<size_t NUMGRAINS, size_t BUFSIZE, interpolate_t BUF_INTERPOLATE, interpolate_t ENV_INTERPOLATE>
   class Granulator {
     struct Grain {
       public:
@@ -66,9 +67,6 @@ namespace dspheaders {
       });
     }
 
-    template<
-      float (*BUF_INTERPOLATE)(const float, const float* const, const size_t), 
-      float (*ENV_INTERPOLATE)(const float, const float* const, const size_t)>
     float play(
         float position,
         float duration,

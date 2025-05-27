@@ -6,6 +6,7 @@
 #include <utility>
 #include <algorithm>
 #include "dsp.h"
+#include "interpolation.hpp"
 
 #ifndef DEBUG
   #define D(x)  
@@ -15,7 +16,7 @@
 #endif
 
 namespace dspheaders {
-  template <float(*interpolate)(const float, const float* const, const size_t)>
+  template <interpolate_t interpolate>
   class VecOsc {
     private:
     struct M {

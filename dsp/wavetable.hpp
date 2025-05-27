@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include "interpolation.hpp"
 #include <stddef.h>
 #ifndef WAVETABLE_HPP
 #define WAVETABLE_HPP
@@ -17,6 +18,34 @@
 #pragma once
 
 namespace dspheaders {
+  template <interpolate_t interpolate>
+  class Osc {
+    private:
+    struct M {
+      float position = 0.f;
+      float samplerate = 0.f;
+      float sr_recip = 0.f;
+    } self;
+    explicit Osc(M self) : self(std::move(self)) {}
+    public:
+    static Osc init(float samplerate) {
+      return Osc(
+        M {
+          .position=0.f,
+          .samplerate=samplerate,
+          .sr_recip=1.f/samplerate
+        }
+      );
+    }
+    float play(float * table, size_t len, float frequency, float phase) {
+      if (frequency > self.samplerate * 0.5f) {return 0.f;}
+      float l = static_cast<float>(len);
+      self.position += len * (self.sr_recip * frequency + phase);
+      while (self.position > len) { self.position -= l; }
+      while (self.position < 0.f) { self.position += l; }
+      return interpolate(self.position, table, len);
+    }
+  };
   class Wavetable {
     struct M {
       float position = 0.f;
@@ -37,7 +66,7 @@ namespace dspheaders {
       );
     }
 
-    template <unsigned SIZE, float(*interpolate) (const float, const float* const , const size_t)>
+    template <unsigned SIZE, interpolate_t interpolate>
     float play(float* table, float frequency, float phase) {
       D(assert(table != nullptr && "table has not been initialized");)
       if (frequency > m.samplerate * 0.5f) return 0;
@@ -105,34 +134,6 @@ namespace dspheaders {
     }
   };
 
-  template <float(*interpolate) (const float, const float*, const size_t)>
-  class Osc {
-    private:
-    struct M {
-      float position = 0.f;
-      float samplerate = 0.f;
-      float sr_recip = 0.f;
-    } self;
-    explicit Osc(M self) : self(std::move(self)) {}
-    public:
-    static Osc init(float samplerate) {
-      return Osc(
-        M {
-          .position=0.f,
-          .samplerate=samplerate,
-          .sr_recip=1.f/samplerate
-        }
-      );
-    }
-    float play(float * table, size_t len, float frequency, float phase) {
-      if (frequency > self.samplerate * 0.5f) {return 0.f;}
-      float l = static_cast<float>(len);
-      self.position += len * (self.sr_recip * frequency + phase);
-      while (self.position > len) { self.position -= l; }
-      while (self.position < 0.f) { self.position += l; }
-      return interpolate(self.position, table, len);
-    }
-  };
 }
 
 #endif

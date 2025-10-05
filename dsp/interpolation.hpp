@@ -19,6 +19,7 @@ namespace dspheaders {
       return table[(int)position];
     };
 
+
   /* |-----------------|
    * |    2 sample     |
    * |  interpolation  |
@@ -29,7 +30,6 @@ namespace dspheaders {
    * |     [ pos ]     |
    * |--------|--------|
    */ 
-
 
     // Basic 2 point linear interpolation
     inline float linear(const float position, const float* const table, const size_t tablelength) {
@@ -130,7 +130,19 @@ namespace dspheaders {
           return table[(int)position];
         }
       };
+  
+  /* |-----------------|
+   * |    2 sample     |
+   * |  interpolation  |
+   * |--[a1]--|--[b1]--|
+   * |        |        |
+   * |   n-1  |  n+1   |
+   * |        |        |
+   * |     [ pos ]     |
+   * |--------|--------|
+   */ 
 
+    // Basic 2 point linear interpolation
       struct linear : public Interpolation {
         float operator() (const float position, const float* const table, const size_t tablelength) const override {
           const float a = table[static_cast<size_t>(position)];
@@ -141,6 +153,7 @@ namespace dspheaders {
       };
 
       
+    // Basic 2 point cosine interpolation
       struct cosine : public Interpolation {
         float operator() (const float position, const float* const table, const size_t tablelength) const override {
           const float a = table[static_cast<size_t>(position)];
@@ -150,7 +163,18 @@ namespace dspheaders {
           return a + x * (b - a);
         }
       };
+    
+    /* |-----------------------------------|
+     * |     4 sample interpolation        |
+     * |--[a1]--|--[a2]--|--[b1]--|--[b2]--|
+     * |        |        |        |        |
+     * |  n-1   |   n    |  n+1   |  n+2   |
+     * |        |        |        |        |
+     * |        |     [ pos ]     |        |
+     * |-----------------------------------|
+     */
       
+    // 4 point cubic interpolation
       struct cubic : public Interpolation {
         float operator() (const float position, const float* const table, const size_t tablelength) const override {
           // positions
@@ -181,6 +205,7 @@ namespace dspheaders {
         }
       };
       
+    // 4 point hermite interpolation
       struct hermite : public Interpolation {
         float operator() (const float position, const float* const table, const size_t tablelength) const override {
           const size_t a2 = position;

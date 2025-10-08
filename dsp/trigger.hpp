@@ -5,13 +5,6 @@
 
 #include <utility>
 
-#pragma once
-
-#ifndef TRIGGER_HPP
-#define TRIGGER_HPP
-
-#include <utility>
-
 namespace dspheaders {
   class Impulse {
     /*

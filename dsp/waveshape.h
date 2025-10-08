@@ -8,7 +8,7 @@
 #include <cstddef>
 
 using namespace dspheaders;
-inline void sine(float* table, size_t tablelength) {
+constexpr inline void sine(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = PI * 2.f / numsamples;
   for (size_t i = 0; i < tablelength; i++) {
@@ -18,7 +18,7 @@ inline void sine(float* table, size_t tablelength) {
 }
 
 
-inline void saw(float* table, size_t tablelength) {
+constexpr inline void saw(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = 2.0 / (numsamples-1);
   for (size_t i = 0; i < tablelength; i++) {
@@ -27,7 +27,7 @@ inline void saw(float* table, size_t tablelength) {
   }
 }
 
-inline void revsaw(float* table, size_t tablelength) {
+constexpr inline void revsaw(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = 2.0 / (numsamples-1);
   for (size_t i = 0; i < tablelength; i++) {
@@ -36,7 +36,7 @@ inline void revsaw(float* table, size_t tablelength) {
   }
 }
 
-inline void square(float* table, size_t tablelength) {
+constexpr inline void square(float* table, size_t tablelength) {
   float val = -1.f;
   for (size_t i = 0; i < tablelength; i++) {
     table[i] = val;
@@ -46,7 +46,7 @@ inline void square(float* table, size_t tablelength) {
   }
 }
 
-inline void phasor(float* table, size_t tablelength) {
+constexpr inline void phasor(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = 1.0 / (numsamples-1);
   for (size_t i = 0; i < tablelength; i++) {
@@ -55,7 +55,7 @@ inline void phasor(float* table, size_t tablelength) {
   }
 }
 
-inline void revsquare(float* table, size_t tablelength) {
+constexpr inline void revsquare(float* table, size_t tablelength) {
   float val = 1.f;
   for (size_t i = 0; i < tablelength; i++) {
     table[i] = val;
@@ -65,7 +65,7 @@ inline void revsquare(float* table, size_t tablelength) {
   } 
 }
 
-inline void hanning(float* table, size_t tablelength) {
+constexpr inline void hanning(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = PI / numsamples;
   for (size_t i = 0; i < tablelength; i++) {
@@ -74,7 +74,7 @@ inline void hanning(float* table, size_t tablelength) {
   }
 }
 
-inline void triangle(float* table, size_t tablelength) {
+constexpr inline void triangle(float* table, size_t tablelength) {
   float inc = 0.f, angle = 0.f, numsamples = (float)tablelength;
   inc = 2.f / (numsamples * 0.5);
   for (size_t i = 0; i < tablelength; i++) {
@@ -91,7 +91,7 @@ inline void triangle(float* table, size_t tablelength) {
 /// different amplitudes and phases
 ///
 
-inline float* complex_sine(
+constexpr inline float* complex_sine(
     float* table,
     size_t tablelength, 
     float* amplitudes,

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #ifndef NOISE_HPP
 #define NOISE_HPP
 
@@ -18,7 +20,6 @@ namespace dspheaders {
 
     public:
     static Noise init(float samplerate) {
-      float sr_recip = 1.0 / samplerate;
       srand(static_cast<unsigned>(time(0)));
       return Noise(M{
         .counter = 0,
@@ -26,7 +27,7 @@ namespace dspheaders {
         .current = 0.0,
         .inc = 0.0,
         .samplerate = samplerate,
-        .sr_recip = sr_recip
+        .sr_recip = 1.f / samplerate 
       });
     }
 

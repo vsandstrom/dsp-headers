@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 #ifndef INTERPOLATION_HPP
 #define INTERPOLATION_HPP
 
@@ -9,11 +10,15 @@
 #include "dsp_math.h"
 
 namespace dspheaders {
+
+  typedef float (*interpolate_t)(const float, const float* const, const size_t);
+
   namespace interpolation {
     // In case there should be no interpolation at all
     inline float none(const float position, const float* const table, const size_t _tablelength) {
       return table[(int)position];
     };
+
 
   /* |-----------------|
    * |    2 sample     |
@@ -25,7 +30,6 @@ namespace dspheaders {
    * |     [ pos ]     |
    * |--------|--------|
    */ 
-
 
     // Basic 2 point linear interpolation
     inline float linear(const float position, const float* const table, const size_t tablelength) {
@@ -117,17 +121,30 @@ namespace dspheaders {
     
     namespace functors {
       struct Interpolation {
-        virtual float operator()(float position, float* table, size_t tablelength);
+        virtual float operator()(const float position, const float* const table, const size_t tablelength) const = 0;
+        virtual ~Interpolation() = default;
       };
 
       struct floor : public Interpolation {
-        float operator() (float position, float* table, size_t tablelength) const {
+        float operator() (const float position, const float* const table, const size_t tablelength) const override {
           return table[(int)position];
         }
       };
+  
+  /* |-----------------|
+   * |    2 sample     |
+   * |  interpolation  |
+   * |--[a1]--|--[b1]--|
+   * |        |        |
+   * |   n-1  |  n+1   |
+   * |        |        |
+   * |     [ pos ]     |
+   * |--------|--------|
+   */ 
 
+    // Basic 2 point linear interpolation
       struct linear : public Interpolation {
-        float operator() (float position, float* table, size_t tablelength) const {
+        float operator() (const float position, const float* const table, const size_t tablelength) const override {
           const float a = table[static_cast<size_t>(position)];
           const float b = table[static_cast<size_t>(position+1)];
           const float x = position - static_cast<long>(position);
@@ -136,8 +153,9 @@ namespace dspheaders {
       };
 
       
+    // Basic 2 point cosine interpolation
       struct cosine : public Interpolation {
-        float operator() (float position, float* table, size_t tablelength) const {
+        float operator() (const float position, const float* const table, const size_t tablelength) const override {
           const float a = table[static_cast<size_t>(position)];
           const float b = table[static_cast<size_t>(position+1)];
           const float diff = position - static_cast<long>(position);
@@ -145,9 +163,20 @@ namespace dspheaders {
           return a + x * (b - a);
         }
       };
+    
+    /* |-----------------------------------|
+     * |     4 sample interpolation        |
+     * |--[a1]--|--[a2]--|--[b1]--|--[b2]--|
+     * |        |        |        |        |
+     * |  n-1   |   n    |  n+1   |  n+2   |
+     * |        |        |        |        |
+     * |        |     [ pos ]     |        |
+     * |-----------------------------------|
+     */
       
+    // 4 point cubic interpolation
       struct cubic : public Interpolation {
-        float operator() (float position, float* table, size_t tablelength) const {
+        float operator() (const float position, const float* const table, const size_t tablelength) const override {
           // positions
           const size_t a2 = position; // implicit cast
           const size_t b1 = a2+1;
@@ -176,8 +205,9 @@ namespace dspheaders {
         }
       };
       
+    // 4 point hermite interpolation
       struct hermite : public Interpolation {
-        float operator() (float position, float* table, size_t tablelength) const {
+        float operator() (const float position, const float* const table, const size_t tablelength) const override {
           const size_t a2 = position;
           const size_t b1 = position + 1;
           const size_t a1 = a2-1 < tablelength ? a2-1 : tablelength-1; // uint wrap-around guard

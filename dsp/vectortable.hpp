@@ -6,6 +6,7 @@
 #include <utility>
 #include <algorithm>
 #include "dsp.h"
+#include "interpolation.hpp"
 
 #ifndef DEBUG
   #define D(x)  
@@ -15,7 +16,8 @@
 #endif
 
 namespace dspheaders {
-  class VectorOscillator {
+  template <interpolate_t interpolate>
+  class VecOsc {
     private:
     struct M {
       float position = 0.f;
@@ -23,13 +25,13 @@ namespace dspheaders {
       float sr_recip = 0.f;
     } m; 
 
-    explicit VectorOscillator(M m) : m(std::move(m)) {}
+    explicit VecOsc(M m) : m(std::move(m)) {}
 
     public:
-    VectorOscillator(){}
+    VecOsc(){}
 
-    static VectorOscillator init(float samplerate) {
-      return VectorOscillator(M{
+    static VecOsc init(float samplerate) {
+      return VecOsc(M{
           .position = 0.f,
           .samplerate = samplerate,
           .sr_recip = 1.f / samplerate
@@ -44,7 +46,7 @@ namespace dspheaders {
      * `tables` is a 2 dimensional array of floats:
      * `float[SIZE][WIDTH]` or `float**`.
      */
-    template<size_t SIZE, size_t WIDTH, float(*interpolate)(const float, const float* const, const size_t)>
+    template<size_t SIZE, size_t WIDTH>
     float play(const float** tables, float frequency, float position, float phase) {
       D({
         for (int i = 0; i < WIDTH; i++) {
@@ -83,7 +85,7 @@ namespace dspheaders {
   
 
 // Inline Linear interpolation
-  class VectorOscillatorLinear {
+  class VecOscLinear {
     private:
     struct M {
       float position = 0.f;
@@ -91,13 +93,13 @@ namespace dspheaders {
       float sr_recip = 0.f;
     } m; 
 
-    explicit VectorOscillatorLinear(M m) : m(std::move(m)) {}
+    explicit VecOscLinear(M m) : m(std::move(m)) {}
 
     public:
-    VectorOscillatorLinear(){}
+    VecOscLinear(){}
 
-    static VectorOscillatorLinear init(float samplerate) {
-      return VectorOscillatorLinear(M{
+    static VecOscLinear init(float samplerate) {
+      return VecOscLinear(M{
           .position = 0.f,
           .samplerate = samplerate,
           .sr_recip = 1.f / samplerate
@@ -165,7 +167,7 @@ namespace dspheaders {
   
 
 // Inline Linear interpolation
-  // class VectorOscillatorLinear {
+  // class VecOscLinear {
   //   private:
   //   struct M {
   //     float position = 0.f;
@@ -173,13 +175,13 @@ namespace dspheaders {
   //     float sr_recip = 0.f;
   //   } m; 
   //
-  //   explicit VectorOscillatorLinear(M m) : m(std::move(m)) {}
+  //   explicit VecOscLinear(M m) : m(std::move(m)) {}
   //
   //   public:
-  //   VectorOscillatorLinear(){}
+  //   VecOscLinear(){}
   //
-  //   static VectorOscillatorLinear init(float samplerate) {
-  //     return VectorOscillatorLinear(M{
+  //   static VecOscLinear init(float samplerate) {
+  //     return VecOscLinear(M{
   //         .position = 0.f,
   //         .samplerate = samplerate,
   //         .sr_recip = 1.f / samplerate

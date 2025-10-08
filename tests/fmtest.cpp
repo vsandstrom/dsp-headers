@@ -23,9 +23,9 @@ float ENV_FREQ =              4.0f;
 
 using namespace dspheaders;
 
-Wavetable carrier   = Wavetable::init(SAMPLE_RATE);
-Wavetable modulator = Wavetable::init(SAMPLE_RATE);
-Wavetable envelope  = Wavetable::init(SAMPLE_RATE);
+Osc carrier   = Osc<interpolation::linear>::init(SAMPLE_RATE);
+Osc modulator = Osc<interpolation::linear>::init(SAMPLE_RATE);
+Osc envelope  = Osc<interpolation::linear>::init(SAMPLE_RATE);
 
 float car_t[SIZE] = {0.f};
 float mod_t[SIZE] = {0.f};
@@ -50,8 +50,8 @@ static int paCallback(  const void* inputBuffer,				// input
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float car = carrier.play<SIZE, interpolation::cubic>(car_t, FREQ, modulator.play<SIZE, interpolation::cubic>(mod_t, FM_FREQ, 0.f));
-    float env = envelope.play<SIZE, interpolation::hermetic>(env_t, ENV_FREQ, 0.f);
+    float car = carrier.play(car_t, SIZE, FREQ, modulator.play(mod_t, SIZE, FM_FREQ, 0.f));
+    float env = envelope.play(env_t, SIZE, ENV_FREQ, 0.f);
 
     // Stereo frame: two increments of out buffer
     *out++ = car * env; 

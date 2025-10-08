@@ -24,9 +24,9 @@ static frame data;
 using namespace dspheaders;
 
 // SETUP:
-VectorOscillator vec = VectorOscillator::init(SAMPLE_RATE);
-Wavetable transfer = Wavetable::init(SAMPLE_RATE);
-Wavetable envelope = Wavetable::init(SAMPLE_RATE);
+VecOsc vec = VecOsc<interpolation::linear>::init(SAMPLE_RATE);
+Osc transfer = Osc<interpolation::linear>::init(SAMPLE_RATE);
+Osc envelope = Osc<interpolation::linear>::init(SAMPLE_RATE);
 
 // Tables
 // 
@@ -54,11 +54,12 @@ static int paCallback(  const void* inputBuffer,
 	(void) inputBuffer; // prevent unused variable warning
 
 	for (i = 0; i < framesPerBuffer; i++) { // loop over buffer
-    float vosc = vec.play<SIZE, WIDTH, interpolation::linear>(
-        tables,
+    float vosc = vec.play<SIZE, WIDTH>(
+        (const float**)tables,
         FREQ,
-        map(transfer.play<SIZE, interpolation::linear>(
+        map(transfer.play(
           trans,
+          SIZE,
           0.45,
           0.f), -1.f, 1.f, 0.f, 1.f),
         0.f

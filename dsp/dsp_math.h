@@ -105,6 +105,22 @@ namespace dspheaders{
     return 12 * (logf(frequency / (base/2)) / LOGTWO) + 57;
   }
 
+  // Out param of an array of length 2, updated with weights for left/right channels
+  inline void pan_exp2(float* out_pan, float pan) {
+    float p = pan * FRAC_PI_4;
+    float c = std::cosf(p);
+    float s = std::sinf(p);
+    out_pan[0] = FRAC_1_SQRT_2 * (c + s);
+    out_pan[1] = FRAC_1_SQRT_2 * (c - s);
+  }
+
+  // Out param of an array of length 2, updated with weights for left/right channels
+  inline void pan_lin2(float* out_pan, float pan) {
+    pan *= 0.5;
+    out_pan[0] = (pan < 0.0) ? 0.5 + pan : 0.5 - pan;
+    out_pan[1] = (pan < 0.0) ? 0.5 - pan : 0.5 + pan;
+  }
+
   // inline float radiansToFreq(float radian, float samplerate) { }
 }
 

@@ -7,7 +7,7 @@
 
 #include <cstdlib>
 #include <cmath>
-#include "dsp_math.hpp"
+#include "dsp_math.h"
 
 namespace dspheaders {
 

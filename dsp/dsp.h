@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef DSP_HPP
-#define DSP_HPP
+#ifndef DSP_H
+#define DSP_H
 
 #include <cstddef>
 #include <cstdlib>

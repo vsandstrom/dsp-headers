@@ -3,7 +3,8 @@
 #ifndef WAVESHAPE_H
 #define WAVESHAPE_H
 
-#include "dsp_math.h"
+#include "dsp_math.hpp"
+#include "dsp.hpp"
 #include <cmath>
 #include <cstddef>
 

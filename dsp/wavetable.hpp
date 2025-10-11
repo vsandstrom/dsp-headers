@@ -91,6 +91,10 @@ namespace dspheaders {
       m.samplerate = samplerate;
       m.sr_recip = 1.0 / samplerate;
     }
+
+    float getSamplerate() {
+      return m.samplerate;
+    }
   };
 
   

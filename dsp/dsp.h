@@ -4,7 +4,6 @@
 #define DSP_H
 
 #include <cstddef>
-#include <cmath>
 #include <cstdlib>
 
 namespace dspheaders {
@@ -16,43 +15,43 @@ namespace dspheaders {
   // Discrete sample manipulation
   ///////////////////////////////
   
-  inline float fmax(float a, float b) {
-    float r;
+  constexpr inline float fmax(float a, float b) {
 #ifdef __arm__
+    float r;
     asm("vmaxnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
 #else
-    r = (a > b) ? a : b;
+    float r = (a > b) ? a : b;
 #endif // __arm__
     return r;
   }
 
-  inline float fmin(float a, float b) {
-    float r;
+  constexpr inline float fmin(float a, float b) {
 #ifdef __arm__
+    float r;
     asm("vminnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
 #else
-    r = (a < b) ? a : b;
+    float r = (a < b) ? a : b;
 #endif // __arm__
     return r;
   }
 
   // Set hard min- and max amplitude limits on signal, where 'x' is signal
-  inline float clamp(float in, float min, float max) {
+  constexpr inline float clamp(float in, float min, float max) {
       return fmin(fmax(in, min), max);
   }
 
   // Convert signal a range to new range, where 'x' is signal
-  inline float map(float x, float inmin, float inmax, float outmin, float outmax) {
+  constexpr inline float map(float x, float inmin, float inmax, float outmin, float outmax) {
       return (outmax-outmin)*(x - inmin)/(inmax-inmin)+outmin;
   }
   
   // Transform value in range -1.0 - 1.0 to 0.0 - 1.0
-  inline float tounipolar(float x) {return map(x, -1.f, 1.f, 0.f, 1.f);} 
+  constexpr inline float tounipolar(float x) {return map(x, -1.f, 1.f, 0.f, 1.f);} 
    
   // Transform value in range 0.0 - 1.0 to -1.0 - 1.0
-  inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
+  constexpr inline float tobipolar(float x) {return map(x, 0.f, 1.f, -1.f, 1.f);}
 
-  inline float fold(float x, float max) {
+  constexpr inline float fold(float x, float max) {
     if (x > max) return x - (x-max);
     if (x < -max) return x + (max + x);
     return x;
@@ -62,13 +61,13 @@ namespace dspheaders {
   // x = input
   // xm1 = previous input
   // ym1 = previous output
-  inline float dcblock(float x, float xm1, float ym1) {
+  constexpr inline float dcblock(float x, float xm1, float ym1) {
       return  x - xm1 + 0.995 * ym1;
   }
 
   /// INDEX WRAPPING FUNCTIONS - AVOID AND USE 
   // Makes sure that x is within range of 0 - n 
-  inline int wrap(int* x, size_t length) {
+  constexpr inline int wrap(int* x, size_t length) {
     while (*x < 0) *x += length;
     while ((size_t)*x >= length) *x -= length;
     return *x;
@@ -91,7 +90,7 @@ namespace dspheaders {
 
 #else
 
-inline unsigned wrap(unsigned* x, size_t length) {
+constexpr inline unsigned wrap(unsigned* x, size_t length) {
   while (*x >= length) *x -= length;
   return *x;
 }
@@ -120,12 +119,12 @@ inline unsigned wrap(unsigned* x, size_t length) {
   // Array/Buffer manipulation
   ////////////////////////////
 
-  inline void initbuffer(float* buffer, size_t bufferlength) {
+  constexpr inline void initbuffer(float* buffer, size_t bufferlength) {
     for (size_t i = 0; i < bufferlength; ++i) *buffer++ = 0.f;
   }
   
   // Mutate values in array with dspheaders::map, for each value
-  inline void range(
+  constexpr inline void range(
       float* buffer, size_t bufferLength,
       float inmin, float inmax,
       float outmin, float outmax) {
@@ -136,7 +135,7 @@ inline unsigned wrap(unsigned* x, size_t length) {
   }
   
   // Mutate
-  inline void scale(float* buffer, size_t length, float outmin, float outmax) {
+  constexpr inline void scale(float* buffer, size_t length, float outmin, float outmax) {
     float min = 0.f, max = 0.f;
     for (size_t i=0; i<length; i++){
       if (buffer[i] < min) {min = buffer[i];}
@@ -146,7 +145,7 @@ inline unsigned wrap(unsigned* x, size_t length) {
   }   
 
   
-  inline float sum(float* buffer, size_t length) {
+  constexpr inline float sum(float* buffer, size_t length) {
     float sum = 0.f;
     for (size_t i = 0; i < length; i++) {
       sum += buffer[i];
@@ -155,7 +154,7 @@ inline unsigned wrap(unsigned* x, size_t length) {
   }
 
   
-  inline unsigned sum(unsigned* buffer, size_t length) {
+  constexpr inline unsigned sum(unsigned* buffer, size_t length) {
     float sum = 0.f;
     for (size_t i = 0; i < length; i++) {
       sum += buffer[i];
@@ -165,7 +164,7 @@ inline unsigned wrap(unsigned* x, size_t length) {
 
   // Softmax function, useful when creating a wavetable, where total amplitude
   // should not excede -1 - 1
-  inline float* normalize(float* buffer, size_t length) {
+  constexpr inline float* normalize(float* buffer, size_t length) {
     float factor = 1 / sum(buffer, length);
     for (size_t i=0; i<length; i++){
       buffer[i] *= factor;

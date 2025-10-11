@@ -4,6 +4,7 @@
 #define WAVESHAPE_H
 
 #include "dsp_math.h"
+#include "dsp.h"
 #include <cmath>
 #include <cstddef>
 

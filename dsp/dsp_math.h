@@ -3,7 +3,6 @@
 #ifndef DSP_MATH_H
 #define DSP_MATH_H
 
-#include "dsp.h"
 #include <cmath>
 #include <math.h>
 

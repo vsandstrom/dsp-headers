@@ -6,6 +6,7 @@ makefile
 tests
 idelaytest.cpp
 portaudio
+bkp
 
 .DS_Store
 score.cpp

@@ -13,63 +13,53 @@
 namespace dspheaders {
   template<interpolate_t BUF_INTERPOLATE>
   class Delay {
+    private:
     struct M {
       std::vector<float> buffer;
       size_t position;
-    } m;
-
-    explicit Delay (M m): m(std::move(m)){}
-
+    } self;
+    explicit Delay (M other): self(std::move(other)){}
     public:
     static Delay init(size_t max_samples) {
       std::vector<float> buffer(max_samples, 0.f);
-      return Delay(M{
-          .buffer = buffer,
-          .position = 0
-        }
-      );
+      return Delay(M{ .buffer = buffer, .position = 0 });
     }
 
-    float play(
-      float input,
-      float delay,
-      float feedback
-    ) {
-      float len = m.buffer.size();
-      float time = 0.f;
-
-      if (len < delay) {
-        time = m.position + len;
-      } else {
-        time = m.position + delay;
-      }
-      while (time <  len) time += len;
+    float play( float input, float delay, float feedback) {
+      float len = self.buffer.size();
+      float time = static_cast<float>(self.position) + delay;
       while (time >= len) time -= len;
-      float out = BUF_INTERPOLATE(time, m.buffer.data(), m.buffer.size());
-      m.position %= m.buffer.size();
-      m.buffer[m.position] = input + (out * feedback);
-      m.position += 1;
+      while (time <  0.0) time += len;
+      float out = BUF_INTERPOLATE(time, self.buffer.data(), self.buffer.size());
+      self.position %= self.buffer.size();
+      self.buffer[self.position] = input + (out * feedback);
+      self.position += 1;
       return out;
     }
   };
 
 
-  template<const size_t MAXLEN> class FixedDelay {
+  template<const size_t MAXLEN> 
+  class FixedDelay {
+    private:
     struct M { 
       std::array<float, MAXLEN> buffer = {0.f};
       size_t position = 0;
-    } m;
+    } self;
+    explicit FixedDelay (M other): self(std::move(other)){}
+    public:
+    static FixedDelay init() {
+      std::array<float, MAXLEN> buffer;
+      std::fill(buffer.begin(), buffer.end(), 0.f);
+      return FixedDelay(M{ .buffer = buffer, .position = 0 });
+    }
 
-    float play(
-      float input,
-      float delay,
-      float feedback
-    ) {
-      float time = (m.position + MAXLEN) % MAXLEN;
-      float out = m.buffer[time];
-      m.position %= m.buffer.size();
-      m.buffer[m.position] = input + (out * feedback);
-      m.position += 1;
+    float play( float input, float delay, float feedback) {
+      float time = (self.position + MAXLEN) % MAXLEN;
+      float out = self.buffer[time];
+      self.position %= self.buffer.size();
+      self.buffer[self.position] = input + (out * feedback);
+      self.position += 1;
       return out;
     }
   };

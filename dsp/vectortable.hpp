@@ -23,9 +23,9 @@ namespace dspheaders {
       float position = 0.f;
       float samplerate = 0.f;
       float sr_recip = 0.f;
-    } m; 
+    } self; 
 
-    explicit VecOsc(M m) : m(std::move(m)) {}
+    explicit VecOsc(M m) : self(std::move(m)) {}
 
     public:
     VecOsc(){}
@@ -53,33 +53,31 @@ namespace dspheaders {
           assert(tables[i] != nullptr && "table is not initialized");
         }
       })
-      if (frequency > m.samplerate * 0.5) return 0.0;
-      float sig = 0.f;
+      if (frequency > self.samplerate * 0.5) return 0.0;
       float len = static_cast<float>(SIZE);
       float wid = static_cast<float>(WIDTH);
-
-      position = clamp(position, 0, 0.999999999999);
+      position = position >= 1.f ? 0.999999999999f : position;
       position *= wid - 1.f;
-      unsigned table1 = static_cast<size_t>(position) % WIDTH;
-      unsigned table2 = (table1 + 1) % WIDTH;
-      float weight = position - size_t(position);
+      unsigned t1 = static_cast<size_t>(position) % WIDTH;
+      unsigned t2 = (t1 + 1) % WIDTH;
+      float x = position - size_t(position);
 
-      sig += interpolate(m.position, tables[table1], SIZE) * (1.f - weight);
-      sig += interpolate(m.position, tables[table2], SIZE) * weight;
+      float sig = interpolate(self.position, tables[t1], SIZE) * (1.f - x)
+                + interpolate(self.position, tables[t2], SIZE) * x;
 
-      m.position += len * m.sr_recip * frequency + (phase * len);
-      while (m.position <  0.f) m.position += len;
-      while (m.position >= len) m.position -= len;
+      self.position += len * self.sr_recip * frequency + (phase * len);
+      while (self.position >= len) self.position -= len;
+      while (self.position <  0.f) self.position += len;
       return sig;
     }
 
     void setSamplerate(float samplerate) {
-      m.samplerate = samplerate;
-      m.sr_recip = 1.f / samplerate;
+      self.samplerate = samplerate;
+      self.sr_recip = 1.f / samplerate;
     }
 
     void resetPhase() {
-      m.position = 0.f;
+      self.position = 0.f;
     }
   };
   

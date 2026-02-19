@@ -15,25 +15,30 @@ namespace dspheaders {
   // Discrete sample manipulation
   ///////////////////////////////
   
+// #ifdef __arm__
+//   inline float fmax(float a, float b) {
+//     float r = 0.f;
+//     asm("vmaxnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
+//     return r;
+//   }
+// #else
   constexpr inline float fmax(float a, float b) {
-#ifdef __arm__
-    float r;
-    asm("vmaxnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
-#else
     float r = (a > b) ? a : b;
-#endif // __arm__
     return r;
   }
+// #endif // __arm__
 
+// #ifdef __arm__
+//   inline float fmin(float a, float b) {
+//     float r;
+//     asm("vminnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
+//     return r;
+// #else
   constexpr inline float fmin(float a, float b) {
-#ifdef __arm__
-    float r;
-    asm("vminnm.f32 %[d], %[n], %[m]" : [d] "=t"(r) : [n] "t"(a), [m] "t"(b) :);
-#else
     float r = (a < b) ? a : b;
-#endif // __arm__
     return r;
   }
+// #endif // __arm__
 
   // Set hard min- and max amplitude limits on signal, where 'x' is signal
   constexpr inline float clamp(float in, float min, float max) {

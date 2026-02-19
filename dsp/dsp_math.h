@@ -107,8 +107,8 @@ namespace dspheaders{
   // Out param of an array of length 2, updated with weights for left/right channels
   inline void pan_exp2(float* out_pan, float pan) {
     float p = pan * FRAC_PI_4;
-    float c = std::cosf(p);
-    float s = std::sinf(p);
+    float c = std::cos(p);
+    float s = std::sin(p);
     out_pan[0] = FRAC_1_SQRT_2 * (c + s);
     out_pan[1] = FRAC_1_SQRT_2 * (c - s);
   }
